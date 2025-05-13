@@ -24,6 +24,7 @@ import {
   UserCircle,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import NotificationBell from '../components/NotificationBell';
 
 interface OrderItem {
   item_name: string;
@@ -116,87 +117,72 @@ export default function EmployeeDashboard() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Combined fetch + filter logic
-async function fetchOrders() {
-  setLoading(true)
-  try {
-    let query = supabase
-      .from<Order>('orders')
-      .select('*')
-      .order('created_at', { ascending: false })
+  async function fetchOrders() {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from<Order>('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    // 4 filter modes: all, new‐group, completed, cancelled
-    if (statusFilter === 'new-group') {
-      query = query.in('fulfillment_status', [
-        'new',
-        'preparing',
-        'on_the_way',
-      ])
-    } else if (statusFilter === 'completed') {
-      query = query.eq('fulfillment_status', 'delivered')
-    } else if (statusFilter === 'cancelled') {
-      query = query.eq('fulfillment_status', 'cancelled')
+      if (statusFilter === 'new-group') {
+        query = query.in('fulfillment_status', ['new', 'preparing', 'on_the_way']);
+      } else if (statusFilter === 'completed') {
+        query = query.eq('fulfillment_status', 'delivered');
+      } else if (statusFilter === 'cancelled') {
+        query = query.eq('fulfillment_status', 'cancelled');
+      }
+
+      if (holeFilter !== 'all') {
+        query = query.eq('hole_number', Number(holeFilter));
+      }
+
+      if (search) {
+        query = query.ilike('ordered_items', `%${search}%`);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      setOrders(data || []);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-    // if statusFilter==='all', we skip status clauses
-
-    // hole filter
-    if (holeFilter !== 'all') {
-      query = query.eq('hole_number', Number(holeFilter))
-    }
-
-    // search
-    if (search) {
-      query = query.ilike('ordered_items', `%${search}%`)
-    }
-
-    const { data, error } = await query
-    if (error) throw error
-
-    setOrders(data || [])
-  } catch (err: any) {
-    setError(err.message)
-  } finally {
-    setLoading(false)
   }
-}
 
-// Run on mount + whenever filters change:
-useEffect(() => {
-  fetchOrders()
-}, [statusFilter, holeFilter, search])
-
+  useEffect(() => {
+    fetchOrders();
+  }, [statusFilter, holeFilter, search]);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
-  try {
-    // 1) write the new status
-    const { error } = await supabase
-      .from('orders')
-      .update({ fulfillment_status: newStatus })
-      .eq('id', orderId);
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ fulfillment_status: newStatus })
+        .eq('id', orderId);
 
-    if (error) {
-      console.error('Failed to update order status:', error);
-      setError('Failed to update order status. Please try again.');
-      return;
+      if (error) {
+        console.error('Failed to update order status:', error);
+        setError('Failed to update order status. Please try again.');
+        return;
+      }
+
+      await fetchOrders();
+      setError(null);
+    } catch (err) {
+      console.error('Error updating order status:', err);
+      setError('An unexpected error occurred. Please try again.');
     }
+  };
 
-    // 2) re-fetch everything so your filters stay correct
-    await fetchOrders();
-    setError(null);
-  } catch (err) {
-    console.error('Error updating order status:', err);
-    setError('An unexpected error occurred. Please try again.');
-  }
-};
-
-
-  // Auto-refresh effect
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
     if (autoRefresh) {
       intervalId = setInterval(() => {
         fetchMetrics();
-      }, 5 * 60 * 1000); // Refresh every 5 minutes
+      }, 5 * 60 * 1000);
     }
     return () => clearInterval(intervalId);
   }, [autoRefresh]);
@@ -239,7 +225,6 @@ useEffect(() => {
     const dateRange = getDateRange();
 
     try {
-      // Fetch current period orders
       const { data: currentOrders, error: currentError } = await supabase
         .from('orders')
         .select('*')
@@ -248,7 +233,6 @@ useEffect(() => {
 
       if (currentError) throw currentError;
 
-      // Fetch previous period orders
       const { data: previousOrders, error: previousError } = await supabase
         .from('orders')
         .select('*')
@@ -257,7 +241,6 @@ useEffect(() => {
 
       if (previousError) throw previousError;
 
-      // Calculate metrics
       const calculateMetrics = (orders: Order[]) => {
         const revenue = orders.reduce((sum, order) => 
           sum + order.ordered_items.reduce((total, item) => total + (item.price * item.quantity), 0), 0);
@@ -275,7 +258,6 @@ useEffect(() => {
       const current = calculateMetrics(currentOrders || []);
       const previous = calculateMetrics(previousOrders || []);
 
-      // Update metrics state with calculated values and trends
       setMetrics({
         revenue: {
           value: current.revenue,
@@ -326,11 +308,8 @@ useEffect(() => {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      // Clear any local storage data
       localStorage.clear();
-      // Redirect to main menu
       navigate('/', { replace: true });
-      // Prevent back navigation
       window.history.pushState(null, '', '/');
     } catch (error) {
       console.error('Logout failed:', error);
@@ -696,7 +675,6 @@ useEffect(() => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
       <div className="w-64 bg-[#1e7e34] text-white flex-shrink-0">
         <div className="p-4">
           <h1 className="text-2xl font-bold">UnderPar</h1>
@@ -717,58 +695,56 @@ useEffect(() => {
         </nav>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
         <header className="h-16 bg-[#28a745] flex items-center justify-between px-6 flex-shrink-0">
           <h1 className="text-white text-xl font-semibold">Employee Dashboard</h1>
           
-          {/* Enhanced User Menu */}
-          <div className="relative">
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center space-x-2 text-white hover:bg-[#1e7e34] px-3 py-2 rounded-lg transition-colors duration-200"
-              aria-expanded={dropdownOpen}
-              aria-haspopup="true"
-            >
-              <UserCircle className="w-5 h-5" />
-              <span className="text-sm font-medium">{session?.user?.email}</span>
-              <ChevronDown className="w-4 h-4 transition-transform duration-200" 
-                style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}
-              />
-            </button>
-
-            {dropdownOpen && (
-              <>
-                {/* Overlay to capture clicks outside dropdown */}
-                <div 
-                  className="fixed inset-0 z-10"
-                  onClick={() => setDropdownOpen(false)}
+          <div className="flex items-center space-x-4">
+            <NotificationBell />
+            
+            <div className="relative">
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center space-x-2 text-white hover:bg-[#1e7e34] px-3 py-2 rounded-lg transition-colors duration-200"
+                aria-expanded={dropdownOpen}
+                aria-haspopup="true"
+              >
+                <UserCircle className="w-5 h-5" />
+                <span className="text-sm font-medium">{session?.user?.email}</span>
+                <ChevronDown className="w-4 h-4 transition-transform duration-200" 
+                  style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}
                 />
-                
-                {/* Dropdown Menu */}
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-20 transform origin-top-right transition-all duration-200 ease-out">
-                  <div className="px-4 py-3 border-b border-gray-100">
-                    <p className="text-sm text-gray-500">Signed in as</p>
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {session?.user?.email}
-                    </p>
-                  </div>
+              </button>
+
+              {dropdownOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-10"
+                    onClick={() => setDropdownOpen(false)}
+                  />
                   
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Sign out
-                  </button>
-                </div>
-              </>
-            )}
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-20">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-sm text-gray-500">Signed in as</p>
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {session?.user?.email}
+                      </p>
+                    </div>
+                    
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <LogOut className="w-4 h-4 mr-2 inline-block" />
+                      Sign out
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </header>
 
-        {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto bg-[#f8f9fa] p-6">
           {activeTab === 'home' && renderHomeTab()}
           {activeTab === 'orders' && renderOrdersTab()}
