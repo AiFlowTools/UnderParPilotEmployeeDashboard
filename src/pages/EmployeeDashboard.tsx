@@ -673,6 +673,11 @@ export default function EmployeeDashboard() {
     </div>
   );
 
+  const handleNotificationClick = () => {
+    setActiveTab('orders');
+    setStatusFilter('new-group');
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
       <div className="w-64 bg-[#1e7e34] text-white flex-shrink-0">
@@ -700,7 +705,7 @@ export default function EmployeeDashboard() {
           <h1 className="text-white text-xl font-semibold">Employee Dashboard</h1>
           
           <div className="flex items-center space-x-4">
-            <NotificationBell />
+            <NotificationBell onNotificationClick={handleNotificationClick} />
             
             <div className="relative">
               <button
@@ -730,6 +735,8 @@ export default function EmployeeDashboard() {
                         {session?.user?.email}
                       </p>
                     </div>
+                    
+                
                     
                     <button
                       onClick={handleLogout}
