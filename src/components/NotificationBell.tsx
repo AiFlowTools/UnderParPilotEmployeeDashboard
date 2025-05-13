@@ -10,7 +10,11 @@ interface Notification {
   order_id: string;
 }
 
-export default function NotificationBell() {
+interface NotificationBellProps {
+  onNotificationClick?: () => void;
+}
+
+export default function NotificationBell({ onNotificationClick }: NotificationBellProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -58,6 +62,11 @@ export default function NotificationBell() {
     
     if (notifications.length === 1) {
       setIsOpen(false);
+    }
+
+    // Call the onNotificationClick callback when a notification is clicked
+    if (onNotificationClick) {
+      onNotificationClick();
     }
   };
 
