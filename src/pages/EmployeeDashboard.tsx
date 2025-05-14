@@ -39,6 +39,7 @@ interface Order {
   notes: string;
   created_at: string;
   fulfillment_status: 'new' | 'preparing' | 'on_the_way' | 'delivered' | 'cancelled';
+  customer_name: string;
 }
 
 interface TabConfig {
@@ -92,7 +93,6 @@ export default function EmployeeDashboard() {
   const [autoRefresh, setAutoRefresh] = useState(false);
 
   useEffect(() => {
-    // Auth check
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) return navigate('/login');
       setSession(session);
@@ -106,7 +106,6 @@ export default function EmployeeDashboard() {
         });
     });
 
-    // Subscribe to new orders
     const subscription = supabase
       .channel('orders')
       .on('postgres_changes', { schema: 'public', table: 'orders', event: 'INSERT' }, ({ new: order }) => {
@@ -608,7 +607,7 @@ export default function EmployeeDashboard() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                {['ID','Hole','Items','Notes','Time','Status','Action'].map(h => (
+                {['ID', 'Customer', 'Hole', 'Items', 'Notes', 'Date & Time', 'Status', 'Action'].map(h => (
                   <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {h}
                   </th>
@@ -622,6 +621,9 @@ export default function EmployeeDashboard() {
                     {order.id.slice(0,8)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {order.customer_name || 'Anonymous'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {order.hole_number}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
@@ -631,7 +633,7 @@ export default function EmployeeDashboard() {
                     {order.notes || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {format(new Date(order.created_at), 'HH:mm')}
+                    {new Date(order.created_at).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -735,8 +737,6 @@ export default function EmployeeDashboard() {
                         {session?.user?.email}
                       </p>
                     </div>
-                    
-                
                     
                     <button
                       onClick={handleLogout}
