@@ -118,7 +118,7 @@ export default function EmployeeDashboard() {
 
   async function fetchOrders() {
     setLoading(true);
-    setError(null); // Clear error before fetching
+    setError(null);
     try {
       let query = supabase
         .from<Order>('orders')
@@ -157,12 +157,13 @@ export default function EmployeeDashboard() {
   }, [statusFilter, holeFilter, search]);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
-    setError(null); // Clear error before update
+    setError(null);
     try {
       const { error } = await supabase
         .from('orders')
         .update({ fulfillment_status: newStatus })
-        .eq('id', orderId);
+        .eq('id', orderId)
+        .select();
 
       if (error) {
         console.error('Failed to update order status:', error);
@@ -222,7 +223,7 @@ export default function EmployeeDashboard() {
 
   const fetchMetrics = async () => {
     setLoading(true);
-    setError(null); // Clear error before fetching metrics
+    setError(null);
     const dateRange = getDateRange();
 
     try {
