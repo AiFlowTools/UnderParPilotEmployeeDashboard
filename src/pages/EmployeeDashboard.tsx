@@ -118,6 +118,7 @@ export default function EmployeeDashboard() {
 
   async function fetchOrders() {
     setLoading(true);
+    setError(null); // Clear error before fetching
     try {
       let query = supabase
         .from<Order>('orders')
@@ -156,6 +157,7 @@ export default function EmployeeDashboard() {
   }, [statusFilter, holeFilter, search]);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
+    setError(null); // Clear error before update
     try {
       const { error } = await supabase
         .from('orders')
@@ -169,7 +171,6 @@ export default function EmployeeDashboard() {
       }
 
       await fetchOrders();
-      setError(null);
     } catch (err) {
       console.error('Error updating order status:', err);
       setError('An unexpected error occurred. Please try again.');
@@ -221,6 +222,7 @@ export default function EmployeeDashboard() {
 
   const fetchMetrics = async () => {
     setLoading(true);
+    setError(null); // Clear error before fetching metrics
     const dateRange = getDateRange();
 
     try {
