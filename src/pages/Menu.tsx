@@ -11,7 +11,8 @@ import {
   Trash2,
   Plus,
   Minus,
-  ChevronDown
+  ChevronDown,
+  Store
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -34,7 +35,8 @@ const categories = [
   { id: 'Lunch & Dinner', name: 'Lunch & Dinner', icon: Utensils },
   { id: 'Snacks', name: 'Snacks', icon: Pizza },
   { id: 'Drinks', name: 'Drinks', icon: CupSoda },
-  { id: 'Beer', name: 'Beer', icon: Beer }
+  { id: 'Beer', name: 'Beer', icon: Beer },
+  { id: 'Pro Shop', name: 'Pro Shop', icon: Store }
 ];
 
 export default function Menu() {
