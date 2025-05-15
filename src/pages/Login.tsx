@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GolfBall, Mail, Lock, AlertCircle } from 'lucide-react';
+import { Goal as GolfBall, Mail, Lock, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export default function Login() {
