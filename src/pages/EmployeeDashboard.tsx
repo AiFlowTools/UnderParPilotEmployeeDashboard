@@ -84,6 +84,10 @@ export default function EmployeeDashboard() {
   const [search, setSearch] = useState('');
   const [session, setSession] = useState<any>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const handleNotificationClick = () => {
+  setActiveTab('orders');
+  setStatusFilter('new-group');
+};
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('Day');
