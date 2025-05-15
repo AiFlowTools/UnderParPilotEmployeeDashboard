@@ -14,21 +14,83 @@
 .bg-primary-green { background-color: var(--color-primary-green); }
 .hover\:bg-primary-dark:hover { background-color: var(--color-primary-dark); }
 
-/* Fade-in animation */
+/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }
   to   { opacity: 1; transform: scale(1); }
 }
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.6s ease-out forwards;
 }
 
-/* Single-ping animation */
-@keyframes pingOnce {
-  0%   { transform: scale(1);   opacity: 1; }
-  50%  { transform: scale(1.2); opacity: 0.6; }
-  100% { transform: scale(1);   opacity: 1; }
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out forwards;
 }
-.animate-pingOnce {
-  animation: pingOnce 0.8s ease-in-out forwards;
+
+.animate-bounce-subtle {
+  animation: bounce 0.3s ease-in-out;
+}
+
+/* Category Icons */
+.category-icon {
+  @apply flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200;
+}
+
+.category-icon:hover {
+  @apply transform scale-105;
+}
+
+.category-icon.active {
+  @apply bg-green-50 border-2 border-green-500;
+}
+
+/* Menu Item Cards */
+.menu-item-card {
+  @apply bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden;
+}
+
+.menu-item-card img {
+  @apply w-full h-48 object-cover;
+}
+
+/* Cart Drawer */
+.cart-drawer {
+  @apply fixed bottom-0 left-0 right-0 bg-white shadow-lg rounded-t-xl transform transition-transform duration-300 z-50;
+}
+
+.cart-drawer.hidden {
+  transform: translateY(100%);
+}
+
+/* Mobile-friendly buttons */
+.mobile-button {
+  @apply min-h-[44px] px-4 rounded-lg font-medium transition-colors duration-200;
+}
+
+/* Tags */
+.item-tag {
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mr-2;
+}
+
+.tag-spicy {
+  @apply bg-red-100 text-red-800;
+}
+
+.tag-vegetarian {
+  @apply bg-green-100 text-green-800;
+}
+
+.tag-bestseller {
+  @apply bg-amber-100 text-amber-800;
 }

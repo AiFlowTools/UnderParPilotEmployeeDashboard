@@ -3,16 +3,17 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   Search,
   Coffee,
-  Utensils,
+  UtensilsCrossed,
   Pizza,
   Beer,
-  CupSoda,
+  Sandwich,
+  Store,
   ShoppingBag,
-  Trash2,
-  Plus,
-  Minus,
-  ChevronDown,
-  Store
+  ChevronUp,
+  Flame,
+  Leaf,
+  Trophy,
+  X
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -24,6 +25,7 @@ interface MenuItem {
   description: string;
   price: number;
   image_url: string;
+  tags?: string[];
 }
 
 interface CartItem extends MenuItem {
@@ -31,12 +33,12 @@ interface CartItem extends MenuItem {
 }
 
 const categories = [
-  { id: 'Breakfast', name: 'Breakfast', icon: Coffee },
-  { id: 'Lunch & Dinner', name: 'Lunch & Dinner', icon: Utensils },
-  { id: 'Snacks', name: 'Snacks', icon: Pizza },
-  { id: 'Drinks', name: 'Drinks', icon: CupSoda },
-  { id: 'Beer', name: 'Beer', icon: Beer },
-  { id: 'Pro Shop', name: 'Pro Shop', icon: Store }
+  { id: 'Breakfast', name: 'Breakfast', icon: Coffee, color: 'bg-amber-100' },
+  { id: 'Lunch & Dinner', name: 'Lunch & Dinner', icon: UtensilsCrossed, color: 'bg-blue-100' },
+  { id: 'Snacks', name: 'Snacks', icon: Pizza, color: 'bg-red-100' },
+  { id: 'Sandwiches', name: 'Sandwiches', icon: Sandwich, color: 'bg-green-100' },
+  { id: 'Beer', name: 'Beer', icon: Beer, color: 'bg-yellow-100' },
+  { id: 'Pro Shop', name: 'Pro Shop', icon: Store, color: 'bg-purple-100' }
 ];
 
 export default function Menu() {
@@ -48,25 +50,8 @@ export default function Menu() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [session, setSession] = useState(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, { session }) => {
-      setSession(session);
-      setDropdownOpen(false);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    navigate('/', { replace: true });
-    setDropdownOpen(false);
-  }
-
-  // Load cart from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('cart');
     if (saved) {
@@ -78,7 +63,6 @@ export default function Menu() {
     }
   }, []);
 
-  // Fetch menu items
   useEffect(() => {
     if (!courseId) {
       setError('No golf course ID provided');
@@ -115,40 +99,64 @@ export default function Menu() {
     else newCart.push({ ...item, quantity: 1 });
     setCart(newCart);
     persist(newCart);
+    setIsCartOpen(true);
   };
 
   const updateQuantity = (itemId: string, delta: number) => {
     const newCart = cart
-      .map(c => (c.id === itemId ? { ...c, quantity: c.quantity + delta } : c))
+      .map(c => (c.id === itemId ? { ...c, quantity: Math.max(0, c.quantity + delta) } : c))
       .filter(c => c.quantity > 0);
     setCart(newCart);
     persist(newCart);
   };
 
-  const removeFromCart = (itemId: string) => {
-    const newCart = cart.filter(c => c.id !== itemId);
-    setCart(newCart);
-    persist(newCart);
-  };
-
   const cartTotal = cart.reduce((sum, c) => sum + c.price * c.quantity, 0);
+  const cartItemCount = cart.reduce((sum, c) => sum + c.quantity, 0);
+
+  const ItemTag = ({ type }: { type: string }) => {
+    switch (type) {
+      case 'spicy':
+        return (
+          <span className="item-tag tag-spicy">
+            <Flame className="w-3 h-3 mr-1" />
+            Spicy
+          </span>
+        );
+      case 'vegetarian':
+        return (
+          <span className="item-tag tag-vegetarian">
+            <Leaf className="w-3 h-3 mr-1" />
+            Vegetarian
+          </span>
+        );
+      case 'bestseller':
+        return (
+          <span className="item-tag tag-bestseller">
+            <Trophy className="w-3 h-3 mr-1" />
+            Best Seller
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-spin h-12 w-12 border-b-2 border-[#4CAF50] rounded-full"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin h-12 w-12 border-b-2 border-green-600 rounded-full"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="bg-white p-6 rounded-lg shadow-md text-center">
-          <p className="text-[#2C2C2C] text-xl mb-4">{error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="bg-white p-6 rounded-xl shadow-md text-center">
+          <p className="text-gray-800 text-xl mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-[#4CAF50] text-white rounded-md hover:bg-[#2E7D32] transition"
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
           >
             Try Again
           </button>
@@ -158,176 +166,125 @@ export default function Menu() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Auth Menu */}
-      <div className="absolute top-4 right-4">
-        {session?.user ? (
-          <div className="relative">
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
-            >
-              {session.user.email}
-              <ChevronDown className="w-4 h-4 ml-1" />
-            </button>
-            {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  Sign out
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <Link
-            to="/login"
-            className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
-          >
-            Login
-          </Link>
-        )}
-      </div>
-
+    <div className="min-h-screen bg-gray-50 pb-32">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Search & Title */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-serif text-[#2C2C2C] mb-4">Menu</h1>
-          <div className="relative">
+        {/* Search & Categories */}
+        <div className="sticky top-0 bg-gray-50 z-10 pb-4">
+          <div className="relative mb-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search menu items..."
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4CAF50]"
+              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
           </div>
+
+          <div className="flex overflow-x-auto pb-4 gap-4 -mx-4 px-4">
+            {categories.map(({ id, name, icon: Icon, color }) => (
+              <button
+                key={id}
+                onClick={() => setSelectedCategory(id)}
+                className={`category-icon flex-shrink-0 ${color} ${
+                  selectedCategory === id ? 'active' : ''
+                }`}
+              >
+                <Icon className="w-6 h-6 mb-2" />
+                <span className="text-sm font-medium whitespace-nowrap">{name}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Categories */}
-        <div className="flex space-x-4 overflow-x-auto mb-12">
-          {categories.map(({ id, name, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setSelectedCategory(id)}
-              className={`flex items-center px-5 py-2 rounded-full text-sm font-medium transition ${
-                selectedCategory === id
-                  ? 'bg-[#4CAF50] text-white'
-                  : 'bg-white text-[#2C2C2C] hover:bg-gray-100'
-              }`}
-            >
-              <Icon className="w-5 h-5 mr-2" />
-              {name}
-            </button>
+        {/* Menu Items */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredItems.map(item => (
+            <div key={item.id} className="menu-item-card">
+              {item.image_url && (
+                <div
+                  className="h-48 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${item.image_url})` }}
+                />
+              )}
+              <div className="p-4">
+                <div className="mb-2">
+                  {item.tags?.map(tag => (
+                    <ItemTag key={tag} type={tag} />
+                  ))}
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{item.item_name}</h3>
+                <p className="text-gray-600 mb-4">{item.description}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-2xl font-bold">${item.price.toFixed(2)}</span>
+                  <button
+                    onClick={() => addToCart(item)}
+                    className="mobile-button bg-green-600 text-white hover:bg-green-700 active:transform active:scale-95"
+                  >
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
+      </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Menu Grid */}
-          <div className="flex-grow">
-            <h2 className="text-2xl font-serif text-[#2C2C2C] mb-4">{selectedCategory}</h2>
-            {filteredItems.length === 0 ? (
-              <p className="text-gray-500">No items found.</p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredItems.map(item => (
-                  <div
-                    key={item.id}
-                    className="bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden"
-                  >
-                    {item.image_url && (
-                      <div
-                        className="h-48 bg-cover bg-center"
-                        style={{ backgroundImage: `url(${item.image_url})` }}
-                      />
-                    )}
-                    <div className="p-6">
-                      <h3 className="text-xl font-serif text-[#2C2C2C] mb-2">{item.item_name}</h3>
-                      <p className="text-gray-600 mb-4">{item.description}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-2xl font-bold text-[#2C2C2C]">
-                          ${item.price.toFixed(2)}
-                        </span>
-                        <button
-                          onClick={() => addToCart(item)}
-                          className="bg-[#4CAF50] text-white px-5 py-2 rounded-lg hover:bg-[#2E7D32] transition"
-                        >
-                          Add to Cart
-                        </button>
-                      </div>
+      {/* Sticky Cart Drawer */}
+      {cart.length > 0 && (
+        <div className={`cart-drawer ${isCartOpen ? 'animate-slideUp' : ''}`}>
+          <div className="p-4">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center">
+                <ShoppingBag className="w-5 h-5 text-green-600 mr-2" />
+                <span className="font-medium">
+                  {cartItemCount} {cartItemCount === 1 ? 'item' : 'items'} • ${cartTotal.toFixed(2)}
+                </span>
+              </div>
+              <button
+                onClick={() => setIsCartOpen(!isCartOpen)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                {isCartOpen ? <X className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+              </button>
+            </div>
+            
+            {isCartOpen && (
+              <div className="space-y-4">
+                {cart.map(item => (
+                  <div key={item.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                    <div>
+                      <h4 className="font-medium">{item.item_name}</h4>
+                      <p className="text-sm text-gray-600">${item.price.toFixed(2)} each</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => updateQuantity(item.id, -1)}
+                        className="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-full"
+                      >
+                        -
+                      </button>
+                      <span className="w-8 text-center">{item.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(item.id, 1)}
+                        className="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-full"
+                      >
+                        +
+                      </button>
                     </div>
                   </div>
                 ))}
+                <Link
+                  to={`/checkout/${courseId}`}
+                  className="block w-full mobile-button bg-green-600 text-white text-center hover:bg-green-700"
+                >
+                  Proceed to Checkout
+                </Link>
               </div>
             )}
           </div>
-
-          {/* Cart Sidebar */}
-          <aside className="lg:w-96">
-            <div className="bg-white rounded-xl shadow-sm p-6 sticky top-8">
-              <div className="flex items-center mb-6">
-                <ShoppingBag className="w-6 h-6 text-[#4CAF50] mr-2" />
-                <h2 className="text-2xl font-serif text-[#2C2C2C]">Your Cart</h2>
-              </div>
-
-              {cart.length === 0 ? (
-                <div className="text-center py-8">
-                  <ShoppingBag className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <p className="text-gray-500">Your cart is empty</p>
-                </div>
-              ) : (
-                <>
-                  <div className="space-y-4 mb-6">
-                    {cart.map(item => (
-                      <div
-                        key={item.id}
-                        className="flex items-start justify-between p-4 bg-gray-50 rounded-lg"
-                      >
-                        <div className="flex-grow">
-                          <h4 className="font-medium text-[#2C2C2C]">{item.item_name}</h4>
-                          <div className="flex items-center mt-2">
-                            <button onClick={() => updateQuantity(item.id, -1)}>
-                              <Minus className="w-4 h-4 text-gray-500 hover:text-gray-700" />
-                            </button>
-                            <span className="mx-3">{item.quantity}</span>
-                            <button onClick={() => updateQuantity(item.id, 1)}>
-                              <Plus className="w-4 h-4 text-gray-500 hover:text-gray-700" />
-                            </button>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium text-[#2C2C2C]">
-                            ${(item.price * item.quantity).toFixed(2)}
-                          </p>
-                          <button onClick={() => removeFromCart(item.id)}>
-                            <Trash2 className="w-4 h-4 text-red-500 hover:text-red-700" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between mb-4">
-                      <span className="text-lg font-medium text-[#2C2C2C]">Total:</span>
-                      <span className="text-lg font-bold text-[#2C2C2C]">
-                        ${cartTotal.toFixed(2)}
-                      </span>
-                    </div>
-                    <Link to={`/checkout/${courseId}`} className="block w-full">
-                      <button className="w-full bg-[#4CAF50] text-white py-3 rounded-lg hover:bg-[#2E7D32] transition">
-                        Proceed to Checkout
-                      </button>
-                    </Link>
-                  </div>
-                </>
-              )}
-            </div>
-          </aside>
         </div>
-      </div>
+      )}
     </div>
   );
 }
