@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check if user is already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate('/dashboard');
+      }
+    });
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,11 +39,10 @@ export default function Login() {
         .eq('id', data.user.id)
         .single();
 
-      // Redirect based on role
       if (profile?.role === 'employee') {
-        navigate('/employee-dashboard');
+        navigate('/dashboard');
       } else {
-        navigate(-1); // Go back to previous page
+        throw new Error('Access denied. Employee account required.');
       }
     } catch (err: any) {
       setError(err.message);
@@ -44,11 +53,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="absolute top-4 left-4">
-        <Link to="/" className="text-gray-700 hover:text-gray-900 flex items-center">
-          ← Back
-        </Link>
-      </div>
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
