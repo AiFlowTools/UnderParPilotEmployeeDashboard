@@ -16,6 +16,7 @@ import {
   X
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import MenuItemDetail from '../components/MenuItemDetail';
 
 interface MenuItem {
   id: string;
@@ -26,10 +27,16 @@ interface MenuItem {
   price: number;
   image_url: string;
   tags?: string[];
+  modifiers?: {
+    id: string;
+    name: string;
+    price: number;
+  }[];
 }
 
 interface CartItem extends MenuItem {
   quantity: number;
+  selectedModifiers?: string[];
 }
 
 const categories = [
@@ -50,6 +57,8 @@ export default function Menu() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const isMobile = window.innerWidth < 768;
 
   useEffect(() => {
     const saved = localStorage.getItem('cart');
@@ -91,11 +100,19 @@ export default function Menu() {
     localStorage.setItem('cart', JSON.stringify(newCart));
   };
 
-  const addToCart = (item: MenuItem) => {
+  const addToCart = (item: MenuItem, quantity: number, selectedModifiers: string[] = []) => {
     const newCart = [...cart];
-    const existing = newCart.find(c => c.id === item.id);
-    if (existing) existing.quantity++;
-    else newCart.push({ ...item, quantity: 1 });
+    const existing = newCart.find(c => 
+      c.id === item.id && 
+      JSON.stringify(c.selectedModifiers) === JSON.stringify(selectedModifiers)
+    );
+    
+    if (existing) {
+      existing.quantity += quantity;
+    } else {
+      newCart.push({ ...item, quantity, selectedModifiers });
+    }
+    
     setCart(newCart);
     persist(newCart);
     setIsCartOpen(true);
@@ -199,7 +216,11 @@ export default function Menu() {
         {/* Menu Items */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredItems.map(item => (
-            <div key={item.id} className="menu-item-card">
+            <div 
+              key={item.id} 
+              className="menu-item-card cursor-pointer"
+              onClick={() => setSelectedItem(item)}
+            >
               {item.image_url && (
                 <div
                   className="h-48 bg-cover bg-center"
@@ -216,18 +237,24 @@ export default function Menu() {
                 <p className="text-gray-600 mb-4">{item.description}</p>
                 <div className="flex justify-between items-center">
                   <span className="text-2xl font-bold">${item.price.toFixed(2)}</span>
-                  <button
-                    onClick={() => addToCart(item)}
-                    className="mobile-button bg-green-600 text-white hover:bg-green-700 active:transform active:scale-95"
-                  >
-                    Add to Cart
-                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Menu Item Detail Modal */}
+      {selectedItem && (
+        <MenuItemDetail
+          item={selectedItem}
+          onClose={() => setSelectedItem(null)}
+          onAddToCart={(quantity, selectedModifiers) => 
+            addToCart(selectedItem, quantity, selectedModifiers)
+          }
+          isMobile={isMobile}
+        />
+      )}
 
       {/* Sticky Cart Drawer */}
       {cart.length > 0 && (
@@ -250,8 +277,8 @@ export default function Menu() {
             
             {isCartOpen && (
               <div className="space-y-4">
-                {cart.map(item => (
-                  <div key={item.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                {cart.map((item, index) => (
+                  <div key={`${item.id}-${index}`} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                     <div>
                       <h4 className="font-medium">{item.item_name}</h4>
                       <p className="text-sm text-gray-600">${item.price.toFixed(2)} each</p>
