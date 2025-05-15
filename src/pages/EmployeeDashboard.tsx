@@ -143,6 +143,35 @@ export default function EmployeeDashboard() {
     };
   }, [navigate]);
 
+  useEffect(() => {
+  fetchOrders();
+}, [statusFilter, holeFilter, search]);
+
+const fetchOrders = async () => {
+  setLoading(true);
+  let query = supabase.from('orders').select('*').order('created_at', { ascending: false });
+
+  if (statusFilter !== 'all') {
+    if (statusFilter === 'new-group') {
+      query = query.in('fulfillment_status', ['new', 'preparing', 'on_the_way']);
+    } else {
+      query = query.eq('fulfillment_status', statusFilter);
+    }
+  }
+
+  if (holeFilter !== 'all') {
+    query = query.eq('hole_number', Number(holeFilter));
+  }
+
+  if (search) {
+    query = query.ilike('customer_name', `%${search}%`);
+  }
+
+  const { data, error } = await query;
+  if (!error && data) setOrders(data as Order[]);
+  setLoading(false);
+};
+
   const renderHomeTab = () => {
     return (
       <div className="space-y-6">
