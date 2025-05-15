@@ -42,55 +42,85 @@
   animation: bounce 0.3s ease-in-out;
 }
 
-/* Category Icons */
-.category-icon {
-  @apply flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200;
+/* Cart Item Styles */
+.cart-item {
+  @apply flex items-center justify-between p-4 bg-gray-50 rounded-lg gap-4;
 }
 
-.category-icon:hover {
-  @apply transform scale-105;
+.cart-item-content {
+  @apply flex-grow;
 }
 
-.category-icon.active {
-  @apply bg-green-50 border-2 border-green-500;
+.cart-item-title {
+  @apply font-medium text-gray-900 mb-1;
 }
 
-/* Menu Item Cards */
-.menu-item-card {
-  @apply bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden;
+.cart-item-price {
+  @apply text-sm text-gray-600;
 }
 
-.menu-item-card img {
-  @apply w-full h-48 object-cover;
+.cart-item-controls {
+  @apply flex items-center gap-3;
 }
 
-/* Cart Drawer */
-.cart-drawer {
-  @apply fixed bottom-0 left-0 right-0 bg-white shadow-lg rounded-t-xl transform transition-transform duration-300 z-50;
+.cart-quantity-button {
+  @apply w-8 h-8 flex items-center justify-center rounded-full transition-colors;
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-700;
 }
 
-.cart-drawer.hidden {
-  transform: translateY(100%);
+.cart-delete-button {
+  @apply p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors;
+  @apply flex items-center justify-center;
 }
 
-/* Mobile-friendly buttons */
-.mobile-button {
-  @apply min-h-[44px] px-4 rounded-lg font-medium transition-colors duration-200;
+/* Cart Note Input */
+.cart-note-input {
+  @apply w-full px-3 py-2 mt-2 text-sm;
+  @apply border border-gray-200 rounded-lg;
+  @apply focus:outline-none focus:ring-2 focus:ring-green-500;
 }
 
-/* Tags */
-.item-tag {
-  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mr-2;
+/* Cart Actions */
+.cart-actions {
+  @apply flex gap-4 mt-6;
 }
 
-.tag-spicy {
-  @apply bg-red-100 text-red-800;
+.cart-action-button {
+  @apply flex-1 py-3 px-4 rounded-lg font-medium transition-colors text-center;
 }
 
-.tag-vegetarian {
-  @apply bg-green-100 text-green-800;
+.cart-clear {
+  @apply border border-gray-300 text-gray-700 hover:bg-gray-50;
 }
 
-.tag-bestseller {
-  @apply bg-amber-100 text-amber-800;
+.cart-submit {
+  @apply bg-green-600 text-white hover:bg-green-700;
+}
+
+/* Cart Summary */
+.cart-summary {
+  @apply flex justify-between items-center py-4 border-t border-gray-200 mt-4;
+}
+
+.cart-summary-label {
+  @apply text-lg font-medium text-gray-900;
+}
+
+.cart-summary-amount {
+  @apply text-xl font-bold text-gray-900;
+}
+
+/* Special Requests Section */
+.special-requests {
+  @apply mb-6;
+}
+
+.special-requests-label {
+  @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+.special-requests-input {
+  @apply w-full px-4 py-3 border border-gray-200 rounded-lg;
+  @apply focus:outline-none focus:ring-2 focus:ring-green-500;
+  @apply resize-none;
 }
