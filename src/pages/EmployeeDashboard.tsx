@@ -129,15 +129,23 @@ export default function EmployeeDashboard() {
         });
     });
 
-    const subscription = supabase
-  .channel('orders')
-  .on('postgres_changes', { schema: 'public', table: 'orders', event: 'INSERT' }, (payload) => {
-  const insertedOrder = payload.new as Order;
-  console.log("🚨 New order received:", insertedOrder); // <-- Add this
-  setOrders(curr => [insertedOrder, ...curr]);
-  setNewOrder(insertedOrder);
-  setShowOverlay(true);
-})
+    const channel = supabase
+  .channel('custom-all-orders') // can be any name
+  .on(
+    'postgres_changes',
+    {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'orders',
+    },
+    (payload) => {
+      const insertedOrder = payload.new as Order;
+      console.log("🔥 New order received via subscription", insertedOrder);
+      setOrders(curr => [insertedOrder, ...curr]);
+      setNewOrder(insertedOrder);
+      setShowOverlay(true);
+    }
+  )
   .subscribe();
 
 
