@@ -23,6 +23,7 @@ import {
   ArrowDown,
   ArrowUp,
   UserCircle,
+  Volume2,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import NotificationBell from '../components/NotificationBell';
@@ -93,7 +94,16 @@ const VIEW_MODES = ['Day', 'Week', 'Month'] as const;
 type ViewMode = typeof VIEW_MODES[number];
 
 export default function EmployeeDashboard() {
-  // 🔔 Uber Eats-style overlay additions
+  // Sound control states
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    const saved = localStorage.getItem('soundEnabled');
+    return saved === null ? true : saved === 'true';
+  });
+  const [volume, setVolume] = useState(() => {
+    const saved = localStorage.getItem('notificationVolume');
+    return saved === null ? 0.8 : parseFloat(saved);
+  });
+
   const [newOrder, setNewOrder] = useState<Order | null>(null);
   const [showOverlay, setShowOverlay] = useState(false);
   const navigate = useNavigate();
@@ -116,6 +126,15 @@ export default function EmployeeDashboard() {
   });
   const [autoRefresh, setAutoRefresh] = useState(false);
 
+  // Save sound preferences to localStorage
+  useEffect(() => {
+    localStorage.setItem('soundEnabled', soundEnabled.toString());
+  }, [soundEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem('notificationVolume', volume.toString());
+  }, [volume]);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) return navigate('/login');
@@ -131,23 +150,23 @@ export default function EmployeeDashboard() {
     });
 
     const channel = supabase
-  .channel('custom-all-orders') // can be any name
-  .on(
-    'postgres_changes',
-    {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'orders',
-    },
-    (payload) => {
-      const insertedOrder = payload.new as Order;
-      console.log("🔥 New order received via subscription", insertedOrder);
-      setOrders(curr => [insertedOrder, ...curr]);
-      setNewOrder(insertedOrder);
-      setShowOverlay(true);
-    }
-  )
-  .subscribe();
+      .channel('custom-all-orders')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'orders',
+        },
+        (payload) => {
+          const insertedOrder = payload.new as Order;
+          console.log("🔥 New order received via subscription", insertedOrder);
+          setOrders(curr => [insertedOrder, ...curr]);
+          setNewOrder(insertedOrder);
+          setShowOverlay(true);
+        }
+      )
+      .subscribe();
 
     return () => {
       channel.unsubscribe();
@@ -578,6 +597,35 @@ export default function EmployeeDashboard() {
             <input type="checkbox" className="form-checkbox h-4 w-4 text-green-600" />
             <span className="ml-2">Push notifications for order updates</span>
           </label>
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={soundEnabled}
+              onChange={(e) => setSoundEnabled(e.target.checked)}
+              className="form-checkbox h-4 w-4 text-green-600"
+            />
+            <span className="ml-2">Enable sound for new orders</span>
+          </label>
+          {soundEnabled && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-sm text-gray-600 flex items-center">
+                  <Volume2 className="w-4 h-4 mr-2" />
+                  Notification volume
+                </label>
+                <span className="text-sm text-gray-500">{Math.round(volume * 100)}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={volume}
+                onChange={(e) => setVolume(parseFloat(e.target.value))}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -741,11 +789,10 @@ export default function EmployeeDashboard() {
             </button>
           ))}
         </nav>
-      
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 bg-[#28a745]  flex items-center justify-between px-6 flex-shrink-0">
+        <header className="h-16 bg-[#28a745] flex items-center justify-between px-6 flex-shrink-0">
           <h1 className="text-white text-xl font-semibold">Employee Dashboard</h1>
 
           <div className="flex items-center space-x-4">
@@ -799,19 +846,13 @@ export default function EmployeeDashboard() {
         </main>
 
         {showOverlay && newOrder && (
-          <div
-            onClick={() => setShowOverlay(false)}
-            className="fixed inset-0 z-50 bg-black bg-opacity-90 text-white flex items-center justify-center text-center p-6 cursor-pointer"
-          >
-            <div className="space-y-4 max-w-md mx-auto">
-              <h1 className="text-5xl font-bold">🚨 New Order</h1>
-              <p className="text-3xl">Hole #{newOrder.hole_number}</p>
-              <p className="text-xl">
-                {(newOrder.customer_name || 'Someone')} just placed an order.
-              </p>
-              <p className="text-sm opacity-70">Tap anywhere to dismiss</p>
-            </div>
-          </div>
+          <NewOrderAlert
+            holeNumber={newOrder.hole_number}
+            customerName={newOrder.customer_name || 'Someone'}
+            onDismiss={() => setShowOverlay(false)}
+            soundEnabled={soundEnabled}
+            volume={volume}
+          />
         )}
       </div>
     </div>

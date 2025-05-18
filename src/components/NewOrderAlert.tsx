@@ -4,13 +4,18 @@ interface NewOrderAlertProps {
   holeNumber: number;
   customerName: string;
   onDismiss: () => void;
+  soundEnabled: boolean;
+  volume: number;
 }
 
-export default function NewOrderAlert({ holeNumber, customerName, onDismiss }: NewOrderAlertProps) {
+export default function NewOrderAlert({ holeNumber, customerName, onDismiss, soundEnabled, volume }: NewOrderAlertProps) {
   useEffect(() => {
-    const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3');
-    audio.play().catch(err => console.warn('🔇 Audio playback blocked:', err));
-  }, []);
+    if (soundEnabled) {
+      const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3');
+      audio.volume = volume;
+      audio.play().catch(err => console.warn('🔇 Audio playback blocked:', err));
+    }
+  }, [soundEnabled, volume]);
 
   return (
     <div
