@@ -149,8 +149,9 @@ export default function EmployeeDashboard() {
   )
   .subscribe();
 
-
-    return () => subscription.unsubscribe();
+    return () => {
+      channel.unsubscribe();
+    };
   }, [navigate]);
 
   async function fetchOrders() {
@@ -740,6 +741,7 @@ export default function EmployeeDashboard() {
             </button>
           ))}
         </nav>
+      
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -796,19 +798,22 @@ export default function EmployeeDashboard() {
           {activeTab === 'settings' && renderSettingsTab()}
         </main>
 
-        {/* 🔔 FULL-SCREEN OVERLAY COMPONENT */}
-       {showOverlay && newOrder && (
-  <div
-    onClick={() => setShowOverlay(false)}
-    className="fixed inset-0 z-50 bg-black bg-opacity-90 text-white flex items-center justify-center text-center p-6 cursor-pointer"
-  >
-    <div className="space-y-4 max-w-md mx-auto">
-      <h1 className="text-5xl font-bold">🚨 New Order</h1>
-      <p className="text-3xl">Hole #{newOrder.hole_number}</p>
-      <p className="text-xl">
-        {(newOrder.customer_name || 'Someone')} just placed an order.
-      </p>
-      <p className="text-sm opacity-70">Tap anywhere to dismiss</p>
+        {showOverlay && newOrder && (
+          <div
+            onClick={() => setShowOverlay(false)}
+            className="fixed inset-0 z-50 bg-black bg-opacity-90 text-white flex items-center justify-center text-center p-6 cursor-pointer"
+          >
+            <div className="space-y-4 max-w-md mx-auto">
+              <h1 className="text-5xl font-bold">🚨 New Order</h1>
+              <p className="text-3xl">Hole #{newOrder.hole_number}</p>
+              <p className="text-xl">
+                {(newOrder.customer_name || 'Someone')} just placed an order.
+              </p>
+              <p className="text-sm opacity-70">Tap anywhere to dismiss</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-)}
+  );
+}
