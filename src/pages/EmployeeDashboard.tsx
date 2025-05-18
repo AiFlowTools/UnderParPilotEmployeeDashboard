@@ -133,6 +133,7 @@ export default function EmployeeDashboard() {
   .channel('orders')
   .on('postgres_changes', { schema: 'public', table: 'orders', event: 'INSERT' }, (payload) => {
   const insertedOrder = payload.new as Order;
+  console.log("🚨 New order received:", insertedOrder); // <-- Add this
   setOrders(curr => [insertedOrder, ...curr]);
   setNewOrder(insertedOrder);
   setShowOverlay(true);
