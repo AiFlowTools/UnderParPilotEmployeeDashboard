@@ -797,7 +797,7 @@ export default function EmployeeDashboard() {
         </main>
 
         {/* 🔔 FULL-SCREEN OVERLAY COMPONENT */}
-        {showOverlay && newOrder && (
+       {showOverlay && newOrder && (
   <div
     onClick={() => setShowOverlay(false)}
     className="fixed inset-0 z-50 bg-black bg-opacity-90 text-white flex items-center justify-center text-center p-6 cursor-pointer"
