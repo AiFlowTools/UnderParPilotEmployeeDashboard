@@ -111,12 +111,12 @@ export default function EmployeeDashboard() {
 
     const subscription = supabase
   .channel('orders')
-  .on('postgres_changes', { schema: 'public', table: 'orders', event: 'INSERT' }, ({ new: order }) => {
-    const insertedOrder = order as Order;
-    setOrders(curr => [insertedOrder, ...curr]);
-    setNewOrder(insertedOrder); // 🔔 Store new order info
-    setShowOverlay(true);       // 🔔 Trigger overlay
-  })
+  .on('postgres_changes', { schema: 'public', table: 'orders', event: 'INSERT' }, (payload) => {
+  const insertedOrder = payload.new as Order;
+  setOrders(curr => [insertedOrder, ...curr]);
+  setNewOrder(insertedOrder);
+  setShowOverlay(true);
+})
   .subscribe();
 
 
