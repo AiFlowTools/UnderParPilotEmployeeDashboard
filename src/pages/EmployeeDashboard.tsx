@@ -72,6 +72,9 @@ const VIEW_MODES = ['Day', 'Week', 'Month'] as const;
 type ViewMode = typeof VIEW_MODES[number];
 
 export default function EmployeeDashboard() {
+  // 🔔 Uber Eats-style overlay additions
+  const [newOrder, setNewOrder] = useState<Order | null>(null);
+  const [showOverlay, setShowOverlay] = useState(false);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('home');
   const [orders, setOrders] = useState<Order[]>([]);
@@ -107,11 +110,15 @@ export default function EmployeeDashboard() {
     });
 
     const subscription = supabase
-      .channel('orders')
-      .on('postgres_changes', { schema: 'public', table: 'orders', event: 'INSERT' }, ({ new: order }) => {
-        setOrders(curr => [order as Order, ...curr]);
-      })
-      .subscribe();
+  .channel('orders')
+  .on('postgres_changes', { schema: 'public', table: 'orders', event: 'INSERT' }, ({ new: order }) => {
+    const insertedOrder = order as Order;
+    setOrders(curr => [insertedOrder, ...curr]);
+    setNewOrder(insertedOrder); // 🔔 Store new order info
+    setShowOverlay(true);       // 🔔 Trigger overlay
+  })
+  .subscribe();
+
 
     return () => subscription.unsubscribe();
   }, [navigate]);
@@ -684,95 +691,95 @@ export default function EmployeeDashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <div className="w-64 bg-[#1e7e34] text-white flex-shrink-0">
-        <div className="p-4">
-          <h1 className="text-2xl font-bold">UnderPar</h1>
-        </div>
-        <nav className="mt-8">
-          {tabs.map(tab => (
+  <div className="flex h-screen bg-gray-100">
+    <div className="w-64 bg-[#1e7e34] text-white flex-shrink-0">
+      <div className="p-4">
+        <h1 className="text-2xl font-bold">UnderPar</h1>
+      </div>
+      <nav className="mt-8">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center w-full px-6 py-3 hover:bg-[#28a745] transition-colors ${
+              activeTab === tab.id ? 'bg-[#28a745]' : ''
+            }`}
+          >
+            <tab.icon className="w-5 h-5 mr-3" />
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+    </div>
+
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <header className="h-16 bg-[#28a745] flex items-center justify-between px-6 flex-shrink-0">
+        <h1 className="text-white text-xl font-semibold">Employee Dashboard</h1>
+
+        <div className="flex items-center space-x-4">
+          <NotificationBell onNotificationClick={handleNotificationClick} />
+
+          <div className="relative">
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center w-full px-6 py-3 hover:bg-[#28a745] transition-colors ${
-                activeTab === tab.id ? 'bg-[#28a745]' : ''
-              }`}
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="flex items-center space-x-2 text-white hover:bg-[#1e7e34] px-3 py-2 rounded-lg transition-colors duration-200"
+              aria-expanded={dropdownOpen}
+              aria-haspopup="true"
             >
-              <tab.icon className="w-5 h-5 mr-3" />
-              {tab.label}
+              <UserCircle className="w-5 h-5" />
+              <span className="text-sm font-medium">{session?.user?.email}</span>
+              <ChevronDown
+                className="w-4 h-4 transition-transform duration-200"
+                style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}
+              />
             </button>
-          ))}
-        </nav>
-      </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 bg-[#28a745] flex items-center justify-between px-6 flex-shrink-0">
-          <h1 className="text-white text-xl font-semibold">Employee Dashboard</h1>
-          
-          <div className="flex items-center space-x-4">
-            <NotificationBell onNotificationClick={handleNotificationClick} />
-            
-            <div className="relative">
-              <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center space-x-2 text-white hover:bg-[#1e7e34] px-3 py-2 rounded-lg transition-colors duration-200"
-                aria-expanded={dropdownOpen}
-                aria-haspopup="true"
-              >
-                <UserCircle className="w-5 h-5" />
-                <span className="text-sm font-medium">{session?.user?.email}</span>
-                <ChevronDown className="w-4 h-4 transition-transform duration-200" 
-                  style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}
-                />
-              </button>
+            {dropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
 
-              {dropdownOpen && (
-                <>
-                  <div 
-                    className="fixed inset-0 z-10"
-                    onClick={() => setDropdownOpen(false)}
-                  />
-                  
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-20">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm text-gray-500">Signed in as</p>
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {session?.user?.email}
-                      </p>
-                    </div>
-                    
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      <LogOut className="w-4 h-4 mr-2 inline-block" />
-                      Sign out
-                    </button>
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-20">
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <p className="text-sm text-gray-500">Signed in as</p>
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {session?.user?.email}
+                    </p>
                   </div>
-                </>
-              )}
-            </div>
+
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <LogOut className="w-4 h-4 mr-2 inline-block" />
+                    Sign out
+                  </button>
+                </div>
+              </>
+            )}
           </div>
-        </header>
+        </div>
+      </header>
 
-        <main className="flex-1 overflow-y-auto bg-[#f8f9fa] p-6">
-          {activeTab === 'home' && renderHomeTab()}
-          {activeTab === 'orders' && renderOrdersTab()}
-          {activeTab === 'settings' && renderSettingsTab()}
-        </main>
-      </div>
-    </div>
-  );
-}
+      <main className="flex-1 overflow-y-auto bg-[#f8f9fa] p-6">
+        {activeTab === 'home' && renderHomeTab()}
+        {activeTab === 'orders' && renderOrdersTab()}
+        {activeTab === 'settings' && renderSettingsTab()}
+      </main>
 
-function MetricCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number | string }) {
-  return (
-    <div className="bg-white rounded-lg shadow-sm p-6 flex items-center">
-      <div className="w-8 h-8 text-[#28a745] mr-3">{icon}</div>
-      <div>
-        <p className="text-[#6c757d] text-sm">{label}</p>
-        <p className="text-2xl font-semibold">{value}</p>
-      </div>
+      {/* 🔔 FULL-SCREEN OVERLAY COMPONENT */}
+      {showOverlay && newOrder && (
+        <div
+          onClick={() => setShowOverlay(false)}
+          className="fixed inset-0 z-50 bg-black bg-opacity-90 text-white flex items-center justify-center text-center p-6 cursor-pointer"
+        >
+          <div className="space-y-4 max-w-md mx-auto">
+            <h1 className="text-5xl font-bold">🚨 New Order</h1>
+            <p className="text-3xl">Hole #{newOrder.hole_number}</p>
+            <p className="text-xl">{newOrder.customer_name} just placed an order.</p>
+            <p className="text-sm opacity-70">Tap anywhere to dismiss</p>
+          </div>
+        </div>
+      )}
     </div>
-  );
-}
+  </div>
+);
