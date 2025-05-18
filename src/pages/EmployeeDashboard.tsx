@@ -114,13 +114,6 @@ export default function EmployeeDashboard() {
     avgOrderValue: { value: 0, previousValue: 0, change: 0, trend: 'neutral' },
   });
   const [autoRefresh, setAutoRefresh] = useState(false);
-  // 🔊 Play sound when overlay appears
-useEffect(() => {
-  if (showOverlay) {
-    const audio = new Audio('/sounds/alert.mp3');
-    audio.play().catch(err => console.warn('🔇 Audio playback failed:', err));
-  }
-}, [showOverlay]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
