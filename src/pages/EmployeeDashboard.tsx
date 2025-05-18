@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import NewOrderAlert from '../components/NewOrderAlert';
 import { useNavigate } from 'react-router-dom';
 import { format, subDays, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import {
@@ -797,19 +798,12 @@ export default function EmployeeDashboard() {
 
         {/* 🔔 FULL-SCREEN OVERLAY COMPONENT */}
         {showOverlay && newOrder && (
-          <div
-            onClick={() => setShowOverlay(false)}
-            className="fixed inset-0 z-50 bg-black bg-opacity-90 text-white flex items-center justify-center text-center p-6 cursor-pointer"
-          >
-            <div className="space-y-4 max-w-md mx-auto">
-              <h1 className="text-5xl font-bold">🚨 New Order</h1>
-              <p className="text-3xl">Hole #{newOrder.hole_number}</p>
-              <p className="text-xl">{newOrder.customer_name} just placed an order.</p>
-              <p className="text-sm opacity-70">Tap anywhere to dismiss</p>
-            </div>
-          </div>
-        )}
-      </div>
+  <div onClick={() => setShowOverlay(false)} className="fixed ...">
+    <div className="space-y-4 ...">
+      <h1 className="text-5xl font-bold">🚨 New Order</h1>
+      <p className="text-3xl">Hole #{newOrder.hole_number}</p>
+      <p className="text-xl">{newOrder.customer_name} just placed an order.</p>
+      <p className="text-sm opacity-70">Tap anywhere to dismiss</p>
     </div>
-  );
-}
+  </div>
+)}
