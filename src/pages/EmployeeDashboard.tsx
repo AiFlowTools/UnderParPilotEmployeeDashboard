@@ -106,6 +106,9 @@ export default function EmployeeDashboard() {
 
   const [newOrder, setNewOrder] = useState<Order | null>(null);
   const [showOverlay, setShowOverlay] = useState(false);
+  const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
+  const [notificationCount, setNotificationCount] = useState(0);
+  
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('home');
   const [orders, setOrders] = useState<Order[]>([]);
@@ -162,8 +165,14 @@ export default function EmployeeDashboard() {
           const insertedOrder = payload.new as Order;
           console.log("🔥 New order received via subscription", insertedOrder);
           setOrders(curr => [insertedOrder, ...curr]);
-          setNewOrder(insertedOrder);
-          setShowOverlay(true);
+          setNotificationCount(count => count + 1);
+          
+          if (showOverlay) {
+            setPendingOrders(current => [...current, insertedOrder]);
+          } else {
+            setNewOrder(insertedOrder);
+            setShowOverlay(true);
+          }
         }
       )
       .subscribe();
@@ -171,7 +180,24 @@ export default function EmployeeDashboard() {
     return () => {
       channel.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, showOverlay]);
+
+  const handleOverlayDismiss = () => {
+    if (pendingOrders.length > 0) {
+      const [nextOrder, ...remainingOrders] = pendingOrders;
+      setNewOrder(nextOrder);
+      setPendingOrders(remainingOrders);
+    } else {
+      setShowOverlay(false);
+      setNewOrder(null);
+    }
+  };
+
+  const handleNotificationClick = () => {
+    setNotificationCount(0);
+    setActiveTab('orders');
+    setStatusFilter('new-group');
+  };
 
   async function fetchOrders() {
     setLoading(true);
@@ -764,11 +790,6 @@ export default function EmployeeDashboard() {
     </div>
   );
 
-  const handleNotificationClick = () => {
-    setActiveTab('orders');
-    setStatusFilter('new-group');
-  };
-
   return (
     <div className="flex h-screen bg-gray-100">
       <div className="w-64 bg-[#1e7e34] text-white flex-shrink-0">
@@ -796,7 +817,7 @@ export default function EmployeeDashboard() {
           <h1 className="text-white text-xl font-semibold">Employee Dashboard</h1>
 
           <div className="flex items-center space-x-4">
-            <NotificationBell onNotificationClick={handleNotificationClick} />
+            <NotificationBell count={notificationCount} onNotificationClick={handleNotificationClick} />
 
             <div className="relative">
               <button
@@ -843,17 +864,17 @@ export default function EmployeeDashboard() {
           {activeTab === 'home' && renderHomeTab()}
           {activeTab === 'orders' && renderOrdersTab()}
           {activeTab === 'settings' && renderSettingsTab()}
-        </main>
 
-        {showOverlay && newOrder && (
-          <NewOrderAlert
-            holeNumber={newOrder.hole_number}
-            customerName={newOrder.customer_name || 'Someone'}
-            onDismiss={() => setShowOverlay(false)}
-            soundEnabled={soundEnabled}
-            volume={volume}
-          />
-        )}
+          {showOverlay && newOrder && (
+            <NewOrderAlert
+              holeNumber={newOrder.hole_number}
+              customerName={newOrder.customer_name || 'Someone'}
+              onDismiss={handleOverlayDismiss}
+              soundEnabled={soundEnabled}
+              volume={volume}
+            />
+          )}
+        </main>
       </div>
     </div>
   );

@@ -11,10 +11,11 @@ interface Notification {
 }
 
 interface NotificationBellProps {
+  count?: number;
   onNotificationClick?: () => void;
 }
 
-export default function NotificationBell({ onNotificationClick }: NotificationBellProps) {
+export default function NotificationBell({ count = 0, onNotificationClick }: NotificationBellProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -77,9 +78,9 @@ export default function NotificationBell({ onNotificationClick }: NotificationBe
         className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
       >
         <Bell className="h-6 w-6 text-gray-600" />
-        {notifications.length > 0 && (
+        {count > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-            {notifications.length}
+            {count}
           </span>
         )}
       </button>
