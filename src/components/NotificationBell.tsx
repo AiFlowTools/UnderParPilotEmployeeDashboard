@@ -48,7 +48,8 @@ export default function NotificationBell({ count = 0, onNotificationClick }: Not
       .from('notifications')
       .select('*')
       .eq('read', false)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(10);
     
     setNotifications(data || []);
   };
@@ -74,7 +75,12 @@ export default function NotificationBell({ count = 0, onNotificationClick }: Not
   return (
     <div className="relative">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (!isOpen) {
+            fetchNotifications(); // Fetch latest notifications when opening
+          }
+        }}
         className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
       >
         <Bell className="h-6 w-6 text-gray-600" />
