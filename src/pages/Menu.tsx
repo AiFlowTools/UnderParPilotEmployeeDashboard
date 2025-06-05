@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   Search,
   Coffee,
@@ -16,7 +16,6 @@ import {
   X
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { useCourse } from '../contexts/CourseContext';
 import MenuItemDetail from '../components/MenuItemDetail';
 
 interface MenuItem {
@@ -49,7 +48,7 @@ const categories = [
 ];
 
 export default function Menu() {
-  const { currentCourse } = useCourse();
+  const { courseId } = useParams();
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>('Breakfast');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -73,23 +72,22 @@ export default function Menu() {
   }, []);
 
   useEffect(() => {
-    if (!currentCourse?.id) {
-      setError('No golf course found');
+    if (!courseId) {
+      setError('No golf course ID provided');
       setLoading(false);
       return;
     }
-
     supabase
       .from('menu_items')
       .select('*')
-      .eq('golf_course_id', currentCourse.id)
+      .eq('golf_course_id', courseId)
       .then(({ data, error: e }) => {
         if (e) throw e;
         setMenuItems(data || []);
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
-  }, [currentCourse]);
+  }, [courseId]);
 
   const filteredItems = menuItems.filter(
     item =>
@@ -186,14 +184,6 @@ export default function Menu() {
   return (
     <div className="min-h-screen bg-gray-50 pb-32">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Course Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">{currentCourse?.name}</h1>
-          {currentCourse?.location && (
-            <p className="text-gray-600 mt-2">{currentCourse.location}</p>
-          )}
-        </div>
-
         {/* Search & Categories */}
         <div className="sticky top-0 bg-gray-50 z-10 pb-4">
           <div className="relative mb-6">
@@ -311,7 +301,7 @@ export default function Menu() {
                   </div>
                 ))}
                 <Link
-                  to={`/checkout/${currentCourse?.id}`}
+                  to={`/checkout/${courseId}`}
                   className="block w-full mobile-button bg-green-600 text-white text-center hover:bg-green-700"
                 >
                   Proceed to Checkout
