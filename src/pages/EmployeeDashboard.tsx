@@ -95,8 +95,6 @@ const { isAdmin, loadingUser } = useUser();
 
 export default function EmployeeDashboard() {
   const { user, role } = useUser();
-  const [activeTab, setActiveTab] = useState('home');
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   // Sound control states
   const [soundEnabled, setSoundEnabled] = useState(() => {
     const saved = localStorage.getItem('soundEnabled');
