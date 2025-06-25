@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import NewOrderAlert from '../components/NewOrderAlert';
 import { useNavigate } from 'react-router-dom';
-import { format, subDays, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
+import { supabase } from '../lib/supabase';
+import NotificationBell from '../components/NotificationBell';
+import NewOrderAlert from '../components/NewOrderAlert';
+import { useUser } from '../hooks/useUser'; // Assumes you have this custom hook
 import {
   Home,
   Settings,
   ClipboardList,
+  LogOut,
+  UserCircle,
+  ChevronDown,
   Package,
   Clock,
-  Timer,
   TrendingUp,
-  Search,
-  ChevronDown,
-  LogOut,
+  Timer,
   BarChart3,
   Users,
   CreditCard,
@@ -20,13 +22,9 @@ import {
   ChevronRight,
   Download,
   RefreshCw,
-  ArrowDown,
-  ArrowUp,
-  UserCircle,
-  Volume2,
+  Search,
+  Volume2
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import NotificationBell from '../components/NotificationBell';
 
 interface OrderItem {
   item_name: string;
@@ -96,6 +94,10 @@ type ViewMode = typeof VIEW_MODES[number];
 const { isAdmin, loadingUser } = useUser();
 
 export default function EmployeeDashboard() {
+  const { user, role } = useUser();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('home');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   // Sound control states
   const [soundEnabled, setSoundEnabled] = useState(() => {
     const saved = localStorage.getItem('soundEnabled');
@@ -584,6 +586,16 @@ export default function EmployeeDashboard() {
     </div>
   );
 
+  const renderMenuTab = () => (
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <h2 className="text-xl font-semibold mb-4">Menu Management</h2>
+        <p className="text-gray-600">Here you can manage your course menu items.</p>
+        {/* Insert your menu management logic here */}
+      </div>
+    </div>
+  );
+
   const renderSettingsTab = () => (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="bg-white rounded-lg shadow-sm p-6">
@@ -799,7 +811,7 @@ export default function EmployeeDashboard() {
           <h1 className="text-2xl font-bold">FairwayMate</h1>
         </div>
         <nav className="mt-8">
-          {tabs.map(tab => (
+          {[...tabs, ...(role === 'admin' ? [{ id: 'menu', label: 'Menu', icon: Package }] : [])].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -819,7 +831,7 @@ export default function EmployeeDashboard() {
           <h1 className="text-white text-xl font-semibold">Employee Dashboard</h1>
 
           <div className="flex items-center space-x-4">
-            <NotificationBell count={notificationCount} onNotificationClick={handleNotificationClick} />
+            <NotificationBell count={0} onNotificationClick={() => setActiveTab('orders')} />
 
             <div className="relative">
               <button
@@ -829,7 +841,7 @@ export default function EmployeeDashboard() {
                 aria-haspopup="true"
               >
                 <UserCircle className="w-5 h-5" />
-                <span className="text-sm font-medium">{session?.user?.email}</span>
+                <span className="text-sm font-medium">{user?.email}</span>
                 <ChevronDown
                   className="w-4 h-4 transition-transform duration-200"
                   style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}
@@ -839,17 +851,19 @@ export default function EmployeeDashboard() {
               {dropdownOpen && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
-
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-20">
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm text-gray-500">Signed in as</p>
                       <p className="text-sm font-medium text-gray-900 truncate">
-                        {session?.user?.email}
+                        {user?.email}
                       </p>
                     </div>
-
                     <button
-                      onClick={handleLogout}
+                      onClick={async () => {
+                        await supabase.auth.signOut();
+                        localStorage.clear();
+                        navigate('/', { replace: true });
+                      }}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       <LogOut className="w-4 h-4 mr-2 inline-block" />
@@ -866,6 +880,7 @@ export default function EmployeeDashboard() {
           {activeTab === 'home' && renderHomeTab()}
           {activeTab === 'orders' && renderOrdersTab()}
           {activeTab === 'settings' && renderSettingsTab()}
+          {activeTab === 'menu' && role === 'admin' && renderMenuTab()}
 
           {showOverlay && newOrder && (
             <NewOrderAlert
