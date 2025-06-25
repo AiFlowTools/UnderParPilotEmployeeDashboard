@@ -93,6 +93,8 @@ const tabs: TabConfig[] = [
 const VIEW_MODES = ['Day', 'Week', 'Month'] as const;
 type ViewMode = typeof VIEW_MODES[number];
 
+const { isAdmin, loadingUser } = useUser();
+
 export default function EmployeeDashboard() {
   // Sound control states
   const [soundEnabled, setSoundEnabled] = useState(() => {
@@ -221,7 +223,7 @@ export default function EmployeeDashboard() {
       }
 
       if (search) {
-        query = query.ilike('ordered_items', %${search}%);
+        query = query.ilike('ordered_items', `%${search}%`);
       }
 
       const { data, error } = await query;
@@ -413,7 +415,7 @@ export default function EmployeeDashboard() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = metrics-${format(selectedDate, 'yyyy-MM-dd')}.json;
+    a.download = `metrics-${format(selectedDate, 'yyyy-MM-dd')}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -430,11 +432,11 @@ export default function EmployeeDashboard() {
                 <button
                   key={mode}
                   onClick={() => setViewMode(mode)}
-                  className={px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     viewMode === mode
                       ? 'bg-green-600 text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }}
+                  }`}
                 >
                   {mode}
                 </button>
@@ -461,9 +463,9 @@ export default function EmployeeDashboard() {
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setAutoRefresh(!autoRefresh)}
-              className={p-2 rounded-lg flex items-center ${
+              className={`p-2 rounded-lg flex items-center ${
                 autoRefresh ? 'text-green-600' : 'text-gray-400'
-              }}
+              }`}
             >
               <RefreshCw className="w-5 h-5 mr-2" />
               Auto-refresh
@@ -487,7 +489,7 @@ export default function EmployeeDashboard() {
                 <div>
                   <p className="text-2xl font-bold">
                     {key === 'revenue' || key === 'avgOrderValue' 
-                      ? $${data.value.toFixed(2)}
+                      ? `$${data.value.toFixed(2)}`
                       : data.value}
                   </p>
                   <div className="flex items-center mt-2">
@@ -496,11 +498,11 @@ export default function EmployeeDashboard() {
                     ) : data.trend === 'down' ? (
                       <ArrowDown className="w-4 h-4 text-red-500" />
                     ) : null}
-                    <span className={text-sm ${
+                    <span className={`text-sm ${
                       data.trend === 'up' ? 'text-green-500' : 
                       data.trend === 'down' ? 'text-red-500' : 
                       'text-gray-500'
-                    }}>
+                    }`}>
                       {Math.abs(data.change).toFixed(1)}%
                     </span>
                   </div>
@@ -564,7 +566,7 @@ export default function EmployeeDashboard() {
                   {format(new Date(order.created_at), 'MMM d, h:mm a')}
                 </p>
               </div>
-              <span className={px-3 py-1 rounded-full text-sm font-medium ${
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                 {
                   new: 'bg-blue-100 text-blue-800',
                   preparing: 'bg-yellow-100 text-yellow-800',
@@ -572,7 +574,7 @@ export default function EmployeeDashboard() {
                   delivered: 'bg-green-100 text-green-800',
                   cancelled: 'bg-red-100 text-red-800'
                 }[order.fulfillment_status]
-              }}>
+              }`}>
                 {order.fulfillment_status.replace(/_/g, ' ')}
               </span>
             </div>
@@ -742,7 +744,7 @@ export default function EmployeeDashboard() {
                     {order.hole_number}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {order.ordered_items.map(i => ${i.quantity}x ${i.item_name}).join(', ')}
+                    {order.ordered_items.map(i => `${i.quantity}x ${i.item_name}`).join(', ')}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {order.notes || '-'}
@@ -751,7 +753,7 @@ export default function EmployeeDashboard() {
                     {new Date(order.created_at).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       {
                         new: 'bg-blue-100 text-blue-800',
                         preparing: 'bg-yellow-100 text-yellow-800',
@@ -759,7 +761,7 @@ export default function EmployeeDashboard() {
                         delivered: 'bg-green-100 text-green-800',
                         cancelled: 'bg-red-100 text-red-800'
                       }[order.fulfillment_status]
-                    }}>
+                    }`}>
                       {order.fulfillment_status.replace(/_/g,' ')}
                     </span>
                   </td>
@@ -801,9 +803,9 @@ export default function EmployeeDashboard() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={flex items-center w-full px-6 py-3 hover:bg-[#28a745] transition-colors ${
+              className={`flex items-center w-full px-6 py-3 hover:bg-[#28a745] transition-colors ${
                 activeTab === tab.id ? 'bg-[#28a745]' : ''
-              }}
+              }`}
             >
               <tab.icon className="w-5 h-5 mr-3" />
               {tab.label}
