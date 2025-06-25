@@ -794,7 +794,7 @@ export default function EmployeeDashboard() {
     <div className="flex h-screen bg-gray-100">
       <div className="w-64 bg-[#1e7e34] text-white flex-shrink-0">
         <div className="p-4">
-          <h1 className="text-2xl font-bold">UnderPar</h1>
+          <h1 className="text-2xl font-bold">FairwayMate</h1>
         </div>
         <nav className="mt-8">
           {tabs.map(tab => (

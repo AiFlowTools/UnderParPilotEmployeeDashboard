@@ -11,7 +11,7 @@ const supabase = createClient(
 
 // 2) Stripe client
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
-  appInfo: { name: 'Golf Course Food Ordering', version: '1.0.0' },
+  appInfo: { name: 'FairwayMate Food Ordering', version: '1.0.0' },
   apiVersion: '2023-10-16'
 });
 

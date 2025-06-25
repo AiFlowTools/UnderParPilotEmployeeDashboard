@@ -67,10 +67,10 @@ export default function Login() {
             <GolfBall className="h-12 w-12 text-green-400" />
           </div>
           <h1 className="text-4xl font-bold text-white mb-2 font-heading">
-            UnderPar
+            FairwayMate
           </h1>
           <p className="text-lg text-gray-200 italic">
-            Your one-stop shop for on-course ordering
+            Seamless Green-side Ordering
           </p>
         </div>
 
