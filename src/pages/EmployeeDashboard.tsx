@@ -27,10 +27,6 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import NotificationBell from '../components/NotificationBell';
-import { useUser } from '../lib/hooks/useUser';
-
-export default function EmployeeDashboard() {
-  const { isAdmin, loadingUser } = useUser();
 
 interface OrderItem {
   item_name: string;
@@ -225,7 +221,7 @@ export default function EmployeeDashboard() {
       }
 
       if (search) {
-        query = query.ilike('ordered_items', `%${search}%`);
+        query = query.ilike('ordered_items', %${search}%);
       }
 
       const { data, error } = await query;
@@ -417,7 +413,7 @@ export default function EmployeeDashboard() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `metrics-${format(selectedDate, 'yyyy-MM-dd')}.json`;
+    a.download = metrics-${format(selectedDate, 'yyyy-MM-dd')}.json;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -434,11 +430,11 @@ export default function EmployeeDashboard() {
                 <button
                   key={mode}
                   onClick={() => setViewMode(mode)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     viewMode === mode
                       ? 'bg-green-600 text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
+                  }}
                 >
                   {mode}
                 </button>
@@ -465,9 +461,9 @@ export default function EmployeeDashboard() {
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`p-2 rounded-lg flex items-center ${
+              className={p-2 rounded-lg flex items-center ${
                 autoRefresh ? 'text-green-600' : 'text-gray-400'
-              }`}
+              }}
             >
               <RefreshCw className="w-5 h-5 mr-2" />
               Auto-refresh
@@ -491,7 +487,7 @@ export default function EmployeeDashboard() {
                 <div>
                   <p className="text-2xl font-bold">
                     {key === 'revenue' || key === 'avgOrderValue' 
-                      ? `$${data.value.toFixed(2)}`
+                      ? $${data.value.toFixed(2)}
                       : data.value}
                   </p>
                   <div className="flex items-center mt-2">
@@ -500,11 +496,11 @@ export default function EmployeeDashboard() {
                     ) : data.trend === 'down' ? (
                       <ArrowDown className="w-4 h-4 text-red-500" />
                     ) : null}
-                    <span className={`text-sm ${
+                    <span className={text-sm ${
                       data.trend === 'up' ? 'text-green-500' : 
                       data.trend === 'down' ? 'text-red-500' : 
                       'text-gray-500'
-                    }`}>
+                    }}>
                       {Math.abs(data.change).toFixed(1)}%
                     </span>
                   </div>
@@ -519,116 +515,6 @@ export default function EmployeeDashboard() {
       </div>
     </div>
   );
-
-  const tabs: TabConfig[] = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'orders', label: 'Orders', icon: ClipboardList },
-    { id: 'settings', label: 'Settings', icon: Settings },
-  ];
-
-  return (
-    <div className="flex h-screen bg-gray-100">
-      <div className="w-64 bg-[#1e7e34] text-white flex-shrink-0">
-        <div className="p-4">
-          <h1 className="text-2xl font-bold">FairwayMate</h1>
-        </div>
-        <nav className="mt-8">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center w-full px-6 py-3 hover:bg-[#28a745] transition-colors ${
-                activeTab === tab.id ? 'bg-[#28a745]' : ''
-              }`}
-            >
-              <tab.icon className="w-5 h-5 mr-3" />
-              {tab.label}
-            </button>
-          ))}
-
-          {isAdmin && (
-            <button
-              key="menu"
-              onClick={() => setActiveTab('menu')}
-              className={`flex items-center w-full px-6 py-3 hover:bg-[#28a745] transition-colors ${
-                activeTab === 'menu' ? 'bg-[#28a745]' : ''
-              }`}
-            >
-              <Settings className="w-5 h-5 mr-3" />
-              Menu Management
-            </button>
-          )}
-        </nav>
-      </div>
-
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 bg-[#28a745] flex items-center justify-between px-6 flex-shrink-0">
-          <h1 className="text-white text-xl font-semibold">Employee Dashboard</h1>
-
-          <div className="flex items-center space-x-4">
-            <NotificationBell count={notificationCount} onNotificationClick={handleNotificationClick} />
-
-            <div className="relative">
-              <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center space-x-2 text-white hover:bg-[#1e7e34] px-3 py-2 rounded-lg transition-colors duration-200"
-                aria-expanded={dropdownOpen}
-                aria-haspopup="true"
-              >
-                <UserCircle className="w-5 h-5" />
-                <span className="text-sm font-medium">{session?.user?.email}</span>
-                <ChevronDown
-                  className="w-4 h-4 transition-transform duration-200"
-                  style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}
-                />
-              </button>
-
-              {dropdownOpen && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
-
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-20">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm text-gray-500">Signed in as</p>
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {session?.user?.email}
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      <LogOut className="w-4 h-4 mr-2 inline-block" />
-                      Sign out
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </header>
-
-        <main className="flex-1 overflow-y-auto bg-[#f8f9fa] p-6">
-          {activeTab === 'home' && renderHomeTab()}
-          {activeTab === 'orders' && renderOrdersTab()}
-          {activeTab === 'settings' && renderSettingsTab()}
-          {activeTab === 'menu' && isAdmin && renderMenuTab?.()}
-
-          {showOverlay && newOrder && (
-            <NewOrderAlert
-              holeNumber={newOrder.hole_number}
-              customerName={newOrder.customer_name || 'Someone'}
-              onDismiss={handleOverlayDismiss}
-              soundEnabled={soundEnabled}
-              volume={volume}
-            />
-          )}
-        </main>
-      </div>
-    </div>
-  );
-}
 
   const renderHomeTab = () => (
     <div className="space-y-6">
@@ -678,7 +564,7 @@ export default function EmployeeDashboard() {
                   {format(new Date(order.created_at), 'MMM d, h:mm a')}
                 </p>
               </div>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              <span className={px-3 py-1 rounded-full text-sm font-medium ${
                 {
                   new: 'bg-blue-100 text-blue-800',
                   preparing: 'bg-yellow-100 text-yellow-800',
@@ -686,7 +572,7 @@ export default function EmployeeDashboard() {
                   delivered: 'bg-green-100 text-green-800',
                   cancelled: 'bg-red-100 text-red-800'
                 }[order.fulfillment_status]
-              }`}>
+              }}>
                 {order.fulfillment_status.replace(/_/g, ' ')}
               </span>
             </div>
@@ -856,7 +742,7 @@ export default function EmployeeDashboard() {
                     {order.hole_number}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {order.ordered_items.map(i => `${i.quantity}x ${i.item_name}`).join(', ')}
+                    {order.ordered_items.map(i => ${i.quantity}x ${i.item_name}).join(', ')}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {order.notes || '-'}
@@ -865,7 +751,7 @@ export default function EmployeeDashboard() {
                     {new Date(order.created_at).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    <span className={px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       {
                         new: 'bg-blue-100 text-blue-800',
                         preparing: 'bg-yellow-100 text-yellow-800',
@@ -873,7 +759,7 @@ export default function EmployeeDashboard() {
                         delivered: 'bg-green-100 text-green-800',
                         cancelled: 'bg-red-100 text-red-800'
                       }[order.fulfillment_status]
-                    }`}>
+                    }}>
                       {order.fulfillment_status.replace(/_/g,' ')}
                     </span>
                   </td>
@@ -915,9 +801,9 @@ export default function EmployeeDashboard() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center w-full px-6 py-3 hover:bg-[#28a745] transition-colors ${
+              className={flex items-center w-full px-6 py-3 hover:bg-[#28a745] transition-colors ${
                 activeTab === tab.id ? 'bg-[#28a745]' : ''
-              }`}
+              }}
             >
               <tab.icon className="w-5 h-5 mr-3" />
               {tab.label}
