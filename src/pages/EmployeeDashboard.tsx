@@ -99,8 +99,13 @@ const VIEW_MODES = ['Day', 'Week', 'Month'] as const;
 type ViewMode = typeof VIEW_MODES[number];
 
 export default function EmployeeDashboard() {
-  const { user, role, loading: userLoading } = useUser();
+  const { user, role, isAdmin, loading: userLoading } = useUser();
   const navigate = useNavigate();
+
+  // Add verification logging
+  console.log('Dashboard - isAdmin:', isAdmin);
+  console.log('Dashboard - role:', role);
+  console.log('Dashboard - user:', user);
 
   // Sound control states
   const [soundEnabled, setSoundEnabled] = useState(() => {
@@ -619,6 +624,19 @@ export default function EmployeeDashboard() {
               className="w-full px-3 py-2 border rounded-lg bg-gray-50"
             />
           </div>
+          {isAdmin && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Admin Status
+              </label>
+              <input
+                type="text"
+                value="Administrator"
+                disabled
+                className="w-full px-3 py-2 border rounded-lg bg-green-50 text-green-800"
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -807,7 +825,7 @@ export default function EmployeeDashboard() {
       case 'orders':
         return renderOrdersTab();
       case 'menu':
-        return role === 'admin' ? <MenuManagement /> : null;
+        return isAdmin ? <MenuManagement /> : null;
       case 'settings':
         return renderSettingsTab();
       default:
@@ -824,8 +842,14 @@ export default function EmployeeDashboard() {
     );
   }
 
-  // Filter tabs based on user role
-  const visibleTabs = tabs.filter(tab => !tab.adminOnly || role === 'admin');
+  // Filter tabs based on user role - only show Menu tab if user is admin
+  const visibleTabs = tabs.filter(tab => {
+    if (tab.adminOnly) {
+      console.log(`Tab ${tab.label} requires admin. User isAdmin: ${isAdmin}`);
+      return isAdmin;
+    }
+    return true;
+  });
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -881,6 +905,9 @@ export default function EmployeeDashboard() {
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {session?.user?.email}
                       </p>
+                      {isAdmin && (
+                        <p className="text-xs text-green-600 font-medium">Administrator</p>
+                      )}
                     </div>
 
                     <button

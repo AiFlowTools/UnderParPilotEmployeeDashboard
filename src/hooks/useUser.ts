@@ -6,14 +6,16 @@ interface User {
   email: string;
 }
 
-interface Profile {
-  id: string;
+interface UserProfile {
+  email: string;
   role: 'employee' | 'admin';
+  is_admin: boolean;
 }
 
 export function useUser() {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<'employee' | 'admin' | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export function useUser() {
           id: session.user.id,
           email: session.user.email || '',
         });
-        fetchUserRole(session.user.id);
+        fetchUserProfile(session.user.id);
       } else {
         setLoading(false);
       }
@@ -39,10 +41,11 @@ export function useUser() {
           id: session.user.id,
           email: session.user.email || '',
         });
-        fetchUserRole(session.user.id);
+        fetchUserProfile(session.user.id);
       } else {
         setUser(null);
         setRole(null);
+        setIsAdmin(false);
         setLoading(false);
       }
     });
@@ -50,22 +53,42 @@ export function useUser() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserRole = async (userId: string) => {
+  const fetchUserProfile = async (userId: string) => {
     try {
-      const { data: profile } = await supabase
+      const { data } = await supabase
         .from('profiles')
-        .select('role')
+        .select('email, role, is_admin')
         .eq('id', userId)
         .single();
 
-      setRole(profile?.role || 'employee');
+      console.log('User profile data:', data);
+
+      if (data) {
+        setRole(data.role || 'employee');
+        setIsAdmin(data.is_admin || false);
+        
+        console.log('isAdmin:', data.is_admin || false);
+        console.log('role:', data.role || 'employee');
+      } else {
+        setRole('employee');
+        setIsAdmin(false);
+      }
     } catch (error) {
-      console.error('Error fetching user role:', error);
-      setRole('employee'); // Default to employee
+      console.error('Error fetching user profile:', error);
+      setRole('employee');
+      setIsAdmin(false);
     } finally {
       setLoading(false);
     }
   };
 
-  return { user, role, loading };
+  return { 
+    user, 
+    role, 
+    isAdmin, 
+    loading,
+    // Additional helper properties
+    isEmployee: role === 'employee',
+    isAuthenticated: !!user
+  };
 }
