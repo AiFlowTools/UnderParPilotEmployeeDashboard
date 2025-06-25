@@ -5,11 +5,13 @@ import {
   Trash2, 
   Save, 
   X, 
-  Upload,
   Search,
-  Filter
+  Filter,
+  AlertCircle,
+  Building2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useUser } from '../hooks/useUser';
 
 interface MenuItem {
   id: string;
@@ -20,6 +22,12 @@ interface MenuItem {
   price: number;
   image_url?: string;
   tags?: string[];
+}
+
+interface GolfCourse {
+  id: string;
+  name: string;
+  location?: string;
 }
 
 const categories = [
@@ -39,7 +47,9 @@ const availableTags = [
 ];
 
 export default function MenuManagement() {
+  const { golfCourseId, loading: userLoading, hasGolfCourse } = useUser();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [golfCourse, setGolfCourse] = useState<GolfCourse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
@@ -58,33 +68,71 @@ export default function MenuManagement() {
   });
 
   useEffect(() => {
-    fetchMenuItems();
-  }, []);
+    if (!userLoading && golfCourseId) {
+      fetchGolfCourse();
+      fetchMenuItems();
+    } else if (!userLoading) {
+      setLoading(false);
+    }
+  }, [userLoading, golfCourseId]);
+
+  const fetchGolfCourse = async () => {
+    if (!golfCourseId) return;
+
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('golf_courses')
+        .select('id, name, location')
+        .eq('id', golfCourseId)
+        .single();
+
+      if (fetchError) throw fetchError;
+      setGolfCourse(data);
+    } catch (err: any) {
+      console.error('Error fetching golf course:', err);
+      setError('Failed to load golf course information');
+    }
+  };
 
   const fetchMenuItems = async () => {
+    if (!golfCourseId) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
+      setError(null);
+
+      console.log('Fetching menu items for golf course:', golfCourseId);
+
       const { data, error: fetchError } = await supabase
         .from('menu_items')
         .select('*')
+        .eq('golf_course_id', golfCourseId)
         .order('category', { ascending: true })
         .order('item_name', { ascending: true });
 
       if (fetchError) throw fetchError;
+      
+      console.log('Fetched menu items:', data);
       setMenuItems(data || []);
     } catch (err: any) {
-      setError(err.message);
+      console.error('Error fetching menu items:', err);
+      setError(`Failed to load menu items: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSave = async () => {
+    if (!golfCourseId) {
+      setError('No golf course assigned to your account');
+      return;
+    }
+
     try {
       setError(null);
-      
-      // Get the course ID (assuming single course for now)
-      const courseId = 'c4a48f69-a535-4f57-8716-d34cff63059b';
 
       if (editingItem) {
         // Update existing item
@@ -98,7 +146,8 @@ export default function MenuManagement() {
             image_url: formData.image_url || null,
             tags: formData.tags.length > 0 ? formData.tags : null
           })
-          .eq('id', editingItem.id);
+          .eq('id', editingItem.id)
+          .eq('golf_course_id', golfCourseId); // Ensure user can only update items from their course
 
         if (updateError) throw updateError;
       } else {
@@ -106,7 +155,7 @@ export default function MenuManagement() {
         const { error: insertError } = await supabase
           .from('menu_items')
           .insert({
-            golf_course_id: courseId,
+            golf_course_id: golfCourseId,
             item_name: formData.item_name,
             description: formData.description,
             price: formData.price,
@@ -122,18 +171,10 @@ export default function MenuManagement() {
       await fetchMenuItems();
       
       // Reset form
-      setEditingItem(null);
-      setIsAddingNew(false);
-      setFormData({
-        item_name: '',
-        description: '',
-        price: 0,
-        category: 'Breakfast',
-        image_url: '',
-        tags: []
-      });
+      handleCancel();
     } catch (err: any) {
-      setError(err.message);
+      console.error('Error saving menu item:', err);
+      setError(`Failed to save menu item: ${err.message}`);
     }
   };
 
@@ -158,12 +199,14 @@ export default function MenuManagement() {
       const { error: deleteError } = await supabase
         .from('menu_items')
         .delete()
-        .eq('id', itemId);
+        .eq('id', itemId)
+        .eq('golf_course_id', golfCourseId); // Ensure user can only delete items from their course
 
       if (deleteError) throw deleteError;
       await fetchMenuItems();
     } catch (err: any) {
-      setError(err.message);
+      console.error('Error deleting menu item:', err);
+      setError(`Failed to delete menu item: ${err.message}`);
     }
   };
 
@@ -196,7 +239,8 @@ export default function MenuManagement() {
     return matchesSearch && matchesCategory;
   });
 
-  if (loading) {
+  // Show loading while checking user data
+  if (userLoading || loading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
@@ -204,22 +248,64 @@ export default function MenuManagement() {
     );
   }
 
+  // Show error if no golf course is assigned
+  if (!hasGolfCourse) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+        <AlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          No Golf Course Assigned
+        </h3>
+        <p className="text-gray-600 mb-4">
+          Your admin account is not currently assigned to a golf course. 
+          Please contact your system administrator to assign you to a golf course.
+        </p>
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-left">
+          <h4 className="font-medium text-amber-800 mb-2">What you can do:</h4>
+          <ul className="text-sm text-amber-700 space-y-1">
+            <li>• Contact your system administrator</li>
+            <li>• Request assignment to a golf course</li>
+            <li>• Verify your admin permissions</li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Menu Management</h2>
-        <button
-          onClick={() => setIsAddingNew(true)}
-          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Add New Item
-        </button>
+      {/* Header with Golf Course Info */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Menu Management</h2>
+            {golfCourse && (
+              <div className="flex items-center text-gray-600">
+                <Building2 className="w-5 h-5 mr-2" />
+                <span className="font-medium">{golfCourse.name}</span>
+                {golfCourse.location && (
+                  <span className="ml-2 text-gray-500">• {golfCourse.location}</span>
+                )}
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => setIsAddingNew(true)}
+            disabled={!golfCourseId}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Add New Item
+          </button>
+        </div>
       </div>
 
       {error && (
-        <div className="bg-red-50 p-4 rounded-lg text-red-700">
-          <p>{error}</p>
+        <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
+          <div className="flex items-center">
+            <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
+            <p className="text-red-700">{error}</p>
+          </div>
         </div>
       )}
 
@@ -262,7 +348,7 @@ export default function MenuManagement() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Item Name
+                Item Name *
               </label>
               <input
                 type="text"
@@ -270,31 +356,35 @@ export default function MenuManagement() {
                 onChange={(e) => setFormData(prev => ({ ...prev, item_name: e.target.value }))}
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 placeholder="Enter item name"
+                required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price ($)
+                Price ($) *
               </label>
               <input
                 type="number"
                 step="0.01"
+                min="0"
                 value={formData.price}
                 onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 placeholder="0.00"
+                required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
+                Category *
               </label>
               <select
                 value={formData.category}
                 onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
               >
                 {categories.map(category => (
                   <option key={category} value={category}>{category}</option>
@@ -317,7 +407,7 @@ export default function MenuManagement() {
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
+                Description *
               </label>
               <textarea
                 value={formData.description}
@@ -325,12 +415,13 @@ export default function MenuManagement() {
                 rows={3}
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 placeholder="Enter item description"
+                required
               />
             </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tags
+                Tags (optional)
               </label>
               <div className="flex flex-wrap gap-2">
                 {availableTags.map(tag => (
@@ -361,7 +452,8 @@ export default function MenuManagement() {
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center"
+              disabled={!formData.item_name || !formData.description || formData.price <= 0}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <Save className="w-4 h-4 mr-2" />
               Save
@@ -372,91 +464,117 @@ export default function MenuManagement() {
 
       {/* Menu Items List */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Item
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Category
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Price
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Tags
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredItems.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">
-                  <div className="flex items-center">
-                    {item.image_url && (
-                      <img
-                        src={item.image_url}
-                        alt={item.item_name}
-                        className="w-12 h-12 object-cover rounded-lg mr-4"
-                      />
-                    )}
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {item.item_name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {item.description}
+        {filteredItems.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <Search className="w-16 h-16 mx-auto" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {menuItems.length === 0 ? 'No menu items yet' : 'No items match your search'}
+            </h3>
+            <p className="text-gray-500 mb-4">
+              {menuItems.length === 0 
+                ? 'Start building your menu by adding your first item.'
+                : 'Try adjusting your search or filter criteria.'
+              }
+            </p>
+            {menuItems.length === 0 && (
+              <button
+                onClick={() => setIsAddingNew(true)}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Add First Menu Item
+              </button>
+            )}
+          </div>
+        ) : (
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Item
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Category
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Price
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tags
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredItems.map((item) => (
+                <tr key={item.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center">
+                      {item.image_url && (
+                        <img
+                          src={item.image_url}
+                          alt={item.item_name}
+                          className="w-12 h-12 object-cover rounded-lg mr-4"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      )}
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {item.item_name}
+                        </div>
+                        <div className="text-sm text-gray-500 max-w-xs truncate">
+                          {item.description}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {item.category}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ${item.price.toFixed(2)}
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex flex-wrap gap-1">
-                    {item.tags?.map(tag => (
-                      <span
-                        key={tag}
-                        className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full"
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                      {item.category}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    ${item.price.toFixed(2)}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-wrap gap-1">
+                      {item.tags?.map(tag => (
+                        <span
+                          key={tag}
+                          className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleEdit(item)}
+                        className="text-green-600 hover:text-green-900 p-1 hover:bg-green-50 rounded transition-colors"
+                        title="Edit item"
                       >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleEdit(item)}
-                      className="text-green-600 hover:text-green-900 p-1 hover:bg-green-50 rounded"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {filteredItems.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No menu items found</p>
-          </div>
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded transition-colors"
+                        title="Delete item"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>
