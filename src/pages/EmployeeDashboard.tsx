@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import NewOrderAlert from '../components/NewOrderAlert';
+import MenuManagement from '../components/MenuManagement';
 import { useNavigate } from 'react-router-dom';
 import { format, subDays, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import {
@@ -24,9 +25,11 @@ import {
   ArrowUp,
   UserCircle,
   Volume2,
+  Menu as MenuIcon,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import NotificationBell from '../components/NotificationBell';
+import { useUser } from '../hooks/useUser';
 
 interface OrderItem {
   item_name: string;
@@ -48,6 +51,7 @@ interface TabConfig {
   id: string;
   label: string;
   icon: React.ElementType;
+  adminOnly?: boolean;
 }
 
 interface MetricData {
@@ -87,6 +91,7 @@ const MetricCard: React.FC<MetricCardProps> = ({ icon, label, value }) => (
 const tabs: TabConfig[] = [
   { id: 'home', label: 'Home', icon: Home },
   { id: 'orders', label: 'Orders', icon: ClipboardList },
+  { id: 'menu', label: 'Menu', icon: MenuIcon, adminOnly: true },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -94,6 +99,9 @@ const VIEW_MODES = ['Day', 'Week', 'Month'] as const;
 type ViewMode = typeof VIEW_MODES[number];
 
 export default function EmployeeDashboard() {
+  const { user, role, loading: userLoading } = useUser();
+  const navigate = useNavigate();
+
   // Sound control states
   const [soundEnabled, setSoundEnabled] = useState(() => {
     const saved = localStorage.getItem('soundEnabled');
@@ -109,7 +117,6 @@ export default function EmployeeDashboard() {
   const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
   
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('home');
   const [orders, setOrders] = useState<Order[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('new');
@@ -139,17 +146,20 @@ export default function EmployeeDashboard() {
   }, [volume]);
 
   useEffect(() => {
+    if (userLoading) return;
+
+    if (!user) {
+      navigate('/');
+      return;
+    }
+
+    if (role !== 'employee' && role !== 'admin') {
+      navigate('/');
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) return navigate('/login');
       setSession(session);
-      supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', session.user.id)
-        .single()
-        .then(({ data: profile }) => {
-          if (profile?.role !== 'employee') navigate('/');
-        });
     });
 
     const channel = supabase
@@ -180,7 +190,7 @@ export default function EmployeeDashboard() {
     return () => {
       channel.unsubscribe();
     };
-  }, [navigate, showOverlay]);
+  }, [navigate, showOverlay, user, role, userLoading]);
 
   const handleOverlayDismiss = () => {
     if (pendingOrders.length > 0) {
@@ -604,7 +614,7 @@ export default function EmployeeDashboard() {
             </label>
             <input
               type="text"
-              value="Employee"
+              value={role === 'admin' ? 'Administrator' : 'Employee'}
               disabled
               className="w-full px-3 py-2 border rounded-lg bg-gray-50"
             />
@@ -790,6 +800,33 @@ export default function EmployeeDashboard() {
     </div>
   );
 
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'home':
+        return renderHomeTab();
+      case 'orders':
+        return renderOrdersTab();
+      case 'menu':
+        return role === 'admin' ? <MenuManagement /> : null;
+      case 'settings':
+        return renderSettingsTab();
+      default:
+        return renderHomeTab();
+    }
+  };
+
+  // Show loading while checking user authentication
+  if (userLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      </div>
+    );
+  }
+
+  // Filter tabs based on user role
+  const visibleTabs = tabs.filter(tab => !tab.adminOnly || role === 'admin');
+
   return (
     <div className="flex h-screen bg-gray-100">
       <div className="w-64 bg-[#1e7e34] text-white flex-shrink-0">
@@ -797,7 +834,7 @@ export default function EmployeeDashboard() {
           <h1 className="text-2xl font-bold">FairwayMate</h1>
         </div>
         <nav className="mt-8">
-          {tabs.map(tab => (
+          {visibleTabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -861,17 +898,13 @@ export default function EmployeeDashboard() {
         </header>
 
         <main className="flex-1 overflow-y-auto bg-[#f8f9fa] p-6">
-          {activeTab === 'home' && renderHomeTab()}
-          {activeTab === 'orders' && renderOrdersTab()}
-          {activeTab === 'settings' && renderSettingsTab()}
+          {renderContent()}
 
           {showOverlay && newOrder && (
             <NewOrderAlert
               holeNumber={newOrder.hole_number}
               customerName={newOrder.customer_name || 'Someone'}
               onDismiss={handleOverlayDismiss}
-              soundEnabled={soundEnabled}
-              volume={volume}
             />
           )}
         </main>
