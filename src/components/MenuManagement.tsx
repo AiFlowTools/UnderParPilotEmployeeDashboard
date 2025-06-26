@@ -136,24 +136,27 @@ export default function MenuManagement() {
   };
 
   const handleSaveEdit = async () => {
-  const { data, error } = await supabase
-    .from('menu_items')
-    .update({
-      name: formData.name,
-      category: formData.category,
-      price: parseFloat(formData.price),
-      description: formData.description,
-      image_url: formData.image_url,
-      tags: formData.tags, // ✅ include this
-    })
-    .eq('id', editingItemId);
+  if (editingItem) {
+    // Update existing item
+    const { error: updateError } = await supabase
+      .from('menu_items')
+      .update({
+        item_name: formData.item_name,
+        category: formData.category,
+        price: parseFloat(formData.price),
+        description: formData.description,
+        image_url: formData.image_url,
+        tags: formData.tags, // ✅ Include this
+      })
+      .eq('id', editingItem.id);
 
-  if (error) {
-    console.error("Failed to update item:", error);
-  } else {
-    toast.success("Menu item updated");
-    setEditingItemId(null);
-    fetchMenuItems(); // optional reload
+    if (updateError) {
+      console.error("Update error:", updateError);
+    } else {
+      toast.success("Item updated!");
+      setEditingItem(null);
+      fetchMenuItems(); // or however you're refreshing the list
+    }
   }
 };
 
