@@ -43,7 +43,12 @@ const availableTags = [
   'vegetarian',
   'bestseller',
   'gluten-free',
-  'dairy-free'
+  'dairy-free',
+  'vegan',
+  'keto',
+  'low-carb',
+  'organic',
+  'local'
 ];
 
 export default function MenuManagement() {
@@ -66,6 +71,10 @@ export default function MenuManagement() {
     image_url: '',
     tags: [] as string[]
   });
+
+  // Tag input state
+  const [tagInput, setTagInput] = useState('');
+  const [showTagSuggestions, setShowTagSuggestions] = useState(false);
 
   useEffect(() => {
     if (!userLoading && golfCourseId) {
@@ -134,6 +143,9 @@ export default function MenuManagement() {
     try {
       setError(null);
 
+      // Ensure tags is properly formatted as an array
+      const tagsToSave = formData.tags.length > 0 ? formData.tags : null;
+
       if (editingItem) {
         // Update existing item
         const { error: updateError } = await supabase
@@ -144,7 +156,7 @@ export default function MenuManagement() {
             price: formData.price,
             category: formData.category,
             image_url: formData.image_url || null,
-            tags: formData.tags.length > 0 ? formData.tags : null
+            tags: tagsToSave
           })
           .eq('id', editingItem.id)
           .eq('golf_course_id', golfCourseId); // Ensure user can only update items from their course
@@ -161,7 +173,7 @@ export default function MenuManagement() {
             price: formData.price,
             category: formData.category,
             image_url: formData.image_url || null,
-            tags: formData.tags.length > 0 ? formData.tags : null
+            tags: tagsToSave
           });
 
         if (insertError) throw insertError;
@@ -221,16 +233,44 @@ export default function MenuManagement() {
       image_url: '',
       tags: []
     });
+    setTagInput('');
+    setShowTagSuggestions(false);
   };
 
-  const handleTagToggle = (tag: string) => {
+  const handleAddTag = (tag: string) => {
+    const trimmedTag = tag.trim().toLowerCase();
+    if (trimmedTag && !formData.tags.includes(trimmedTag)) {
+      setFormData(prev => ({
+        ...prev,
+        tags: [...prev.tags, trimmedTag]
+      }));
+    }
+    setTagInput('');
+    setShowTagSuggestions(false);
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
     setFormData(prev => ({
       ...prev,
-      tags: prev.tags.includes(tag)
-        ? prev.tags.filter(t => t !== tag)
-        : [...prev.tags, tag]
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
     }));
   };
+
+  const handleTagInputKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (tagInput.trim()) {
+        handleAddTag(tagInput);
+      }
+    } else if (e.key === 'Escape') {
+      setShowTagSuggestions(false);
+    }
+  };
+
+  const filteredTagSuggestions = availableTags.filter(tag => 
+    tag.toLowerCase().includes(tagInput.toLowerCase()) &&
+    !formData.tags.includes(tag)
+  );
 
   const filteredItems = menuItems.filter(item => {
     const matchesSearch = item.item_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -421,24 +461,65 @@ export default function MenuManagement() {
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tags (optional)
+                Tags
               </label>
-              <div className="flex flex-wrap gap-2">
-                {availableTags.map(tag => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => handleTagToggle(tag)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      formData.tags.includes(tag)
-                        ? 'bg-green-100 text-green-800 border-2 border-green-500'
-                        : 'bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200'
-                    }`}
-                  >
-                    {tag}
-                  </button>
-                ))}
+              
+              {/* Current Tags */}
+              {formData.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {formData.tags.map(tag => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTag(tag)}
+                        className="ml-2 text-green-600 hover:text-green-800"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Tag Input */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => {
+                    setTagInput(e.target.value);
+                    setShowTagSuggestions(e.target.value.length > 0);
+                  }}
+                  onKeyDown={handleTagInputKeyDown}
+                  onFocus={() => setShowTagSuggestions(tagInput.length > 0)}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Type a tag and press Enter, or select from suggestions"
+                />
+
+                {/* Tag Suggestions Dropdown */}
+                {showTagSuggestions && filteredTagSuggestions.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                    {filteredTagSuggestions.map(tag => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => handleAddTag(tag)}
+                        className="w-full text-left px-3 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
+
+              <p className="text-sm text-gray-500 mt-1">
+                Add tags to help categorize your menu items (e.g., spicy, vegetarian, gluten-free)
+              </p>
             </div>
           </div>
 
@@ -543,14 +624,18 @@ export default function MenuManagement() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-1">
-                      {item.tags?.map(tag => (
-                        <span
-                          key={tag}
-                          className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+                      {item.tags && item.tags.length > 0 ? (
+                        item.tags.map(tag => (
+                          <span
+                            key={tag}
+                            className="text-xs bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full shadow-sm"
+                          >
+                            {tag}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-gray-400 italic">No tags</span>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
