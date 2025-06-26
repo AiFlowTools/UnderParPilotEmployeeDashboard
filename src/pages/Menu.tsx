@@ -218,9 +218,28 @@ export default function Menu() {
           {filteredItems.map(item => (
             <div 
               key={item.id} 
-              className="menu-item-card cursor-pointer"
+              className="menu-item-card cursor-pointer relative"
               onClick={() => setSelectedItem(item)}
             >
+              {/* Tags container - positioned absolutely in top-right */}
+              {item.tags && item.tags.length > 0 && (
+                <div className="absolute top-2 right-2 flex flex-wrap gap-1 justify-end max-w-[70%] z-10">
+                  {item.tags.slice(0, 3).map((tag) => (
+                    <span 
+                      key={tag} 
+                      className="text-xs bg-white/90 backdrop-blur-sm text-gray-800 px-2 py-0.5 rounded-full shadow-sm border border-gray-200"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                  {item.tags.length > 3 && (
+                    <span className="text-xs bg-gray-300/90 backdrop-blur-sm text-gray-800 px-2 py-0.5 rounded-full shadow-sm border border-gray-200">
+                      +{item.tags.length - 3}
+                    </span>
+                  )}
+                </div>
+              )}
+
               {item.image_url && (
                 <div
                   className="h-48 bg-cover bg-center"
