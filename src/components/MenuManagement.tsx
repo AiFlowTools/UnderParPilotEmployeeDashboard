@@ -134,6 +134,9 @@ export default function MenuManagement() {
     try {
       setError(null);
 
+      // Prepare tags array - ensure it's an array of strings
+      const tagsToSave = formData.tags.length > 0 ? formData.tags : null;
+
       if (editingItem) {
         // Update existing item
         const { error: updateError } = await supabase
@@ -144,7 +147,7 @@ export default function MenuManagement() {
             price: formData.price,
             category: formData.category,
             image_url: formData.image_url || null,
-            tags: formData.tags.length > 0 ? formData.tags : null
+            tags: tagsToSave
           })
           .eq('id', editingItem.id)
           .eq('golf_course_id', golfCourseId); // Ensure user can only update items from their course
@@ -161,7 +164,7 @@ export default function MenuManagement() {
             price: formData.price,
             category: formData.category,
             image_url: formData.image_url || null,
-            tags: formData.tags.length > 0 ? formData.tags : null
+            tags: tagsToSave
           });
 
         if (insertError) throw insertError;
@@ -546,7 +549,7 @@ export default function MenuManagement() {
                       {item.tags?.map(tag => (
                         <span
                           key={tag}
-                          className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full"
+                          className="text-xs bg-gray-200 text-gray-800 px-2 py-0.5 rounded-full shadow-sm"
                         >
                           {tag}
                         </span>
