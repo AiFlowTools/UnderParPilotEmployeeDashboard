@@ -74,6 +74,7 @@ export default function MenuManagement() {
 
   // Tag input state
   const [tagInput, setTagInput] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
 
   useEffect(() => {
@@ -134,14 +135,27 @@ export default function MenuManagement() {
     }
   };
 
-  const handleSave = async () => {
-    if (!golfCourseId) {
-      setError('No golf course assigned to your account');
-      return;
-    }
+  const handleSaveEdit = async () => {
+  const { data, error } = await supabase
+    .from('menu_items')
+    .update({
+      name: formData.name,
+      category: formData.category,
+      price: parseFloat(formData.price),
+      description: formData.description,
+      image_url: formData.image_url,
+      tags: formData.tags, // ✅ include this
+    })
+    .eq('id', editingItemId);
 
-    try {
-      setError(null);
+  if (error) {
+    console.error("Failed to update item:", error);
+  } else {
+    toast.success("Menu item updated");
+    setEditingItemId(null);
+    fetchMenuItems(); // optional reload
+  }
+};
 
       // Ensure tags is properly formatted as an array
       const tagsToSave = formData.tags.length > 0 ? formData.tags : null;
