@@ -74,7 +74,6 @@ export default function MenuManagement() {
 
   // Tag input state
   const [tagInput, setTagInput] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
 
   useEffect(() => {
@@ -135,30 +134,30 @@ export default function MenuManagement() {
     }
   };
 
-  const handleSaveEdit = async () => {
-    if (editingItem) {
-    // Update existing item
-     const { error: updateError } = await supabase
-      .from('menu_items')
-      .update({
-        item_name: formData.item_name,
-        category: formData.category,
-        price: parseFloat(formData.price),
-        description: formData.description,
-        image_url: formData.image_url,
-        tags: formData.tags, // ✅ Save tags here
-      })
-      .eq('id', editingItem.id);
-
-    if (updateError) {
-      console.error("Update error:", updateError);
-    } else {
-      toast.success("Item updated!");
-      setEditingItem(null);
-      fetchMenuItems(); // or whatever method you use to refresh
+  const handleSave = async () => {
+    if (!golfCourseId) {
+      setError('No golf course assigned to your account');
+      return;
     }
-  }
-};
+
+    try {
+      setError(null);
+
+      // Validate required fields
+      if (!formData.item_name.trim()) {
+        setError('Item name is required');
+        return;
+      }
+
+      if (!formData.description.trim()) {
+        setError('Description is required');
+        return;
+      }
+
+      if (formData.price <= 0) {
+        setError('Price must be greater than 0');
+        return;
+      }
 
       // Ensure tags is properly formatted as an array
       const tagsToSave = formData.tags.length > 0 ? formData.tags : null;
@@ -168,11 +167,11 @@ export default function MenuManagement() {
         const { error: updateError } = await supabase
           .from('menu_items')
           .update({
-            item_name: formData.item_name,
-            description: formData.description,
+            item_name: formData.item_name.trim(),
+            description: formData.description.trim(),
             price: formData.price,
             category: formData.category,
-            image_url: formData.image_url || null,
+            image_url: formData.image_url.trim() || null,
             tags: tagsToSave
           })
           .eq('id', editingItem.id)
@@ -185,11 +184,11 @@ export default function MenuManagement() {
           .from('menu_items')
           .insert({
             golf_course_id: golfCourseId,
-            item_name: formData.item_name,
-            description: formData.description,
+            item_name: formData.item_name.trim(),
+            description: formData.description.trim(),
             price: formData.price,
             category: formData.category,
-            image_url: formData.image_url || null,
+            image_url: formData.image_url.trim() || null,
             tags: tagsToSave
           });
 
