@@ -138,7 +138,7 @@ export default function MenuManagement() {
   const handleSaveEdit = async () => {
   if (editingItem) {
     // Update existing item
-    const { error: updateError } = async supabase
+    const { error: updateError } = async; supabase
       .from('menu_items')
       .update({
         item_name: formData.item_name,
