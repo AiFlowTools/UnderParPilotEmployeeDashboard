@@ -136,9 +136,9 @@ export default function MenuManagement() {
   };
 
   const handleSaveEdit = async () => {
-  if (editingItem) {
+    if (editingItem) {
     // Update existing item
-    const { error: updateError } = await supabase
+     const { error: updateError } = await supabase
       .from('menu_items')
       .update({
         item_name: formData.item_name,
@@ -146,7 +146,7 @@ export default function MenuManagement() {
         price: parseFloat(formData.price),
         description: formData.description,
         image_url: formData.image_url,
-        tags: formData.tags, // ✅ Include this
+        tags: formData.tags, // ✅ Save tags here
       })
       .eq('id', editingItem.id);
 
@@ -155,7 +155,7 @@ export default function MenuManagement() {
     } else {
       toast.success("Item updated!");
       setEditingItem(null);
-      fetchMenuItems(); // or however you're refreshing the list
+      fetchMenuItems(); // or whatever method you use to refresh
     }
   }
 };
