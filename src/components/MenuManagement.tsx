@@ -8,7 +8,11 @@ import {
   Search,
   Filter,
   AlertCircle,
-  Building2
+  Building2,
+  Upload,
+  Loader2,
+  Check,
+  Image as ImageIcon
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useUser } from '../hooks/useUser';
@@ -62,6 +66,11 @@ export default function MenuManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
+  // Image upload states
+  const [uploading, setUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   // Form state for new/editing items
   const [formData, setFormData] = useState({
     item_name: '',
@@ -80,10 +89,108 @@ export default function MenuManagement() {
     if (!userLoading && golfCourseId) {
       fetchGolfCourse();
       fetchMenuItems();
+      ensureStorageBucket();
     } else if (!userLoading) {
       setLoading(false);
     }
   }, [userLoading, golfCourseId]);
+
+  // Reset upload states when form data changes
+  useEffect(() => {
+    if (formData.image_url) {
+      setImagePreview(formData.image_url);
+      setUploadSuccess(false);
+    } else {
+      setImagePreview(null);
+      setUploadSuccess(false);
+    }
+  }, [formData.image_url]);
+
+  const ensureStorageBucket = async () => {
+    try {
+      // Check if bucket exists
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const menuImagesBucket = buckets?.find(bucket => bucket.name === 'menu-images');
+      
+      if (!menuImagesBucket) {
+        // Create bucket if it doesn't exist
+        const { error: createError } = await supabase.storage.createBucket('menu-images', {
+          public: true,
+          allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
+          fileSizeLimit: 5242880 // 5MB
+        });
+        
+        if (createError) {
+          console.error('Error creating storage bucket:', createError);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking/creating storage bucket:', error);
+    }
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !golfCourseId) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file (JPG, PNG, WebP)');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5242880) {
+      setError('Image file size must be less than 5MB');
+      return;
+    }
+
+    setUploading(true);
+    setError(null);
+    setUploadSuccess(false);
+
+    try {
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${golfCourseId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+      // Upload file to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('menu-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('menu-images')
+        .getPublicUrl(fileName);
+
+      if (urlData?.publicUrl) {
+        // Update form data with the new URL
+        setFormData(prev => ({
+          ...prev,
+          image_url: urlData.publicUrl
+        }));
+        
+        setImagePreview(urlData.publicUrl);
+        setUploadSuccess(true);
+        
+        // Clear success state after 3 seconds
+        setTimeout(() => setUploadSuccess(false), 3000);
+      }
+    } catch (err: any) {
+      console.error('Error uploading image:', err);
+      setError(`Failed to upload image: ${err.message}`);
+    } finally {
+      setUploading(false);
+      // Reset file input
+      event.target.value = '';
+    }
+  };
 
   const fetchGolfCourse = async () => {
     if (!golfCourseId) return;
@@ -251,6 +358,9 @@ export default function MenuManagement() {
     });
     setTagInput('');
     setShowTagSuggestions(false);
+    setImagePreview(null);
+    setUploadSuccess(false);
+    setUploading(false);
   };
 
   const handleAddTag = (tag: string) => {
@@ -452,13 +562,47 @@ export default function MenuManagement() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Image URL (optional)
               </label>
-              <input
-                type="url"
-                value={formData.image_url}
-                onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="https://example.com/image.jpg"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={formData.image_url}
+                  onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
+                  className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="https://example.com/image.jpg"
+                />
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    disabled={uploading}
+                  />
+                  <button
+                    type="button"
+                    disabled={uploading}
+                    className={`px-3 py-2 border rounded-lg flex items-center gap-2 transition-colors ${
+                      uploading 
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                        : uploadSuccess
+                        ? 'bg-green-50 text-green-600 border-green-200'
+                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                    }`}
+                    title="Upload image"
+                  >
+                    {uploading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : uploadSuccess ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Upload an image or enter a URL manually. Max file size: 5MB
+              </p>
             </div>
 
             <div className="md:col-span-2">
@@ -474,6 +618,28 @@ export default function MenuManagement() {
                 required
               />
             </div>
+
+            {/* Image Preview */}
+            {imagePreview && (
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Image Preview
+                </label>
+                <div className="relative inline-block">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-32 h-32 object-cover rounded-lg border border-gray-200"
+                    onError={() => setImagePreview(null)}
+                  />
+                  {uploadSuccess && (
+                    <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full p-1">
+                      <Check className="w-3 h-3" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -549,7 +715,7 @@ export default function MenuManagement() {
             </button>
             <button
               onClick={handleSave}
-              disabled={!formData.item_name || !formData.description || formData.price <= 0}
+              disabled={!formData.item_name || !formData.description || formData.price <= 0 || uploading}
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <Save className="w-4 h-4 mr-2" />
