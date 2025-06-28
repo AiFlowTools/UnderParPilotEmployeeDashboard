@@ -61,7 +61,7 @@ export default function MenuManagement() {
   const [golfCourse, setGolfCourse] = useState<GolfCourse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -245,7 +245,7 @@ export default function MenuManagement() {
       // Ensure tags is properly formatted as an array
       const tagsToSave = formData.tags.length > 0 ? formData.tags : null;
 
-      if (editingItem) {
+      if (editingItemId) {
         // Update existing item
         const { error: updateError } = await supabase
           .from('menu_items')
@@ -257,7 +257,7 @@ export default function MenuManagement() {
             image_url: formData.image_url.trim() || null,
             tags: tagsToSave
           })
-          .eq('id', editingItem.id)
+          .eq('id', editingItemId)
           .eq('golf_course_id', golfCourseId); // Ensure user can only update items from their course
 
         if (updateError) throw updateError;
@@ -290,7 +290,8 @@ export default function MenuManagement() {
   };
 
   const handleEdit = (item: MenuItem) => {
-    setEditingItem(item);
+    // Close any existing edit form and open new one
+    setEditingItemId(item.id);
     setFormData({
       item_name: item.item_name,
       description: item.description,
@@ -322,7 +323,7 @@ export default function MenuManagement() {
   };
 
   const handleCancel = () => {
-    setEditingItem(null);
+    setEditingItemId(null);
     setIsAddingNew(false);
     setFormData({
       item_name: '',
@@ -380,6 +381,227 @@ export default function MenuManagement() {
     const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
+
+  // Render the edit form component
+  const renderEditForm = () => (
+    <div className="bg-gray-50 border-l-4 border-green-500 p-6 animate-slideDown">
+      <h4 className="text-lg font-semibold mb-4 text-green-800">
+        {editingItemId ? 'Edit Menu Item' : 'Add New Menu Item'}
+      </h4>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Item Name *
+          </label>
+          <input
+            type="text"
+            value={formData.item_name}
+            onChange={(e) => setFormData(prev => ({ ...prev, item_name: e.target.value }))}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            placeholder="Enter item name"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Price ($) *
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            value={formData.price}
+            onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            placeholder="0.00"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Category *
+          </label>
+          <select
+            value={formData.category}
+            onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            required
+          >
+            {categories.map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Image URL (optional)
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="url"
+              value={formData.image_url}
+              onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
+              className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="https://example.com/image.jpg"
+            />
+            <div className="relative">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                disabled={uploading}
+              />
+              <button
+                type="button"
+                disabled={uploading}
+                className={`px-3 py-2 border rounded-lg flex items-center gap-2 transition-colors ${
+                  uploading 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    : uploadSuccess
+                    ? 'bg-green-50 text-green-600 border-green-200'
+                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                }`}
+                title="Upload image"
+              >
+                {uploading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : uploadSuccess ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  <Upload className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            Upload an image or enter a URL manually. Max file size: 5MB
+          </p>
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description *
+          </label>
+          <textarea
+            value={formData.description}
+            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            rows={3}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            placeholder="Enter item description"
+            required
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Tags
+          </label>
+          
+          {/* Current Tags */}
+          {formData.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {formData.tags.map(tag => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTag(tag)}
+                    className="ml-2 text-green-600 hover:text-green-800"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Tag Input */}
+          <div className="relative">
+            <input
+              type="text"
+              value={tagInput}
+              onChange={(e) => {
+                setTagInput(e.target.value);
+                setShowTagSuggestions(e.target.value.length > 0);
+              }}
+              onKeyDown={handleTagInputKeyDown}
+              onFocus={() => setShowTagSuggestions(tagInput.length > 0)}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="Type a tag and press Enter, or select from suggestions"
+            />
+
+            {/* Tag Suggestions Dropdown */}
+            {showTagSuggestions && filteredTagSuggestions.length > 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                {filteredTagSuggestions.map(tag => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => handleAddTag(tag)}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <p className="text-sm text-gray-500 mt-1">
+            Add tags to help categorize your menu items (e.g., spicy, vegetarian, gluten-free)
+          </p>
+        </div>
+
+        {/* Image Preview */}
+        {imagePreview && (
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Image Preview
+            </label>
+            <div className="relative inline-block">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-32 h-32 object-cover rounded-lg border border-gray-200"
+                onError={() => setImagePreview(null)}
+              />
+              {uploadSuccess && (
+                <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full p-1">
+                  <Check className="w-3 h-3" />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="flex justify-end space-x-4 mt-6">
+        <button
+          onClick={handleCancel}
+          className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors flex items-center"
+        >
+          <X className="w-4 h-4 mr-2" />
+          Cancel
+        </button>
+        <button
+          onClick={handleSave}
+          disabled={!formData.item_name || !formData.description || formData.price <= 0 || uploading}
+          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          <Save className="w-4 h-4 mr-2" />
+          Save
+        </button>
+      </div>
+    </div>
+  );
 
   // Show loading while checking user data
   if (userLoading || loading) {
@@ -451,6 +673,9 @@ export default function MenuManagement() {
         </div>
       )}
 
+      {/* Add New Item Form */}
+      {isAddingNew && renderEditForm()}
+
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -479,227 +704,6 @@ export default function MenuManagement() {
           </div>
         </div>
       </div>
-
-      {/* Add/Edit Form */}
-      {(isAddingNew || editingItem) && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-4">
-            {editingItem ? 'Edit Menu Item' : 'Add New Menu Item'}
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Item Name *
-              </label>
-              <input
-                type="text"
-                value={formData.item_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, item_name: e.target.value }))}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Enter item name"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price ($) *
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.price}
-                onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="0.00"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category *
-              </label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                required
-              >
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Image URL (optional)
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                  className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="https://example.com/image.jpg"
-                />
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    disabled={uploading}
-                  />
-                  <button
-                    type="button"
-                    disabled={uploading}
-                    className={`px-3 py-2 border rounded-lg flex items-center gap-2 transition-colors ${
-                      uploading 
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                        : uploadSuccess
-                        ? 'bg-green-50 text-green-600 border-green-200'
-                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                    }`}
-                    title="Upload image"
-                  >
-                    {uploading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : uploadSuccess ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Upload className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Upload an image or enter a URL manually. Max file size: 5MB
-              </p>
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description *
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                rows={3}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Enter item description"
-                required
-              />
-            </div>
-
-            {/* Image Preview */}
-            {imagePreview && (
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image Preview
-                </label>
-                <div className="relative inline-block">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-32 h-32 object-cover rounded-lg border border-gray-200"
-                    onError={() => setImagePreview(null)}
-                  />
-                  {uploadSuccess && (
-                    <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full p-1">
-                      <Check className="w-3 h-3" />
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tags
-              </label>
-              
-              {/* Current Tags */}
-              {formData.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {formData.tags.map(tag => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200"
-                    >
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTag(tag)}
-                        className="ml-2 text-green-600 hover:text-green-800"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Tag Input */}
-              <div className="relative">
-                <input
-                  type="text"
-                  value={tagInput}
-                  onChange={(e) => {
-                    setTagInput(e.target.value);
-                    setShowTagSuggestions(e.target.value.length > 0);
-                  }}
-                  onKeyDown={handleTagInputKeyDown}
-                  onFocus={() => setShowTagSuggestions(tagInput.length > 0)}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Type a tag and press Enter, or select from suggestions"
-                />
-
-                {/* Tag Suggestions Dropdown */}
-                {showTagSuggestions && filteredTagSuggestions.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                    {filteredTagSuggestions.map(tag => (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => handleAddTag(tag)}
-                        className="w-full text-left px-3 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                      >
-                        {tag}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <p className="text-sm text-gray-500 mt-1">
-                Add tags to help categorize your menu items (e.g., spicy, vegetarian, gluten-free)
-              </p>
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-4 mt-6">
-            <button
-              onClick={handleCancel}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors flex items-center"
-            >
-              <X className="w-4 h-4 mr-2" />
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={!formData.item_name || !formData.description || formData.price <= 0 || uploading}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Save
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Menu Items List */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -749,72 +753,82 @@ export default function MenuManagement() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredItems.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      {item.image_url && (
-                        <img
-                          src={item.image_url}
-                          alt={item.item_name}
-                          className="w-12 h-12 object-cover rounded-lg mr-4"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
-                      )}
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">
-                          {item.item_name}
-                        </div>
-                        <div className="text-sm text-gray-500 max-w-xs truncate">
-                          {item.description}
+                <React.Fragment key={item.id}>
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center">
+                        {item.image_url && (
+                          <img
+                            src={item.image_url}
+                            alt={item.item_name}
+                            className="w-12 h-12 object-cover rounded-lg mr-4"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        )}
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {item.item_name}
+                          </div>
+                          <div className="text-sm text-gray-500 max-w-xs truncate">
+                            {item.description}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                      {item.category}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    ${item.price.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1">
-                      {item.tags && item.tags.length > 0 ? (
-                        item.tags.map(tag => (
-                          <span
-                            key={tag}
-                            className="text-xs bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full shadow-sm"
-                          >
-                            {tag}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-xs text-gray-400 italic">No tags</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEdit(item)}
-                        className="text-green-600 hover:text-green-900 p-1 hover:bg-green-50 rounded transition-colors"
-                        title="Edit item"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded transition-colors"
-                        title="Delete item"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                        {item.category}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      ${item.price.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap gap-1">
+                        {item.tags && item.tags.length > 0 ? (
+                          item.tags.map(tag => (
+                            <span
+                              key={tag}
+                              className="text-xs bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full shadow-sm"
+                            >
+                              {tag}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">No tags</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="text-green-600 hover:text-green-900 p-1 hover:bg-green-50 rounded transition-colors"
+                          title="Edit item"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded transition-colors"
+                          title="Delete item"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  {/* Inline Edit Form */}
+                  {editingItemId === item.id && (
+                    <tr>
+                      <td colSpan={5} className="px-0 py-0">
+                        {renderEditForm()}
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
