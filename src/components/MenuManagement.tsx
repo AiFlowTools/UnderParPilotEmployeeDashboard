@@ -89,7 +89,6 @@ export default function MenuManagement() {
     if (!userLoading && golfCourseId) {
       fetchGolfCourse();
       fetchMenuItems();
-      ensureStorageBucket();
     } else if (!userLoading) {
       setLoading(false);
     }
@@ -105,29 +104,6 @@ export default function MenuManagement() {
       setUploadSuccess(false);
     }
   }, [formData.image_url]);
-
-  const ensureStorageBucket = async () => {
-    try {
-      // Check if bucket exists
-      const { data: buckets } = await supabase.storage.listBuckets();
-      const menuImagesBucket = buckets?.find(bucket => bucket.name === 'menu-images');
-      
-      if (!menuImagesBucket) {
-        // Create bucket if it doesn't exist
-        const { error: createError } = await supabase.storage.createBucket('menu-images', {
-          public: true,
-          allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
-          fileSizeLimit: 5242880 // 5MB
-        });
-        
-        if (createError) {
-          console.error('Error creating storage bucket:', createError);
-        }
-      }
-    } catch (error) {
-      console.error('Error checking/creating storage bucket:', error);
-    }
-  };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
