@@ -81,10 +81,6 @@ export default function MenuManagement() {
     tags: [] as string[]
   });
 
-  // Tag input state
-  const [tagInput, setTagInput] = useState('');
-  const [showTagSuggestions, setShowTagSuggestions] = useState(false);
-
   useEffect(() => {
     if (!userLoading && golfCourseId) {
       fetchGolfCourse();
@@ -333,47 +329,19 @@ export default function MenuManagement() {
       image_url: '',
       tags: []
     });
-    setTagInput('');
-    setShowTagSuggestions(false);
     setImagePreview(null);
     setUploadSuccess(false);
     setUploading(false);
   };
 
-  const handleAddTag = (tag: string) => {
-    const trimmedTag = tag.trim().toLowerCase();
-    if (trimmedTag && !formData.tags.includes(trimmedTag)) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, trimmedTag]
-      }));
-    }
-    setTagInput('');
-    setShowTagSuggestions(false);
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
+  const handleTagToggle = (tag: string) => {
     setFormData(prev => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      tags: prev.tags.includes(tag)
+        ? prev.tags.filter(t => t !== tag)
+        : [...prev.tags, tag]
     }));
   };
-
-  const handleTagInputKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (tagInput.trim()) {
-        handleAddTag(tagInput);
-      }
-    } else if (e.key === 'Escape') {
-      setShowTagSuggestions(false);
-    }
-  };
-
-  const filteredTagSuggestions = availableTags.filter(tag => 
-    tag.toLowerCase().includes(tagInput.toLowerCase()) &&
-    !formData.tags.includes(tag)
-  );
 
   const filteredItems = menuItems.filter(item => {
     const matchesSearch = item.item_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -498,65 +466,33 @@ export default function MenuManagement() {
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
             Tags
           </label>
           
-          {/* Current Tags */}
-          {formData.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-3">
-              {formData.tags.map(tag => (
-                <span
+          {/* Clickable Tag Chips */}
+          <div className="flex flex-wrap gap-2">
+            {availableTags.map(tag => {
+              const isSelected = formData.tags.includes(tag);
+              return (
+                <button
                   key={tag}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200"
+                  type="button"
+                  onClick={() => handleTagToggle(tag)}
+                  className={`px-3 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer ${
+                    isSelected
+                      ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-200'
+                      : 'bg-gray-200 text-gray-600 border border-gray-300 hover:bg-gray-300'
+                  }`}
                 >
                   {tag}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(tag)}
-                    className="ml-2 text-green-600 hover:text-green-800"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Tag Input */}
-          <div className="relative">
-            <input
-              type="text"
-              value={tagInput}
-              onChange={(e) => {
-                setTagInput(e.target.value);
-                setShowTagSuggestions(e.target.value.length > 0);
-              }}
-              onKeyDown={handleTagInputKeyDown}
-              onFocus={() => setShowTagSuggestions(tagInput.length > 0)}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              placeholder="Type a tag and press Enter, or select from suggestions"
-            />
-
-            {/* Tag Suggestions Dropdown */}
-            {showTagSuggestions && filteredTagSuggestions.length > 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                {filteredTagSuggestions.map(tag => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => handleAddTag(tag)}
-                    className="w-full text-left px-3 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            )}
+                </button>
+              );
+            })}
           </div>
 
-          <p className="text-sm text-gray-500 mt-1">
-            Add tags to help categorize your menu items (e.g., spicy, vegetarian, gluten-free)
+          <p className="text-sm text-gray-500 mt-3">
+            Click tags to select or deselect them for this menu item
           </p>
         </div>
 
