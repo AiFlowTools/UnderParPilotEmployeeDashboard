@@ -854,75 +854,23 @@ export default function EmployeeDashboard() {
     return true;
   });
 
+    // … your code up through visibleTabs definition …
+
   return (
-  <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100">
 
-    {/* ─── Desktop Sidebar (visible on lg and up) ─── */}
-    <div className="hidden lg:flex w-60 bg-green-600 text-white flex-shrink-0">
-      <div className="w-full">
-        <div className="p-4">
-          <h1 className="text-2xl font-bold">FairwayMate</h1>
-        </div>
-        <nav className="mt-8">
-          {visibleTabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center w-full px-6 py-3 hover:bg-green-700 transition-colors focus:ring-2 focus:ring-green-400 ${
-                activeTab === tab.id ? 'bg-green-700' : ''
-              }`}
-            >
-              <tab.icon className="w-5 h-5 mr-3" />
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
-    </div>
-
-    {/* ─── Mobile/Tablet: Hamburger Toggle (hidden on lg and up) ─── */}
-    <div className="lg:hidden flex-shrink-0 p-4">
-      <button
-        onClick={() => setSidebarOpen(true)}
-        className="text-white focus:outline-none focus:ring-2 focus:ring-green-400 p-2 rounded"
-        aria-label="Open navigation"
-      >
-        <MenuIcon className="w-6 h-6" />
-      </button>
-    </div>
-
-    {/* ─── Main Content (rest of your dashboard) ─── */}
-    <div className="flex-1 flex flex-col overflow-hidden">
-      {/* ... your existing header, toolbar, KPI grid, tabs, etc. ... */}
-    </div>
-
-    {/* ─── Mobile/Tablet Sidebar Drawer Overlay ─── */}
-    {sidebarOpen && (
-      <div className="fixed inset-0 z-50 flex">
-        {/* backdrop */}
-        <div
-          className="absolute inset-0 bg-black/50"
-          onClick={() => setSidebarOpen(false)}
-        />
-
-        {/* sliding panel */}
-        <div className="relative w-56 bg-green-600 text-white p-4">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl font-bold">FairwayMate</h2>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="p-2 hover:bg-green-700 rounded-full focus:ring-2 focus:ring-green-400"
-              aria-label="Close navigation"
-            >
-              <X className="w-5 h-5" />
-            </button>
+      {/* ─── Desktop Sidebar (visible on lg+) ─── */}
+      <div className="hidden lg:flex w-60 bg-green-600 text-white flex-shrink-0">
+        <div className="w-full">
+          <div className="p-4">
+            <h1 className="text-2xl font-bold">FairwayMate</h1>
           </div>
-          <nav>
+          <nav className="mt-8">
             {visibleTabs.map(tab => (
               <button
                 key={tab.id}
-                onClick={() => { setActiveTab(tab.id); setSidebarOpen(false); }}
-                className={`flex items-center w-full px-4 py-3 mb-2 rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-400 ${
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center w-full px-6 py-3 hover:bg-green-700 transition-colors focus:ring-2 focus:ring-green-400 ${
                   activeTab === tab.id ? 'bg-green-700' : ''
                 }`}
               >
@@ -933,83 +881,60 @@ export default function EmployeeDashboard() {
           </nav>
         </div>
       </div>
-    )}
-  </div>
-);
 
-      {/* Mobile/Tablet Sidebar Overlay */}
-      {sidebarOpen && (
-        <>
-          <div 
-            className="fixed inset-0 bg-black/50 z-50 lg:hidden" 
-            onClick={() => setSidebarOpen(false)}
-          />
-          <div className="absolute left-0 top-0 w-56 h-full bg-green-600 text-white p-4 z-50 lg:hidden">
-            <div className="flex items-center justify-between mb-8">
-              <h1 className="text-xl font-bold">FairwayMate</h1>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="p-2 hover:bg-green-700 rounded-full focus:ring-2 focus:ring-green-400"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <nav>
-              {visibleTabs.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id);
-                    setSidebarOpen(false);
-                  }}
-                  className={`flex items-center w-full px-4 py-3 mb-2 rounded-lg hover:bg-green-700 transition-colors focus:ring-2 focus:ring-green-400 min-h-[44px] ${
-                    activeTab === tab.id ? 'bg-green-700' : ''
-                  }`}
-                >
-                  <tab.icon className="w-5 h-5 mr-3" />
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-          </div>
-        </>
-      )}
+      {/* ─── Mobile/Tablet: Hamburger Toggle (hidden on lg+) ─── */}
+      <div className="lg:hidden flex-shrink-0 p-4">
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="text-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 p-2 rounded"
+          aria-label="Open navigation"
+        >
+          <MenuIcon className="w-6 h-6" />
+        </button>
+      </div>
 
+      {/* ─── Main Content ─── */}
       <div className="flex-1 flex flex-col overflow-hidden">
+
+        {/* Header (contains secondary mobile toggle, title, bell, user menu) */}
         <header className="h-16 bg-green-600 flex items-center justify-between px-4 md:px-6 flex-shrink-0">
           <div className="flex items-center">
-            {/* Mobile/Tablet Menu Button */}
+            {/* Secondary toggle for consistency on mobile */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 mr-3 text-white hover:bg-green-700 rounded-lg focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="lg:hidden p-2 mr-3 text-white hover:bg-green-700 rounded-lg focus:ring-2 focus:ring-green-400"
+              aria-label="Open navigation"
             >
               <MenuIcon className="w-6 h-6" />
             </button>
             <h1 className="text-white text-lg md:text-xl font-semibold">Employee Dashboard</h1>
           </div>
 
-          <div className="flex items-center space-x-2 md:space-x-4">
-            <NotificationBell count={notificationCount} onNotificationClick={handleNotificationClick} />
-
+          <div className="flex items-center space-x-4">
+            <NotificationBell
+              count={notificationCount}
+              onNotificationClick={handleNotificationClick}
+            />
             <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center space-x-2 text-white hover:bg-green-700 px-2 md:px-3 py-2 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-green-400 min-h-[44px]"
+                className="flex items-center space-x-2 text-white hover:bg-green-700 px-2 md:px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400"
                 aria-expanded={dropdownOpen}
-                aria-haspopup="true"
               >
                 <UserCircle className="w-5 h-5" />
-                <span className="text-sm font-medium hidden sm:inline">{session?.user?.email}</span>
+                <span className="hidden sm:inline">{session?.user?.email}</span>
                 <ChevronDown
-                  className="w-4 h-4 transition-transform duration-200"
+                  className="w-4 h-4 transition-transform"
                   style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}
                 />
               </button>
 
               {dropdownOpen && (
                 <>
-                  <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
-
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setDropdownOpen(false)}
+                  />
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-20">
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm text-gray-500">Signed in as</p>
@@ -1020,12 +945,11 @@ export default function EmployeeDashboard() {
                         <p className="text-xs text-green-600 font-medium">Administrator</p>
                       )}
                     </div>
-
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:ring-2 focus:ring-green-400 min-h-[44px] flex items-center"
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:ring-2 focus:ring-green-400 flex items-center"
                     >
-                      <LogOut className="w-4 h-4 mr-2 inline-block" />
+                      <LogOut className="w-4 h-4 mr-2" />
                       Sign out
                     </button>
                   </div>
@@ -1035,6 +959,7 @@ export default function EmployeeDashboard() {
           </div>
         </header>
 
+        {/* ─── Main Scrollable Area ─── */}
         <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
           {renderContent()}
 
@@ -1047,6 +972,47 @@ export default function EmployeeDashboard() {
           )}
         </main>
       </div>
+
+      {/* ─── Mobile/Tablet Sidebar Drawer Overlay ─── */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 flex lg:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setSidebarOpen(false)}
+          />
+          {/* Drawer panel */}
+          <div className="relative w-56 bg-green-600 text-white p-4">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-bold">FairwayMate</h2>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2 hover:bg-green-700 rounded-full focus:ring-2 focus:ring-green-400"
+                aria-label="Close navigation"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <nav>
+              {visibleTabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setSidebarOpen(false);
+                  }}
+                  className={`flex items-center w-full px-4 py-3 mb-2 rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-400 ${
+                    activeTab === tab.id ? 'bg-green-700' : ''
+                  }`}
+                >
+                  <tab.icon className="w-5 h-5 mr-3" />
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
