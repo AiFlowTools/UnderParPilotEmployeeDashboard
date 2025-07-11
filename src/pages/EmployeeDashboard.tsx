@@ -32,6 +32,8 @@ import { supabase } from '../lib/supabase';
 import NotificationBell from '../components/NotificationBell';
 import { useUser } from '../hooks/useUser';
 
+const [sidebarOpen, setSidebarOpen] = useState(false);
+
 interface OrderItem {
   item_name: string;
   quantity: number;
