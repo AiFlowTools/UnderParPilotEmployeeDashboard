@@ -882,17 +882,6 @@ export default function EmployeeDashboard() {
         </div>
       </div>
 
-      {/* ─── Mobile/Tablet: Hamburger Toggle (hidden on lg+) ─── */}
-      <div className="lg:hidden flex-shrink-0 p-4">
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="text-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 p-2 rounded"
-          aria-label="Open navigation"
-        >
-          <MenuIcon className="w-6 h-6" />
-        </button>
-      </div>
-
       {/* ─── Main Content ─── */}
       <div className="flex-1 flex flex-col overflow-hidden">
 
