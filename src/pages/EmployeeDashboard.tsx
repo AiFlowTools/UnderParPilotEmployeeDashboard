@@ -27,11 +27,12 @@ import {
   Volume2,
   Menu as MenuIcon,
   X,
+  Calendar as CalendarIcon,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import NotificationBell from '../components/NotificationBell';
 import { useUser } from '../hooks/useUser';
-import { Calendar } from 'lucide-react';
+import { Calendar } from '../components/ui/calendar';
 
 interface OrderItem {
   item_name: string;
@@ -141,6 +142,7 @@ export default function EmployeeDashboard() {
   });
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   // Save sound preferences to localStorage
   useEffect(() => {
@@ -475,6 +477,38 @@ export default function EmployeeDashboard() {
           </div>
         </div>
         <div className="flex items-center space-x-2 md:space-x-4">
+          <div className="relative">
+            <button
+              onClick={() => setShowCalendar(!showCalendar)}
+              className="p-2 md:p-3 text-gray-600 hover:text-gray-900 focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-100"
+              title="Select date"
+            >
+              <CalendarIcon className="w-5 h-5" />
+            </button>
+            
+            {showCalendar && (
+              <>
+                <div
+                  className="fixed inset-0 z-30"
+                  onClick={() => setShowCalendar(false)}
+                />
+                <div className="absolute right-0 mt-2 z-40 bg-white rounded-lg shadow-lg border border-gray-200 p-4">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => {
+                      if (date) {
+                        setSelectedDate(date);
+                        setShowCalendar(false);
+                      }
+                    }}
+                    className="rounded-lg"
+                    initialFocus
+                  />
+                </div>
+              </>
+            )}
+          </div>
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`p-2 md:p-3 rounded-lg flex items-center focus:ring-2 focus:ring-green-400 min-h-[44px] ${
