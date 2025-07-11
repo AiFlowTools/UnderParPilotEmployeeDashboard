@@ -31,6 +31,7 @@ import {
 import { supabase } from '../lib/supabase';
 import NotificationBell from '../components/NotificationBell';
 import { useUser } from '../hooks/useUser';
+import { Calendar } from 'lucide-react';
 
 interface OrderItem {
   item_name: string;
