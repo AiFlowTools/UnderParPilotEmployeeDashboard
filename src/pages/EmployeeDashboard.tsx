@@ -26,6 +26,7 @@ import {
   UserCircle,
   Volume2,
   Menu as MenuIcon,
+  X,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import NotificationBell from '../components/NotificationBell';
@@ -75,14 +76,14 @@ interface MetricCardProps {
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({ icon, label, value }) => (
-  <div className="bg-white p-6 rounded-lg shadow-sm">
+  <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
     <div className="flex items-center">
-      <div className="p-2 bg-green-100 rounded-lg text-green-600 mr-4">
+      <div className="p-2 bg-green-100 rounded-lg text-green-600 mr-3 md:mr-4">
         {icon}
       </div>
       <div>
         <p className="text-sm text-gray-500">{label}</p>
-        <p className="text-xl font-semibold mt-1">{value}</p>
+        <p className="text-lg md:text-xl font-semibold mt-1">{value}</p>
       </div>
     </div>
   </div>
@@ -102,10 +103,8 @@ export default function EmployeeDashboard() {
   const { user, role, isAdmin, loading: userLoading } = useUser();
   const navigate = useNavigate();
 
-  // Add verification logging
-  console.log('Dashboard - isAdmin:', isAdmin);
-  console.log('Dashboard - role:', role);
-  console.log('Dashboard - user:', user);
+  // Sidebar state for mobile/tablet
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Sound control states
   const [soundEnabled, setSoundEnabled] = useState(() => {
@@ -437,70 +436,71 @@ export default function EmployeeDashboard() {
 
   const renderMetricsTable = () => (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center space-x-4">
-            <div className="flex space-x-1">
-              {VIEW_MODES.map(mode => (
-                <button
-                  key={mode}
-                  onClick={() => setViewMode(mode)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    viewMode === mode
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  {mode}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center space-x-2">
+      {/* Sticky Date + Auto-Refresh Toolbar */}
+      <div className="sticky top-0 z-40 bg-white px-4 md:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-200 gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+          <div className="flex space-x-1">
+            {VIEW_MODES.map(mode => (
               <button
-                onClick={() => handleDateChange('prev')}
-                className="p-2 hover:bg-gray-100 rounded-full"
+                key={mode}
+                onClick={() => setViewMode(mode)}
+                className={`px-3 md:px-4 py-2 md:py-3 rounded-lg text-sm md:text-base font-medium transition-colors focus:ring-2 focus:ring-green-400 min-h-[44px] ${
+                  viewMode === mode
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
               >
-                <ChevronLeft className="w-5 h-5" />
+                {mode}
               </button>
-              <span className="text-gray-600">
-                {format(selectedDate, 'dd MMM yyyy')}
-              </span>
-              <button
-                onClick={() => handleDateChange('next')}
-                className="p-2 hover:bg-gray-100 rounded-full"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+            ))}
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
             <button
-              onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`p-2 rounded-lg flex items-center ${
-                autoRefresh ? 'text-green-600' : 'text-gray-400'
-              }`}
+              onClick={() => handleDateChange('prev')}
+              className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
-              <RefreshCw className="w-5 h-5 mr-2" />
-              Auto-refresh
+              <ChevronLeft className="w-5 h-5" />
             </button>
+            <span className="text-gray-600 text-sm md:text-base px-2">
+              {format(selectedDate, 'dd MMM yyyy')}
+            </span>
             <button
-              onClick={exportData}
-              className="p-2 text-gray-600 hover:text-gray-900"
+              onClick={() => handleDateChange('next')}
+              className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
-              <Download className="w-5 h-5" />
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </div>
+        <div className="flex items-center space-x-2 md:space-x-4">
+          <button
+            onClick={() => setAutoRefresh(!autoRefresh)}
+            className={`p-2 md:p-3 rounded-lg flex items-center focus:ring-2 focus:ring-green-400 min-h-[44px] ${
+              autoRefresh ? 'text-green-600' : 'text-gray-400'
+            }`}
+          >
+            <RefreshCw className="w-5 h-5 mr-2" />
+            <span className="hidden sm:inline">Auto-refresh</span>
+          </button>
+          <button
+            onClick={exportData}
+            className="p-2 md:p-3 text-gray-600 hover:text-gray-900 focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
+          >
+            <Download className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="p-4 md:p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {Object.entries(metrics).map(([key, data]) => (
-            <div key={key} className="bg-gray-50 p-6 rounded-lg">
+            <div key={key} className="bg-gray-50 p-4 md:p-6 rounded-lg">
               <h3 className="text-sm font-medium text-gray-500 mb-2">
                 {key.replace(/([A-Z])/g, ' $1').toUpperCase()}
               </h3>
               <div className="flex items-end justify-between">
                 <div>
-                  <p className="text-2xl font-bold">
+                  <p className="text-xl md:text-2xl font-bold">
                     {key === 'revenue' || key === 'avgOrderValue' 
                       ? `$${data.value.toFixed(2)}`
                       : data.value}
@@ -520,7 +520,7 @@ export default function EmployeeDashboard() {
                     </span>
                   </div>
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className="text-xs md:text-sm text-gray-500">
                   vs previous {viewMode.toLowerCase()}
                 </div>
               </div>
@@ -535,40 +535,40 @@ export default function EmployeeDashboard() {
     <div className="space-y-6">
       {renderMetricsTable()}
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
           <h3 className="text-lg font-semibold mb-4">Revenue Overview</h3>
           <div className="flex items-center">
             <BarChart3 className="w-8 h-8 text-green-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">${metrics.revenue.value.toFixed(2)}</p>
+              <p className="text-xl md:text-2xl font-bold">${metrics.revenue.value.toFixed(2)}</p>
               <p className="text-sm text-gray-500">This {viewMode.toLowerCase()}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
           <h3 className="text-lg font-semibold mb-4">Customer Stats</h3>
           <div className="flex items-center">
             <Users className="w-8 h-8 text-blue-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">{metrics.customers.value}</p>
+              <p className="text-xl md:text-2xl font-bold">{metrics.customers.value}</p>
               <p className="text-sm text-gray-500">Active customers</p>
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm md:col-span-2 lg:col-span-1">
           <h3 className="text-lg font-semibold mb-4">Average Order Value</h3>
           <div className="flex items-center">
             <CreditCard className="w-8 h-8 text-purple-600 mr-3" />
             <div>
-              <p className="text-2xl font-bold">${metrics.avgOrderValue.value.toFixed(2)}</p>
+              <p className="text-xl md:text-2xl font-bold">${metrics.avgOrderValue.value.toFixed(2)}</p>
               <p className="text-sm text-gray-500">Per order</p>
             </div>
           </div>
         </div>
       </div>
       
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
         <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
         <div className="space-y-4">
           {orders.slice(0, 5).map(order => (
@@ -599,7 +599,7 @@ export default function EmployeeDashboard() {
 
   const renderSettingsTab = () => (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
         <h3 className="text-lg font-semibold mb-4">Profile Settings</h3>
         <div className="space-y-4">
           <div>
@@ -610,7 +610,7 @@ export default function EmployeeDashboard() {
               type="email"
               value={session?.user?.email || ''}
               disabled
-              className="w-full px-3 py-2 border rounded-lg bg-gray-50"
+              className="w-full px-3 py-2 md:py-3 border rounded-lg bg-gray-50"
             />
           </div>
           <div>
@@ -621,7 +621,7 @@ export default function EmployeeDashboard() {
               type="text"
               value={role === 'admin' ? 'Administrator' : 'Employee'}
               disabled
-              className="w-full px-3 py-2 border rounded-lg bg-gray-50"
+              className="w-full px-3 py-2 md:py-3 border rounded-lg bg-gray-50"
             />
           </div>
           {isAdmin && (
@@ -633,30 +633,30 @@ export default function EmployeeDashboard() {
                 type="text"
                 value="Administrator"
                 disabled
-                className="w-full px-3 py-2 border rounded-lg bg-green-50 text-green-800"
+                className="w-full px-3 py-2 md:py-3 border rounded-lg bg-green-50 text-green-800"
               />
             </div>
           )}
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
         <h3 className="text-lg font-semibold mb-4">Notification Preferences</h3>
         <div className="space-y-4">
-          <label className="flex items-center">
-            <input type="checkbox" className="form-checkbox h-4 w-4 text-green-600" />
+          <label className="flex items-center min-h-[44px]">
+            <input type="checkbox" className="form-checkbox h-4 w-4 text-green-600 focus:ring-2 focus:ring-green-400" />
             <span className="ml-2">Email notifications for new orders</span>
           </label>
-          <label className="flex items-center">
-            <input type="checkbox" className="form-checkbox h-4 w-4 text-green-600" />
+          <label className="flex items-center min-h-[44px]">
+            <input type="checkbox" className="form-checkbox h-4 w-4 text-green-600 focus:ring-2 focus:ring-green-400" />
             <span className="ml-2">Push notifications for order updates</span>
           </label>
-          <label className="flex items-center">
+          <label className="flex items-center min-h-[44px]">
             <input
               type="checkbox"
               checked={soundEnabled}
               onChange={(e) => setSoundEnabled(e.target.checked)}
-              className="form-checkbox h-4 w-4 text-green-600"
+              className="form-checkbox h-4 w-4 text-green-600 focus:ring-2 focus:ring-green-400"
             />
             <span className="ml-2">Enable sound for new orders</span>
           </label>
@@ -676,18 +676,18 @@ export default function EmployeeDashboard() {
                 step="0.01"
                 value={volume}
                 onChange={(e) => setVolume(parseFloat(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-green-400"
               />
             </div>
           )}
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
         <h3 className="text-lg font-semibold text-red-600 mb-4">Danger Zone</h3>
         <button
           onClick={handleLogout}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          className="px-4 md:px-6 py-2 md:py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors focus:ring-2 focus:ring-red-400 min-h-[44px]"
         >
           Sign Out
         </button>
@@ -697,18 +697,18 @@ export default function EmployeeDashboard() {
 
   const renderOrdersTab = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard icon={<Package />} label="New Orders" value={metrics.orders.value} />
         <MetricCard icon={<Clock />} label="In Progress" value={metrics.orders.value} />
         <MetricCard icon={<TrendingUp />} label="Delivered Today" value={metrics.orders.value} />
         <MetricCard icon={<Timer />} label="Avg Prep Time" value="15 min" />
       </div>
 
-      <div className="flex gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <select 
           value={statusFilter} 
           onChange={e => setStatusFilter(e.target.value as any)} 
-          className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28a745]"
+          className="px-3 md:px-4 py-2 md:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 min-h-[44px]"
         >
           <option value="all">ALL</option>
           <option value="new-group">New</option>
@@ -718,7 +718,7 @@ export default function EmployeeDashboard() {
         <select 
           value={holeFilter} 
           onChange={e => setHoleFilter(e.target.value)} 
-          className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28a745]"
+          className="px-3 md:px-4 py-2 md:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 min-h-[44px]"
         >
           <option value="all">All Holes</option>
           {[...Array(18)].map((_, i) => (
@@ -732,7 +732,7 @@ export default function EmployeeDashboard() {
             placeholder="Search orders..." 
             value={search} 
             onChange={e => setSearch(e.target.value)} 
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#28a745]" 
+            className="w-full pl-10 pr-4 py-2 md:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 min-h-[44px]" 
           />
         </div>
       </div>
@@ -747,72 +747,74 @@ export default function EmployeeDashboard() {
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                {['ID', 'Customer', 'Hole', 'Items', 'Notes', 'Date & Time', 'Status', 'Action'].map(h => (
-                  <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {orders.map(order => (
-                <tr key={order.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {order.id.slice(0,8)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {order.customer_name || 'Anonymous'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {order.hole_number}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {order.ordered_items.map(i => `${i.quantity}x ${i.item_name}`).join(', ')}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {order.notes || '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(order.created_at).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      {
-                        new: 'bg-blue-100 text-blue-800',
-                        preparing: 'bg-yellow-100 text-yellow-800',
-                        on_the_way: 'bg-purple-100 text-purple-800',
-                        delivered: 'bg-green-100 text-green-800',
-                        cancelled: 'bg-red-100 text-red-800'
-                      }[order.fulfillment_status]
-                    }`}>
-                      {order.fulfillment_status.replace(/_/g,' ')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {(order.fulfillment_status !== 'delivered' && order.fulfillment_status !== 'cancelled') && (
-                      <div className="relative inline-block">
-                        <select
-                          value={order.fulfillment_status}
-                          onChange={e => handleStatusChange(order.id, e.target.value)}
-                          className="appearance-none pl-2 pr-6 py-1 border rounded bg-white text-sm"
-                        >
-                          <option value="new">New</option>
-                          <option value="preparing">Preparing</option>
-                          <option value="on_the_way">On the Way</option>
-                          <option value="delivered">Delivered</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
-                        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
-                      </div>
-                    )}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  {['ID', 'Customer', 'Hole', 'Items', 'Notes', 'Date & Time', 'Status', 'Action'].map(h => (
+                    <th key={h} className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {orders.map(order => (
+                  <tr key={order.id} className="hover:bg-gray-50">
+                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {order.id.slice(0,8)}
+                    </td>
+                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {order.customer_name || 'Anonymous'}
+                    </td>
+                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {order.hole_number}
+                    </td>
+                    <td className="px-4 md:px-6 py-4 text-sm text-gray-900">
+                      {order.ordered_items.map(i => `${i.quantity}x ${i.item_name}`).join(', ')}
+                    </td>
+                    <td className="px-4 md:px-6 py-4 text-sm text-gray-500">
+                      {order.notes || '-'}
+                    </td>
+                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(order.created_at).toLocaleString()}
+                    </td>
+                    <td className="px-4 md:px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        {
+                          new: 'bg-blue-100 text-blue-800',
+                          preparing: 'bg-yellow-100 text-yellow-800',
+                          on_the_way: 'bg-purple-100 text-purple-800',
+                          delivered: 'bg-green-100 text-green-800',
+                          cancelled: 'bg-red-100 text-red-800'
+                        }[order.fulfillment_status]
+                      }`}>
+                        {order.fulfillment_status.replace(/_/g,' ')}
+                      </span>
+                    </td>
+                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {(order.fulfillment_status !== 'delivered' && order.fulfillment_status !== 'cancelled') && (
+                        <div className="relative inline-block">
+                          <select
+                            value={order.fulfillment_status}
+                            onChange={e => handleStatusChange(order.id, e.target.value)}
+                            className="appearance-none pl-2 pr-6 py-1 md:py-2 border rounded bg-white text-sm focus:ring-2 focus:ring-green-400 min-h-[44px]"
+                          >
+                            <option value="new">New</option>
+                            <option value="preparing">Preparing</option>
+                            <option value="on_the_way">On the Way</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                          </select>
+                          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
@@ -853,42 +855,92 @@ export default function EmployeeDashboard() {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <div className="w-64 bg-[#1e7e34] text-white flex-shrink-0">
-        <div className="p-4">
-          <h1 className="text-2xl font-bold">FairwayMate</h1>
+      {/* Desktop Sidebar - Hidden on tablet and below */}
+      <div className="hidden lg:flex w-60 bg-green-600 text-white flex-shrink-0">
+        <div className="w-full">
+          <div className="p-4">
+            <h1 className="text-2xl font-bold">FairwayMate</h1>
+          </div>
+          <nav className="mt-8">
+            {visibleTabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center w-full px-6 py-3 hover:bg-green-700 transition-colors focus:ring-2 focus:ring-green-400 ${
+                  activeTab === tab.id ? 'bg-green-700' : ''
+                }`}
+              >
+                <tab.icon className="w-5 h-5 mr-3" />
+                {tab.label}
+              </button>
+            ))}
+          </nav>
         </div>
-        <nav className="mt-8">
-          {visibleTabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center w-full px-6 py-3 hover:bg-[#28a745] transition-colors ${
-                activeTab === tab.id ? 'bg-[#28a745]' : ''
-              }`}
-            >
-              <tab.icon className="w-5 h-5 mr-3" />
-              {tab.label}
-            </button>
-          ))}
-        </nav>
       </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 bg-[#28a745] flex items-center justify-between px-6 flex-shrink-0">
-          <h1 className="text-white text-xl font-semibold">Employee Dashboard</h1>
+      {/* Mobile/Tablet Sidebar Overlay */}
+      {sidebarOpen && (
+        <>
+          <div 
+            className="fixed inset-0 bg-black/50 z-50 lg:hidden" 
+            onClick={() => setSidebarOpen(false)}
+          />
+          <div className="absolute left-0 top-0 w-56 h-full bg-green-600 text-white p-4 z-50 lg:hidden">
+            <div className="flex items-center justify-between mb-8">
+              <h1 className="text-xl font-bold">FairwayMate</h1>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2 hover:bg-green-700 rounded-full focus:ring-2 focus:ring-green-400"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <nav>
+              {visibleTabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setSidebarOpen(false);
+                  }}
+                  className={`flex items-center w-full px-4 py-3 mb-2 rounded-lg hover:bg-green-700 transition-colors focus:ring-2 focus:ring-green-400 min-h-[44px] ${
+                    activeTab === tab.id ? 'bg-green-700' : ''
+                  }`}
+                >
+                  <tab.icon className="w-5 h-5 mr-3" />
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </>
+      )}
 
-          <div className="flex items-center space-x-4">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <header className="h-16 bg-green-600 flex items-center justify-between px-4 md:px-6 flex-shrink-0">
+          <div className="flex items-center">
+            {/* Mobile/Tablet Menu Button */}
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 mr-3 text-white hover:bg-green-700 rounded-lg focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            >
+              <MenuIcon className="w-6 h-6" />
+            </button>
+            <h1 className="text-white text-lg md:text-xl font-semibold">Employee Dashboard</h1>
+          </div>
+
+          <div className="flex items-center space-x-2 md:space-x-4">
             <NotificationBell count={notificationCount} onNotificationClick={handleNotificationClick} />
 
             <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center space-x-2 text-white hover:bg-[#1e7e34] px-3 py-2 rounded-lg transition-colors duration-200"
+                className="flex items-center space-x-2 text-white hover:bg-green-700 px-2 md:px-3 py-2 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-green-400 min-h-[44px]"
                 aria-expanded={dropdownOpen}
                 aria-haspopup="true"
               >
                 <UserCircle className="w-5 h-5" />
-                <span className="text-sm font-medium">{session?.user?.email}</span>
+                <span className="text-sm font-medium hidden sm:inline">{session?.user?.email}</span>
                 <ChevronDown
                   className="w-4 h-4 transition-transform duration-200"
                   style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}
@@ -912,7 +964,7 @@ export default function EmployeeDashboard() {
 
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:ring-2 focus:ring-green-400 min-h-[44px] flex items-center"
                     >
                       <LogOut className="w-4 h-4 mr-2 inline-block" />
                       Sign out
@@ -924,7 +976,7 @@ export default function EmployeeDashboard() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto bg-[#f8f9fa] p-6">
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
           {renderContent()}
 
           {showOverlay && newOrder && (
