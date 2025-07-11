@@ -855,19 +855,74 @@ export default function EmployeeDashboard() {
   });
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Desktop Sidebar - Hidden on tablet and below */}
-      <div className="hidden lg:flex w-60 bg-green-600 text-white flex-shrink-0">
-        <div className="w-full">
-          <div className="p-4">
-            <h1 className="text-2xl font-bold">FairwayMate</h1>
+  <div className="flex h-screen bg-gray-100">
+
+    {/* ─── Desktop Sidebar (visible on lg and up) ─── */}
+    <div className="hidden lg:flex w-60 bg-green-600 text-white flex-shrink-0">
+      <div className="w-full">
+        <div className="p-4">
+          <h1 className="text-2xl font-bold">FairwayMate</h1>
+        </div>
+        <nav className="mt-8">
+          {visibleTabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center w-full px-6 py-3 hover:bg-green-700 transition-colors focus:ring-2 focus:ring-green-400 ${
+                activeTab === tab.id ? 'bg-green-700' : ''
+              }`}
+            >
+              <tab.icon className="w-5 h-5 mr-3" />
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+    </div>
+
+    {/* ─── Mobile/Tablet: Hamburger Toggle (hidden on lg and up) ─── */}
+    <div className="lg:hidden flex-shrink-0 p-4">
+      <button
+        onClick={() => setSidebarOpen(true)}
+        className="text-white focus:outline-none focus:ring-2 focus:ring-green-400 p-2 rounded"
+        aria-label="Open navigation"
+      >
+        <MenuIcon className="w-6 h-6" />
+      </button>
+    </div>
+
+    {/* ─── Main Content (rest of your dashboard) ─── */}
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* ... your existing header, toolbar, KPI grid, tabs, etc. ... */}
+    </div>
+
+    {/* ─── Mobile/Tablet Sidebar Drawer Overlay ─── */}
+    {sidebarOpen && (
+      <div className="fixed inset-0 z-50 flex">
+        {/* backdrop */}
+        <div
+          className="absolute inset-0 bg-black/50"
+          onClick={() => setSidebarOpen(false)}
+        />
+
+        {/* sliding panel */}
+        <div className="relative w-56 bg-green-600 text-white p-4">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-xl font-bold">FairwayMate</h2>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="p-2 hover:bg-green-700 rounded-full focus:ring-2 focus:ring-green-400"
+              aria-label="Close navigation"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <nav className="mt-8">
+          <nav>
             {visibleTabs.map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center w-full px-6 py-3 hover:bg-green-700 transition-colors focus:ring-2 focus:ring-green-400 ${
+                onClick={() => { setActiveTab(tab.id); setSidebarOpen(false); }}
+                className={`flex items-center w-full px-4 py-3 mb-2 rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-400 ${
                   activeTab === tab.id ? 'bg-green-700' : ''
                 }`}
               >
@@ -878,6 +933,9 @@ export default function EmployeeDashboard() {
           </nav>
         </div>
       </div>
+    )}
+  </div>
+);
 
       {/* Mobile/Tablet Sidebar Overlay */}
       {sidebarOpen && (
