@@ -139,6 +139,7 @@ export default function EmployeeDashboard() {
     avgOrderValue: { value: 0, previousValue: 0, change: 0, trend: 'neutral' },
   });
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   // Save sound preferences to localStorage
   useEffect(() => {
