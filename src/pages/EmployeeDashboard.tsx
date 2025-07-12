@@ -894,29 +894,6 @@ export default function EmployeeDashboard() {
   return (
     <div className="flex h-screen bg-gray-100">
 
-      {/* ─── Desktop Sidebar (visible on lg+) ─── */}
-      <div className="hidden lg:flex w-60 bg-green-600 text-white flex-shrink-0">
-        <div className="w-full">
-          <div className="p-4">
-            <h1 className="text-2xl font-bold">FairwayMate</h1>
-          </div>
-          <nav className="mt-8">
-            {visibleTabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center w-full px-6 py-3 hover:bg-green-700 transition-colors focus:ring-2 focus:ring-green-400 ${
-                  activeTab === tab.id ? 'bg-green-700' : ''
-                }`}
-              >
-                <tab.icon className="w-5 h-5 mr-3" />
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </div>
-
       {/* ─── Main Content ─── */}
       <div className="flex-1 flex flex-col overflow-hidden">
 
