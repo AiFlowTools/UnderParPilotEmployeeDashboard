@@ -976,7 +976,7 @@ export default function EmployeeDashboard() {
 
       {/* ─── Mobile/Tablet Sidebar Drawer Overlay ─── */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-50 flex lg:hidden">
+        <div className="fixed inset-0 z-50 flex">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50"
