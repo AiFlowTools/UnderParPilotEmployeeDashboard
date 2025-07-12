@@ -442,9 +442,11 @@ export default function EmployeeDashboard() {
     // ─── Metrics Table (lines 442–643) ───
   const renderMetricsTable = () => (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      {/* Entire KPI Strip: toolbar + cards */}
       <div
         className="
-          sticky top-16 z-30 bg-white px-4 md:px-6 py-4
+          sticky top-0 z-40 bg-white
+          px-4 md:px-6 py-4
           flex flex-col items-center justify-center
           sm:flex-row sm:items-center sm:justify-between
           border-b border-gray-200 gap-4
