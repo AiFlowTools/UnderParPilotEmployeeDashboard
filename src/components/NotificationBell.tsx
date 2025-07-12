@@ -73,53 +73,39 @@ export default function NotificationBell({ count = 0, onNotificationClick }: Not
   };
 
   return (
+    // 1) A relative wrapper
     <div className="relative">
       <button
-        onClick={() => {
-          setIsOpen(!isOpen);
-          if (!isOpen) {
-            fetchNotifications(); // Fetch latest notifications when opening
-          }
-        }}
-        className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
+        onClick={() => setOpen(o => !o)}
+        className="relative p-2 text-white hover:bg-green-700 rounded-lg focus:ring-2 focus:ring-green-400"
+        aria-label="Toggle notifications"
       >
-        <Bell className="h-6 w-6 text-gray-600" />
-        {count > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-            {count}
+        <Bell className="w-6 h-6" />
+        {notifications.length > 0 && (
+          <span className="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full">
+            {notifications.length}
           </span>
         )}
       </button>
 
-      {isOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => setIsOpen(false)}
-          />
-          <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-20 max-h-[400px] overflow-y-auto">
-            {notifications.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">
-                No new notifications
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-100">
-                {notifications.map((notification) => (
-                  <button
-                    key={notification.id}
-                    onClick={() => markAsRead(notification.id)}
-                    className="w-full p-4 text-left hover:bg-gray-50 transition-colors"
-                  >
-                    <p className="text-sm text-gray-900">{notification.message}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {new Date(notification.created_at).toLocaleString()}
-                    </p>
-                  </button>
-                ))}
-              </div>
-            )}
+      {open && (
+        // 2) Dropdown positioned immediately below the button
+        <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl z-50">
+          <div className="flex justify-between items-center px-4 py-2 border-b">
+            <span className="font-medium text-gray-700">Notifications</span>
+            <button onClick={() => setOpen(false)} aria-label="Close" className="p-1">
+              <X className="w-4 h-4 text-gray-500 hover:text-gray-700" />
+            </button>
           </div>
-        </>
+          <div className="max-h-64 overflow-y-auto">
+            {notifications.map((n, i) => (
+              <div key={i} className="px-4 py-3 border-b last:border-b-0">
+                {n.message}
+                <div className="text-xs text-gray-400 mt-1">{n.time}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
