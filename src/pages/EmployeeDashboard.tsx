@@ -440,52 +440,50 @@ export default function EmployeeDashboard() {
   };
 
   const renderMetricsTable = () => (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      {/* Sticky Date + Auto-Refresh Toolbar */}
-<div
-     className="
-       sticky top-0 z-40 bg-white px-4 md:px-6 py-4
-        flex
-        flex-col items-center justify-center
-        sm:flex-row sm:items-center sm:justify-between
-        border-b border-gray-200 gap-4
-       "
-     >
-        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <div className="flex space-x-1">
-            {VIEW_MODES.map(mode => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                className={`px-3 md:px-4 py-2 md:py-3 rounded-lg text-sm md:text-base font-medium transition-colors focus:ring-2 focus:ring-green-400 min-h-[44px] ${
-                  viewMode === mode
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {mode}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center space-x-2">
+  <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    {/* Entire KPI Strip: toolbar + cards */}
+    <div className="sticky top-0 z-40 bg-white">
+      {/* Date + Auto-Refresh Toolbar */}
+      <div className="px-4 md:px-6 py-4 flex flex-col items-center justify-center gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-gray-200">
+        {/* View-mode pills */}
+        <div className="flex space-x-1">
+          {VIEW_MODES.map(mode => (
             <button
-              onClick={() => handleDateChange('prev')}
-              className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              className={`px-3 md:px-4 py-2 md:py-3 rounded-lg text-sm md:text-base font-medium transition-colors focus:ring-2 focus:ring-green-400 min-h-[44px] ${
+                viewMode === mode
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
             >
-              <ChevronLeft className="w-5 h-5" />
+              {mode}
             </button>
-            <span className="text-gray-600 text-sm md:text-base px-2">
-              {format(selectedDate, 'dd MMM yyyy')}
-            </span>
-            <button
-              onClick={() => handleDateChange('next')}
-              className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
+          ))}
         </div>
+
+        {/* Date navigation */}
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => handleDateChange('prev')}
+            className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <span className="text-gray-600 text-sm md:text-base px-2">
+            {format(selectedDate, 'dd MMM yyyy')}
+          </span>
+          <button
+            onClick={() => handleDateChange('next')}
+            className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Calendar, Refresh & Download */}
         <div className="flex items-center space-x-2 md:space-x-4">
+          {/* Calendar picker */}
           <div className="relative">
             <button
               onClick={() => setShowCalendar(!showCalendar)}
@@ -494,7 +492,6 @@ export default function EmployeeDashboard() {
             >
               <CalendarIcon className="w-5 h-5" />
             </button>
-            
             {showCalendar && (
               <>
                 <div
@@ -518,25 +515,32 @@ export default function EmployeeDashboard() {
               </>
             )}
           </div>
+
+          {/* Auto-refresh button */}
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`p-2 md:p-3 rounded-lg flex items-center focus:ring-2 focus:ring-green-400 min-h-[44px] ${
               autoRefresh ? 'text-green-600' : 'text-gray-400'
             }`}
+            aria-label="Toggle auto-refresh"
           >
             <RefreshCw className="w-5 h-5 mr-2" />
             <span className="hidden sm:inline">Auto-refresh</span>
           </button>
+
+          {/* Download */}
           <button
             onClick={exportData}
             className="p-2 md:p-3 text-gray-600 hover:text-gray-900 focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            aria-label="Export data"
           >
             <Download className="w-5 h-5" />
           </button>
         </div>
       </div>
 
-      <div className="p-4 md:p-6">
+      {/* KPI Cards */}
+      <div className="px-4 md:px-6 py-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {Object.entries(metrics).map(([key, data]) => (
             <div key={key} className="bg-gray-50 p-4 md:p-6 rounded-lg">
@@ -546,7 +550,7 @@ export default function EmployeeDashboard() {
               <div className="flex items-end justify-between">
                 <div>
                   <p className="text-xl md:text-2xl font-bold">
-                    {key === 'revenue' || key === 'avgOrderValue' 
+                    {key === 'revenue' || key === 'avgOrderValue'
                       ? `$${data.value.toFixed(2)}`
                       : data.value}
                   </p>
@@ -556,11 +560,15 @@ export default function EmployeeDashboard() {
                     ) : data.trend === 'down' ? (
                       <ArrowDown className="w-4 h-4 text-red-500" />
                     ) : null}
-                    <span className={`text-sm ${
-                      data.trend === 'up' ? 'text-green-500' : 
-                      data.trend === 'down' ? 'text-red-500' : 
-                      'text-gray-500'
-                    }`}>
+                    <span
+                      className={`text-sm ${
+                        data.trend === 'up'
+                          ? 'text-green-500'
+                          : data.trend === 'down'
+                          ? 'text-red-500'
+                          : 'text-gray-500'
+                      }`}
+                    >
                       {Math.abs(data.change).toFixed(1)}%
                     </span>
                   </div>
@@ -576,73 +584,7 @@ export default function EmployeeDashboard() {
     </div>
   );
 
-  const renderHomeTab = () => (
-    <div className="space-y-6">
-      {renderMetricsTable()}
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
-          <h3 className="text-lg font-semibold mb-4">Revenue Overview</h3>
-          <div className="flex items-center">
-            <BarChart3 className="w-8 h-8 text-green-600 mr-3" />
-            <div>
-              <p className="text-xl md:text-2xl font-bold">${metrics.revenue.value.toFixed(2)}</p>
-              <p className="text-sm text-gray-500">This {viewMode.toLowerCase()}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
-          <h3 className="text-lg font-semibold mb-4">Customer Stats</h3>
-          <div className="flex items-center">
-            <Users className="w-8 h-8 text-blue-600 mr-3" />
-            <div>
-              <p className="text-xl md:text-2xl font-bold">{metrics.customers.value}</p>
-              <p className="text-sm text-gray-500">Active customers</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm md:col-span-2 lg:col-span-1">
-          <h3 className="text-lg font-semibold mb-4">Average Order Value</h3>
-          <div className="flex items-center">
-            <CreditCard className="w-8 h-8 text-purple-600 mr-3" />
-            <div>
-              <p className="text-xl md:text-2xl font-bold">${metrics.avgOrderValue.value.toFixed(2)}</p>
-              <p className="text-sm text-gray-500">Per order</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
-        <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-        <div className="space-y-4">
-          {orders.slice(0, 5).map(order => (
-            <div key={order.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <p className="font-medium">Order #{order.id.slice(0, 8)}</p>
-                <p className="text-sm text-gray-500">
-                  {format(new Date(order.created_at), 'MMM d, h:mm a')}
-                </p>
-              </div>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                {
-                  new: 'bg-blue-100 text-blue-800',
-                  preparing: 'bg-yellow-100 text-yellow-800',
-                  on_the_way: 'bg-purple-100 text-purple-800',
-                  delivered: 'bg-green-100 text-green-800',
-                  cancelled: 'bg-red-100 text-red-800'
-                }[order.fulfillment_status]
-              }`}>
-                {order.fulfillment_status.replace(/_/g, ' ')}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderSettingsTab = () => (
+   const renderSettingsTab = () => (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
         <h3 className="text-lg font-semibold mb-4">Profile Settings</h3>
