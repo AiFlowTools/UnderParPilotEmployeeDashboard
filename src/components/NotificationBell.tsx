@@ -17,7 +17,7 @@ interface NotificationBellProps {
 
 export default function NotificationBell({ count = 0, onNotificationClick }: NotificationBellProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     fetchNotifications();
