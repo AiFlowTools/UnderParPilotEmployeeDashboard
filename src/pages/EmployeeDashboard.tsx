@@ -582,9 +582,75 @@ export default function EmployeeDashboard() {
         </div>
       </div>
     </div>
+  ); 
+
+  const renderHomeTab = () => (
+    <div className="space-y-6">
+      {renderMetricsTable()}
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
+          <h3 className="text-lg font-semibold mb-4">Revenue Overview</h3>
+          <div className="flex items-center">
+            <BarChart3 className="w-8 h-8 text-green-600 mr-3" />
+            <div>
+              <p className="text-xl md:text-2xl font-bold">${metrics.revenue.value.toFixed(2)}</p>
+              <p className="text-sm text-gray-500">This {viewMode.toLowerCase()}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
+          <h3 className="text-lg font-semibold mb-4">Customer Stats</h3>
+          <div className="flex items-center">
+            <Users className="w-8 h-8 text-blue-600 mr-3" />
+            <div>
+              <p className="text-xl md:text-2xl font-bold">{metrics.customers.value}</p>
+              <p className="text-sm text-gray-500">Active customers</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm md:col-span-2 lg:col-span-1">
+          <h3 className="text-lg font-semibold mb-4">Average Order Value</h3>
+          <div className="flex items-center">
+            <CreditCard className="w-8 h-8 text-purple-600 mr-3" />
+            <div>
+              <p className="text-xl md:text-2xl font-bold">${metrics.avgOrderValue.value.toFixed(2)}</p>
+              <p className="text-sm text-gray-500">Per order</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
+        <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+        <div className="space-y-4">
+          {orders.slice(0, 5).map(order => (
+            <div key={order.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div>
+                <p className="font-medium">Order #{order.id.slice(0, 8)}</p>
+                <p className="text-sm text-gray-500">
+                  {format(new Date(order.created_at), 'MMM d, h:mm a')}
+                </p>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                {
+                  new: 'bg-blue-100 text-blue-800',
+                  preparing: 'bg-yellow-100 text-yellow-800',
+                  on_the_way: 'bg-purple-100 text-purple-800',
+                  delivered: 'bg-green-100 text-green-800',
+                  cancelled: 'bg-red-100 text-red-800'
+                }[order.fulfillment_status]
+              }`}>
+                {order.fulfillment_status.replace(/_/g, ' ')}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 
-   const renderSettingsTab = () => (
+  const renderSettingsTab = () => (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
         <h3 className="text-lg font-semibold mb-4">Profile Settings</h3>
