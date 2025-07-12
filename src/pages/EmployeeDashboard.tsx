@@ -107,6 +107,7 @@ export default function EmployeeDashboard() {
 
   // Sidebar state for mobile/tablet
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Sound control states
   const [soundEnabled, setSoundEnabled] = useState(() => {
@@ -441,7 +442,15 @@ export default function EmployeeDashboard() {
   const renderMetricsTable = () => (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       {/* Sticky Date + Auto-Refresh Toolbar */}
-      <div className="sticky top-0 z-40 bg-white px-4 md:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-200 gap-4">
+<div
+     className="
+       sticky top-0 z-40 bg-white px-4 md:px-6 py-4
+        flex
+        flex-col items-center justify-center
+        sm:flex-row sm:items-center sm:justify-between
+        border-b border-gray-200 gap-4
+       "
+     >
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
           <div className="flex space-x-1">
             {VIEW_MODES.map(mode => (
