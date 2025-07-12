@@ -900,10 +900,10 @@ export default function EmployeeDashboard() {
         {/* Header (contains secondary mobile toggle, title, bell, user menu) */}
         <header className="h-16 bg-green-600 flex items-center justify-between px-4 md:px-6 flex-shrink-0 overflow-visible">
           <div className="flex items-center">
-            {/* Secondary toggle for consistency on mobile */}
+            {/* Always-visible sidebar toggle */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 mr-3 text-white hover:bg-green-700 rounded-lg focus:ring-2 focus:ring-green-400"
+              className="p-2 mr-3 text-white hover:bg-green-700 rounded-lg focus:ring-2 focus:ring-green-400"
               aria-label="Open navigation"
             >
               <MenuIcon className="w-6 h-6" />
