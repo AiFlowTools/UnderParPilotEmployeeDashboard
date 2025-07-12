@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Notification {
