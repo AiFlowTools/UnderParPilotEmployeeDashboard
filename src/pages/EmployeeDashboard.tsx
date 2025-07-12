@@ -931,7 +931,7 @@ export default function EmployeeDashboard() {
     <div className="flex h-screen bg-gray-100">
 
       {/* ─── Main Content ─── */}
-      <div className="flex-1 flex flex-col overflow-auto">
+      <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
 
         {/* Header (contains secondary mobile toggle, title, bell, user menu) */}
         <header className="h-16 bg-green-600 flex items-center justify-between px-4 md:px-6 flex-shrink-0 overflow-visible">
