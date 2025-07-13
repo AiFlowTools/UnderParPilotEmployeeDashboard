@@ -319,40 +319,40 @@ const renderToolbar = () => (
       </button>
       <button
         onClick={() => setShowCalendar(!showCalendar)}
-        className="p-2 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-w-[36px] flex items-center justify-center"
+        className="p-2 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-w-[44px] min-h-[44px] flex items-center justify-center"
       >
         <CalendarIcon className="w-5 h-5" />
       </button>
-      {showCalendar && (
-        <>
-          {/* Overlay to close calendar on click */}
-          <div
-            className="fixed inset-0 z-40 bg-black/10"
-            onClick={() => setShowCalendar(false)}
-            aria-label="Close calendar"
-          />
-          {/* Popover calendar panel */}
-          <div
-            className="fixed z-50 bg-white rounded-lg shadow-xl p-1"
-            style={{
-              top: '84px', // adjust this for your actual header+toolbar height
-              left: 'calc(50% - 125px)', // adjust for alignment, or use right-8 for right side
-              minWidth: '250',
-              maxWidth: '280px'
-            }}
-          >
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={date => {
-                setSelectedDate(date || new Date());
-                setShowCalendar(false);
-              }}
-              initialFocus
-            />
-          </div>
-        </>
-      )}
+     {showCalendar && (
+  <>
+    {/* Overlay to close calendar on click */}
+    <div
+      className="fixed inset-0 z-40 bg-black/10"
+      onClick={() => setShowCalendar(false)}
+      aria-label="Close calendar"
+    />
+    {/* Popover calendar panel */}
+    <div
+      className="fixed z-50 bg-white rounded-lg shadow-xl p-1"
+      style={{
+        top: '84px', // adjust this for your actual header+toolbar height
+        left: 'calc(50% - 125px)', // adjust for alignment, or use right-8 for right side
+        minWidth: '250',
+        maxWidth: '280px'
+      }}
+    >
+      <Calendar
+        mode="single"
+        selected={selectedDate}
+        onSelect={date => {
+          setSelectedDate(date || new Date());
+          setShowCalendar(false);
+        }}
+        initialFocus
+      />
+    </div>
+  </>
+)}
 
     </div>
     {/* Right: Auto-refresh & Download */}
