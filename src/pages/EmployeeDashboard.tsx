@@ -1,39 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import NewOrderAlert from '../components/NewOrderAlert';
-import MenuManagement from '../components/MenuManagement';
 import { useNavigate } from 'react-router-dom';
-import { format, subDays, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import {
   Home,
   Settings,
   ClipboardList,
-  Package,
-  Clock,
-  Timer,
-  TrendingUp,
-  Search,
-  ChevronDown,
+  Menu as MenuIcon,
   LogOut,
-  BarChart3,
-  Users,
-  CreditCard,
+  ChevronDown,
+  UserCircle,
+  X,
   ChevronLeft,
   ChevronRight,
   Download,
   RefreshCw,
-  ArrowDown,
-  ArrowUp,
-  UserCircle,
-  Volume2,
-  Menu as MenuIcon,
-  X,
   Calendar as CalendarIcon,
+  BarChart3,
+  Users,
+  CreditCard,
+  ArrowUp,
+  ArrowDown,
+  Search,
+  Package,
+  Clock,
+  TrendingUp,
+  Timer,
+  Volume2,
 } from 'lucide-react';
+import { format, subDays, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
+
 import { supabase } from '../lib/supabase';
 import NotificationBell from '../components/NotificationBell';
+import NewOrderAlert from '../components/NewOrderAlert';
+import MenuManagement from '../components/MenuManagement';
 import { useUser } from '../hooks/useUser';
-import { Calendar } from '../components/ui/calendar';
 
+// --- Types ---
 interface OrderItem {
   item_name: string;
   quantity: number;
@@ -71,26 +72,6 @@ interface DashboardMetrics {
   avgOrderValue: MetricData;
 }
 
-interface MetricCardProps {
-  icon: React.ReactNode;
-  label: string;
-  value: string | number;
-}
-
-const MetricCard: React.FC<MetricCardProps> = ({ icon, label, value }) => (
-  <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
-    <div className="flex items-center">
-      <div className="p-2 bg-green-100 rounded-lg text-green-600 mr-3 md:mr-4">
-        {icon}
-      </div>
-      <div>
-        <p className="text-sm text-gray-500">{label}</p>
-        <p className="text-lg md:text-xl font-semibold mt-1">{value}</p>
-      </div>
-    </div>
-  </div>
-);
-
 const tabs: TabConfig[] = [
   { id: 'home', label: 'Home', icon: Home },
   { id: 'orders', label: 'Orders', icon: ClipboardList },
@@ -105,28 +86,15 @@ export default function EmployeeDashboard() {
   const { user, role, isAdmin, loading: userLoading } = useUser();
   const navigate = useNavigate();
 
-  // Sidebar state for mobile/tablet
+  // --- State ---
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
-  // Sound control states
-  const [soundEnabled, setSoundEnabled] = useState(() => {
-    const saved = localStorage.getItem('soundEnabled');
-    return saved === null ? true : saved === 'true';
-  });
-  const [volume, setVolume] = useState(() => {
-    const saved = localStorage.getItem('notificationVolume');
-    return saved === null ? 0.8 : parseFloat(saved);
-  });
-
   const [newOrder, setNewOrder] = useState<Order | null>(null);
   const [showOverlay, setShowOverlay] = useState(false);
   const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
-  
   const [activeTab, setActiveTab] = useState('home');
   const [orders, setOrders] = useState<Order[]>([]);
-  const [statusFilter, setStatusFilter] = useState<string>('new');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [holeFilter, setHoleFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [session, setSession] = useState<any>(null);
@@ -142,62 +110,32 @@ export default function EmployeeDashboard() {
     avgOrderValue: { value: 0, previousValue: 0, change: 0, trend: 'neutral' },
   });
   const [autoRefresh, setAutoRefresh] = useState(false);
-  const [isNavOpen, setIsNavOpen] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [volume, setVolume] = useState(0.5);
 
-  // Save sound preferences to localStorage
-  useEffect(() => {
-    localStorage.setItem('soundEnabled', soundEnabled.toString());
-  }, [soundEnabled]);
-
-  useEffect(() => {
-    localStorage.setItem('notificationVolume', volume.toString());
-  }, [volume]);
-
+    // --- Effect: Auth and Real-time Orders ---
   useEffect(() => {
     if (userLoading) return;
-
-    if (!user) {
+    if (!user || (role !== 'employee' && role !== 'admin')) {
       navigate('/');
       return;
     }
-
-    if (role !== 'employee' && role !== 'admin') {
-      navigate('/');
-      return;
-    }
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
     const channel = supabase
       .channel('custom-all-orders')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'orders',
-        },
-        (payload) => {
-          const insertedOrder = payload.new as Order;
-          setOrders(curr => [insertedOrder, ...curr]);
-          setNotificationCount(count => count + 1);
-          
-          if (showOverlay) {
-            setPendingOrders(current => [...current, insertedOrder]);
-          } else {
-            setNewOrder(insertedOrder);
-            setShowOverlay(true);
-          }
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
+        const insertedOrder = payload.new as Order;
+        setOrders(curr => [insertedOrder, ...curr]);
+        setNotificationCount(count => count + 1);
+        if (showOverlay) setPendingOrders(current => [...current, insertedOrder]);
+        else {
+          setNewOrder(insertedOrder);
+          setShowOverlay(true);
         }
-      )
+      })
       .subscribe();
-
-    return () => {
-      channel.unsubscribe();
-    };
+    return () => { channel.unsubscribe(); };
   }, [navigate, showOverlay, user, role, userLoading]);
 
   const handleOverlayDismiss = () => {
@@ -217,6 +155,7 @@ export default function EmployeeDashboard() {
     setStatusFilter('new-group');
   };
 
+  // --- Orders Fetch ---
   async function fetchOrders() {
     setLoading(true);
     setError(null);
@@ -225,98 +164,45 @@ export default function EmployeeDashboard() {
         .from<Order>('orders')
         .select('*')
         .order('created_at', { ascending: false });
-
-      if (statusFilter === 'new-group') {
-        query = query.in('fulfillment_status', ['new', 'preparing', 'on_the_way']);
-      } else if (statusFilter === 'completed') {
-        query = query.eq('fulfillment_status', 'delivered');
-      } else if (statusFilter === 'cancelled') {
-        query = query.eq('fulfillment_status', 'cancelled');
-      }
-
-      if (holeFilter !== 'all') {
-        query = query.eq('hole_number', Number(holeFilter));
-      }
-
-      if (search) {
-        query = query.ilike('ordered_items', `%${search}%`);
-      }
-
+      if (statusFilter === 'new-group') query = query.in('fulfillment_status', ['new', 'preparing', 'on_the_way']);
+      else if (statusFilter === 'completed') query = query.eq('fulfillment_status', 'delivered');
+      else if (statusFilter === 'cancelled') query = query.eq('fulfillment_status', 'cancelled');
+      if (holeFilter !== 'all') query = query.eq('hole_number', Number(holeFilter));
+      if (search) query = query.ilike('ordered_items', `%${search}%`);
       const { data, error } = await query;
       if (error) throw error;
-
       setOrders(data || []);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err: any) { setError(err.message); }
+    finally { setLoading(false); }
   }
 
-  useEffect(() => {
-    fetchOrders();
-  }, [statusFilter, holeFilter, search]);
+  useEffect(() => { fetchOrders(); }, [statusFilter, holeFilter, search]);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     setError(null);
     try {
-      const { error } = await supabase
-        .from('orders')
-        .update({ fulfillment_status: newStatus })
-        .eq('id', orderId)
-        .select();
-
+      const { error } = await supabase.from('orders').update({ fulfillment_status: newStatus }).eq('id', orderId).select();
       if (error) {
         setError('Failed to update order status. Please try again.');
         return;
       }
-
       await fetchOrders();
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
-    }
+    } catch (err) { setError('An unexpected error occurred. Please try again.'); }
   };
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
-    if (autoRefresh) {
-      intervalId = setInterval(() => {
-        fetchMetrics();
-      }, 5 * 60 * 1000);
-    }
+    if (autoRefresh) intervalId = setInterval(() => { fetchMetrics(); }, 5 * 60 * 1000);
     return () => clearInterval(intervalId);
   }, [autoRefresh]);
 
+  // --- Metrics Helpers ---
   const getDateRange = () => {
     const now = selectedDate;
     switch (viewMode) {
-      case 'Day':
-        return {
-          start: startOfDay(now),
-          end: endOfDay(now),
-          previous: {
-            start: startOfDay(subDays(now, 1)),
-            end: endOfDay(subDays(now, 1)),
-          },
-        };
-      case 'Week':
-        return {
-          start: startOfWeek(now),
-          end: endOfWeek(now),
-          previous: {
-            start: startOfWeek(subDays(now, 7)),
-            end: endOfWeek(subDays(now, 7)),
-          },
-        };
-      case 'Month':
-        return {
-          start: startOfMonth(now),
-          end: endOfMonth(now),
-          previous: {
-            start: startOfMonth(subDays(now, 30)),
-            end: endOfMonth(subDays(now, 30)),
-          },
-        };
+      case 'Day': return { start: startOfDay(now), end: endOfDay(now), previous: { start: startOfDay(subDays(now, 1)), end: endOfDay(subDays(now, 1)) } };
+      case 'Week': return { start: startOfWeek(now), end: endOfWeek(now), previous: { start: startOfWeek(subDays(now, 7)), end: endOfWeek(subDays(now, 7)) } };
+      case 'Month': return { start: startOfMonth(now), end: endOfMonth(now), previous: { start: startOfMonth(subDays(now, 30)), end: endOfMonth(subDays(now, 30)) } };
     }
   };
 
@@ -324,83 +210,49 @@ export default function EmployeeDashboard() {
     setLoading(true);
     setError(null);
     const dateRange = getDateRange();
-
     try {
-      const { data: currentOrders, error: currentError } = await supabase
-        .from('orders')
-        .select('*')
-        .gte('created_at', dateRange.start.toISOString())
-        .lte('created_at', dateRange.end.toISOString());
-
-      if (currentError) throw currentError;
-
-      const { data: previousOrders, error: previousError } = await supabase
-        .from('orders')
-        .select('*')
-        .gte('created_at', dateRange.previous.start.toISOString())
-        .lte('created_at', dateRange.previous.end.toISOString());
-
-      if (previousError) throw previousError;
-
+      const { data: currentOrders } = await supabase.from('orders').select('*').gte('created_at', dateRange.start.toISOString()).lte('created_at', dateRange.end.toISOString());
+      const { data: previousOrders } = await supabase.from('orders').select('*').gte('created_at', dateRange.previous.start.toISOString()).lte('created_at', dateRange.previous.end.toISOString());
       const calculateMetrics = (orders: Order[]) => {
-        const revenue = orders.reduce((sum, order) => 
-          sum + order.ordered_items.reduce((total, item) => total + (item.price * item.quantity), 0), 0);
-        const uniqueCustomers = new Set(orders.map(o => o.id)).size;
+        const revenue = orders.reduce((sum, order) => sum + order.ordered_items.reduce((total, item) => total + (item.price * item.quantity), 0), 0);
+        const uniqueCustomers = new Set(orders.map(o => o.customer_name)).size;
         const avgOrderValue = orders.length > 0 ? revenue / orders.length : 0;
-
-        return {
-          revenue,
-          orders: orders.length,
-          customers: uniqueCustomers,
-          avgOrderValue,
-        };
+        return { revenue, orders: orders.length, customers: uniqueCustomers, avgOrderValue };
       };
-
       const current = calculateMetrics(currentOrders || []);
       const previous = calculateMetrics(previousOrders || []);
-
       setMetrics({
         revenue: {
-          value: current.revenue,
-          previousValue: previous.revenue,
+          value: current.revenue, previousValue: previous.revenue,
           change: previous.revenue ? ((current.revenue - previous.revenue) / previous.revenue) * 100 : 0,
-          trend: current.revenue >= previous.revenue ? 'up' : 'down',
+          trend: current.revenue >= previous.revenue ? 'up' : 'down'
         },
         orders: {
-          value: current.orders,
-          previousValue: previous.orders,
+          value: current.orders, previousValue: previous.orders,
           change: previous.orders ? ((current.orders - previous.orders) / previous.orders) * 100 : 0,
-          trend: current.orders >= previous.orders ? 'up' : 'down',
+          trend: current.orders >= previous.orders ? 'up' : 'down'
         },
         customers: {
-          value: current.customers,
-          previousValue: previous.customers,
+          value: current.customers, previousValue: previous.customers,
           change: previous.customers ? ((current.customers - previous.customers) / previous.customers) * 100 : 0,
-          trend: current.customers >= previous.customers ? 'up' : 'down',
+          trend: current.customers >= previous.customers ? 'up' : 'down'
         },
         avgOrderValue: {
-          value: current.avgOrderValue,
-          previousValue: previous.avgOrderValue,
+          value: current.avgOrderValue, previousValue: previous.avgOrderValue,
           change: previous.avgOrderValue ? ((current.avgOrderValue - previous.avgOrderValue) / previous.avgOrderValue) * 100 : 0,
-          trend: current.avgOrderValue >= previous.avgOrderValue ? 'up' : 'down',
-        },
+          trend: current.avgOrderValue >= previous.avgOrderValue ? 'up' : 'down'
+        }
       });
-
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err: any) { setError(err.message); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    fetchMetrics();
-  }, [viewMode, selectedDate]);
+  useEffect(() => { fetchMetrics(); }, [viewMode, selectedDate]);
 
   const handleDateChange = (direction: 'prev' | 'next') => {
     const days = viewMode === 'Day' ? 1 : viewMode === 'Week' ? 7 : 30;
-    setSelectedDate(current => 
-      direction === 'prev' 
+    setSelectedDate(current =>
+      direction === 'prev'
         ? subDays(current, days)
         : new Date(current.getTime() + (days * 24 * 60 * 60 * 1000))
     );
@@ -412,9 +264,7 @@ export default function EmployeeDashboard() {
       localStorage.clear();
       navigate('/', { replace: true });
       window.history.pushState(null, '', '/');
-    } catch (error) {
-      // Optionally handle logout errors
-    }
+    } catch (error) {}
   };
 
   const exportData = () => {
@@ -424,7 +274,6 @@ export default function EmployeeDashboard() {
       viewMode,
       dateRange: getDateRange(),
     };
-
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -436,98 +285,71 @@ export default function EmployeeDashboard() {
     URL.revokeObjectURL(url);
   };
 
-        {/* Calendar, Auto-refresh & Export */}
-        <div className="flex items-center space-x-2 md:space-x-4">
-          <div className="relative">
-            <button
-              onClick={() => setShowCalendar(!showCalendar)}
-              className="p-2 md:p-3 text-gray-600 hover:text-gray-900 focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-100"
-              title="Select date"
-            >
-              <CalendarIcon className="w-5 h-5" />
-            </button>
-            {showCalendar && (
-              <>
-                <div
-                  className="fixed inset-0 z-30"
-                  onClick={() => setShowCalendar(false)}
-                />
-                <div className="absolute right-0 mt-2 z-40 bg-white rounded-lg shadow-lg border border-gray-200 p-4">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={date => {
-                      if (date) {
-                        setSelectedDate(date)
-                        setShowCalendar(false)
-                      }
-                    }}
-                    className="rounded-lg"
-                    initialFocus
-                  />
-                </div>
-              </>
-            )}
-          </div>
+    // --- KPI Toolbar (Sticky under Green Header) ---
+  const renderToolbar = () => (
+    <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-2 py-2">
+      <div className="flex items-center gap-2">
+        {VIEW_MODES.map(mode => (
           <button
-            onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`p-2 md:p-3 rounded-lg flex items-center focus:ring-2 focus:ring-green-400 min-h-[44px] ${
-              autoRefresh ? 'text-green-600' : 'text-gray-400'
+            key={mode}
+            onClick={() => setViewMode(mode)}
+            className={`px-3 py-2 rounded text-sm font-medium transition-colors focus:ring-2 focus:ring-green-400 ${
+              viewMode === mode ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            <RefreshCw className="w-5 h-5 mr-2" />
-            <span className="hidden sm:inline">Auto-refresh</span>
+            {mode}
           </button>
-          <button
-            onClick={exportData}
-            className="p-2 md:p-3 text-gray-600 hover:text-gray-900 focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
-          >
-            <Download className="w-5 h-5" />
-          </button>
-        </div>
+        ))}
+        <button
+          onClick={() => handleDateChange('prev')}
+          className="p-2 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-w-[36px] flex items-center justify-center"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <span className="text-gray-600 text-sm px-2">
+          {format(selectedDate, 'dd MMM yyyy')}
+        </span>
+        <button
+          onClick={() => handleDateChange('next')}
+          className="p-2 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-w-[36px] flex items-center justify-center"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
       </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setAutoRefresh(!autoRefresh)}
+          className={`p-2 rounded flex items-center focus:ring-2 focus:ring-green-400 ${
+            autoRefresh ? 'text-green-600' : 'text-gray-400'
+          }`}
+        >
+          <RefreshCw className="w-5 h-5 mr-2" />
+          <span className="hidden sm:inline">Auto-refresh</span>
+        </button>
+        <button
+          onClick={exportData}
+          className="p-2 text-gray-600 hover:text-gray-900 focus:ring-2 focus:ring-green-400"
+        >
+          <Download className="w-5 h-5" />
+        </button>
+      </div>
+    </div>
+  );
 
-      {/* KPI Cards Grid */}
-      <div className="p-4 md:p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Object.entries(metrics).map(([key, data]) => (
-            <div key={key} className="bg-gray-50 p-4 md:p-6 rounded-lg">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">
-                {key.replace(/([A-Z])/g, ' $1').toUpperCase()}
-              </h3>
-              <div className="flex items-end justify-between">
-                <div>
-                  <p className="text-xl md:text-2xl font-bold">
-                    {key === 'revenue' || key === 'avgOrderValue'
-                      ? `$${data.value.toFixed(2)}`
-                      : data.value}
-                  </p>
-                  <div className="flex items-center mt-2">
-                    {data.trend === 'up' ? (
-                      <ArrowUp className="w-4 h-4 text-green-500" />
-                    ) : data.trend === 'down' ? (
-                      <ArrowDown className="w-4 h-4 text-red-500" />
-                    ) : null}
-                    <span
-                      className={`text-sm ${
-                        data.trend === 'up'
-                          ? 'text-green-500'
-                          : data.trend === 'down'
-                          ? 'text-red-500'
-                          : 'text-gray-500'
-                      }`}
-                    >
-                      {Math.abs(data.change).toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-                <div className="text-xs md:text-sm text-gray-500">
-                  vs previous {viewMode.toLowerCase()}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+  // --- Compact KPI Bar (Sticky under Toolbar) ---
+  const renderCompactKPIBar = () => (
+    <div className="flex justify-around items-center h-10">
+      <div className="flex flex-col items-center">
+        <span className="text-xs text-gray-500">Revenue</span>
+        <span className="font-semibold text-green-700 text-base">${metrics.revenue.value.toFixed(0)}</span>
+      </div>
+      <div className="flex flex-col items-center">
+        <span className="text-xs text-gray-500">Orders</span>
+        <span className="font-semibold text-blue-700 text-base">{metrics.orders.value}</span>
+      </div>
+      <div className="flex flex-col items-center">
+        <span className="text-xs text-gray-500">Customers</span>
+        <span className="font-semibold text-purple-700 text-base">{metrics.customers.value}</span>
       </div>
     </div>
   );
@@ -535,50 +357,42 @@ export default function EmployeeDashboard() {
   // --- Home Tab ---
   const renderHomeTab = () => (
     <div className="space-y-6">
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
-          <h3 className="text-lg font-semibold mb-4">Revenue Overview</h3>
-          <div className="flex items-center">
+      {/* Large Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm flex flex-col items-start">
+          <div className="flex items-center mb-2">
             <BarChart3 className="w-8 h-8 text-green-600 mr-3" />
-            <div>
-              <p className="text-xl md:text-2xl font-bold">
-                ${metrics.revenue.value.toFixed(2)}
-              </p>
-              <p className="text-sm text-gray-500">
-                This {viewMode.toLowerCase()}
-              </p>
-            </div>
+            <h3 className="text-lg font-semibold">Revenue Overview</h3>
           </div>
+          <div className="text-3xl font-bold mb-1">${metrics.revenue.value.toFixed(2)}</div>
+          <div className="text-sm text-gray-500">This {viewMode.toLowerCase()}</div>
         </div>
-
-        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
-          <h3 className="text-lg font-semibold mb-4">Customer Stats</h3>
-          <div className="flex items-center">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm flex flex-col items-start">
+          <div className="flex items-center mb-2">
             <Users className="w-8 h-8 text-blue-600 mr-3" />
-            <div>
-              <p className="text-xl md:text-2xl font-bold">
-                {metrics.customers.value}
-              </p>
-              <p className="text-sm text-gray-500">Active customers</p>
-            </div>
+            <h3 className="text-lg font-semibold">Customer Stats</h3>
           </div>
+          <div className="text-3xl font-bold mb-1">{metrics.customers.value}</div>
+          <div className="text-sm text-gray-500">Active customers</div>
         </div>
-
-        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm md:col-span-2 lg:col-span-1">
-          <h3 className="text-lg font-semibold mb-4">Average Order Value</h3>
-          <div className="flex items-center">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm flex flex-col items-start">
+          <div className="flex items-center mb-2">
             <CreditCard className="w-8 h-8 text-purple-600 mr-3" />
-            <div>
-              <p className="text-xl md:text-2xl font-bold">
-                ${metrics.avgOrderValue.value.toFixed(2)}
-              </p>
-              <p className="text-sm text-gray-500">Per order</p>
-            </div>
+            <h3 className="text-lg font-semibold">Average Order Value</h3>
           </div>
+          <div className="text-3xl font-bold mb-1">${metrics.avgOrderValue.value.toFixed(2)}</div>
+          <div className="text-sm text-gray-500">Per order</div>
+        </div>
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm flex flex-col items-start">
+          <div className="flex items-center mb-2">
+            <Package className="w-8 h-8 text-yellow-600 mr-3" />
+            <h3 className="text-lg font-semibold">Total Orders</h3>
+          </div>
+          <div className="text-3xl font-bold mb-1">{metrics.orders.value}</div>
+          <div className="text-sm text-gray-500">This {viewMode.toLowerCase()}</div>
         </div>
       </div>
-
+      {/* Recent Activity */}
       <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
         <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
         <div className="space-y-4">
@@ -615,6 +429,122 @@ export default function EmployeeDashboard() {
     </div>
   );
 
+  // --- Orders Tab ---
+  const renderOrdersTab = () => (
+    <div className="space-y-6">
+      {/* Filter Controls */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <select 
+          value={statusFilter} 
+          onChange={e => setStatusFilter(e.target.value)} 
+          className="px-3 md:px-4 py-2 md:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 min-h-[44px]"
+        >
+          <option value="all">ALL</option>
+          <option value="new-group">New</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <select 
+          value={holeFilter} 
+          onChange={e => setHoleFilter(e.target.value)} 
+          className="px-3 md:px-4 py-2 md:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 min-h-[44px]"
+        >
+          <option value="all">All Holes</option>
+          {[...Array(18)].map((_, i) => (
+            <option key={i+1} value={i+1}>Hole {i+1}</option>
+          ))}
+        </select>
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <input 
+            type="text" 
+            placeholder="Search orders..." 
+            value={search} 
+            onChange={e => setSearch(e.target.value)} 
+            className="w-full pl-10 pr-4 py-2 md:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 min-h-[44px]" 
+          />
+        </div>
+      </div>
+      {/* Orders Table */}
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                {['ID', 'Customer', 'Hole', 'Items', 'Notes', 'Date & Time', 'Status', 'Action'].map(h => (
+                  <th key={h} className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {orders.map(order => (
+                <tr key={order.id} className="hover:bg-gray-50">
+                  <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {order.id.slice(0,8)}
+                  </td>
+                  <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {order.customer_name || 'Anonymous'}
+                  </td>
+                  <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {order.hole_number}
+                  </td>
+                  <td className="px-4 md:px-6 py-4 text-sm text-gray-900">
+                    {order.ordered_items.map(i => `${i.quantity}x ${i.item_name}`).join(', ')}
+                  </td>
+                  <td className="px-4 md:px-6 py-4 text-sm text-gray-500">
+                    {order.notes || '-'}
+                  </td>
+                  <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(order.created_at).toLocaleString()}
+                  </td>
+                  <td className="px-4 md:px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      {
+                        new: 'bg-blue-100 text-blue-800',
+                        preparing: 'bg-yellow-100 text-yellow-800',
+                        on_the_way: 'bg-purple-100 text-purple-800',
+                        delivered: 'bg-green-100 text-green-800',
+                        cancelled: 'bg-red-100 text-red-800'
+                      }[order.fulfillment_status]
+                    }`}>
+                      {order.fulfillment_status.replace(/_/g,' ')}
+                    </span>
+                  </td>
+                  <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {(order.fulfillment_status !== 'delivered' && order.fulfillment_status !== 'cancelled') && (
+                      <div className="relative inline-block">
+                        <select
+                          value={order.fulfillment_status}
+                          onChange={e => handleStatusChange(order.id, e.target.value)}
+                          className="appearance-none pl-2 pr-6 py-1 md:py-2 border rounded bg-white text-sm focus:ring-2 focus:ring-green-400 min-h-[44px]"
+                        >
+                          <option value="new">New</option>
+                          <option value="preparing">Preparing</option>
+                          <option value="on_the_way">On the Way</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  // --- Menu Tab ---
+  const renderMenuTab = () => (
+    isAdmin ? <MenuManagement /> : null
+  );
+
+  // --- Settings Tab ---
   const renderSettingsTab = () => (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
@@ -657,7 +587,6 @@ export default function EmployeeDashboard() {
           )}
         </div>
       </div>
-
       <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
         <h3 className="text-lg font-semibold mb-4">Notification Preferences</h3>
         <div className="space-y-4">
@@ -700,7 +629,6 @@ export default function EmployeeDashboard() {
           )}
         </div>
       </div>
-
       <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
         <h3 className="text-lg font-semibold text-red-600 mb-4">Danger Zone</h3>
         <button
@@ -713,143 +641,14 @@ export default function EmployeeDashboard() {
     </div>
   );
 
-  const renderOrdersTab = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard icon={<Package />} label="New Orders" value={metrics.orders.value} />
-        <MetricCard icon={<Clock />} label="In Progress" value={metrics.orders.value} />
-        <MetricCard icon={<TrendingUp />} label="Delivered Today" value={metrics.orders.value} />
-        <MetricCard icon={<Timer />} label="Avg Prep Time" value="15 min" />
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <select 
-          value={statusFilter} 
-          onChange={e => setStatusFilter(e.target.value as any)} 
-          className="px-3 md:px-4 py-2 md:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 min-h-[44px]"
-        >
-          <option value="all">ALL</option>
-          <option value="new-group">New</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-        <select 
-          value={holeFilter} 
-          onChange={e => setHoleFilter(e.target.value)} 
-          className="px-3 md:px-4 py-2 md:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 min-h-[44px]"
-        >
-          <option value="all">All Holes</option>
-          {[...Array(18)].map((_, i) => (
-            <option key={i+1} value={i+1}>Hole {i+1}</option>
-          ))}
-        </select>
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="Search orders..." 
-            value={search} 
-            onChange={e => setSearch(e.target.value)} 
-            className="w-full pl-10 pr-4 py-2 md:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 min-h-[44px]" 
-          />
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-        </div>
-      ) : error ? (
-        <div className="bg-red-50 p-4 rounded-lg text-red-700">
-          <p>{error}</p>
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  {['ID', 'Customer', 'Hole', 'Items', 'Notes', 'Date & Time', 'Status', 'Action'].map(h => (
-                    <th key={h} className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {orders.map(order => (
-                  <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {order.id.slice(0,8)}
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {order.customer_name || 'Anonymous'}
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {order.hole_number}
-                    </td>
-                    <td className="px-4 md:px-6 py-4 text-sm text-gray-900">
-                      {order.ordered_items.map(i => `${i.quantity}x ${i.item_name}`).join(', ')}
-                    </td>
-                    <td className="px-4 md:px-6 py-4 text-sm text-gray-500">
-                      {order.notes || '-'}
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(order.created_at).toLocaleString()}
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        {
-                          new: 'bg-blue-100 text-blue-800',
-                          preparing: 'bg-yellow-100 text-yellow-800',
-                          on_the_way: 'bg-purple-100 text-purple-800',
-                          delivered: 'bg-green-100 text-green-800',
-                          cancelled: 'bg-red-100 text-red-800'
-                        }[order.fulfillment_status]
-                      }`}>
-                        {order.fulfillment_status.replace(/_/g,' ')}
-                      </span>
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {(order.fulfillment_status !== 'delivered' && order.fulfillment_status !== 'cancelled') && (
-                        <div className="relative inline-block">
-                          <select
-                            value={order.fulfillment_status}
-                            onChange={e => handleStatusChange(order.id, e.target.value)}
-                            className="appearance-none pl-2 pr-6 py-1 md:py-2 border rounded bg-white text-sm focus:ring-2 focus:ring-green-400 min-h-[44px]"
-                          >
-                            <option value="new">New</option>
-                            <option value="preparing">Preparing</option>
-                            <option value="on_the_way">On the Way</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="cancelled">Cancelled</option>
-                          </select>
-                          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
+  // --- Tab Switcher ---
   const renderContent = () => {
     switch(activeTab) {
-      case 'home':
-        return renderHomeTab();
-      case 'orders':
-        return renderOrdersTab();
-      case 'menu':
-        return isAdmin ? <MenuManagement /> : null;
-      case 'settings':
-        return renderSettingsTab();
-      default:
-        return renderHomeTab();
+      case 'home': return renderHomeTab();
+      case 'orders': return renderOrdersTab();
+      case 'menu': return renderMenuTab();
+      case 'settings': return renderSettingsTab();
+      default: return renderHomeTab();
     }
   };
 
@@ -861,169 +660,117 @@ export default function EmployeeDashboard() {
     );
   }
 
-  const visibleTabs = tabs.filter(tab => {
-    if (tab.adminOnly) {
-      return isAdmin;
-    }
-    return true;
-  });
+  const visibleTabs = tabs.filter(tab => tab.adminOnly ? isAdmin : true);
 
+  // --- Final Return ---
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex flex-col h-screen bg-gray-100">
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-
-        {/* Green Header */}
-        <div className="sticky top-0 z-50 bg-green-600 text-white px-4 h-16 flex items-center font-bold text-lg">
-          <div className="flex items-center">
-            {/* Sidebar Toggle */}
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 mr-3 text-white hover:bg-green-700 rounded-lg focus:ring-2 focus:ring-green-400"
-              aria-label="Open navigation"
-            >
-              <MenuIcon className="w-6 h-6" />
-            </button>
-            <h1 className="text-white text-lg md:text-xl font-semibold">Employee Dashboard</h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            <NotificationBell
-              count={notificationCount}
-              onNotificationClick={handleNotificationClick}
+      {/* Green Header */}
+      <div className="sticky top-0 z-50 bg-green-600 text-white px-4 h-16 flex items-center font-bold text-lg">
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="p-2 mr-3 text-white hover:bg-green-700 rounded-lg focus:ring-2 focus:ring-green-400"
+          aria-label="Open navigation"
+        >
+          <MenuIcon className="w-6 h-6" />
+        </button>
+        Employee Dashboard
+        <div className="flex-1" />
+        <NotificationBell
+          count={notificationCount}
+          onNotificationClick={handleNotificationClick}
+        />
+        <div className="relative">
+          <button
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="flex items-center space-x-2 text-white hover:bg-green-700 px-2 md:px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400"
+            aria-expanded={dropdownOpen}
+          >
+            <UserCircle className="w-5 h-5" />
+            <span className="hidden sm:inline">{session?.user?.email}</span>
+            <ChevronDown
+              className="w-4 h-4 transition-transform"
+              style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}
             />
-            <div className="relative">
-              <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center space-x-2 text-white hover:bg-green-700 px-2 md:px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400"
-                aria-expanded={dropdownOpen}
-              >
-                <UserCircle className="w-5 h-5" />
-                <span className="hidden sm:inline">{session?.user?.email}</span>
-                <ChevronDown
-                  className="w-4 h-4 transition-transform"
-                  style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}
-                />
-              </button>
-              {dropdownOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setDropdownOpen(false)}
-                  />
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-20">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm text-gray-500">Signed in as</p>
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {session?.user?.email}
-                      </p>
-                      {isAdmin && (
-                        <p className="text-xs text-green-600 font-medium">Administrator</p>
-                      )}
-                    </div>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:ring-2 focus:ring-green-400 flex items-center"
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign out
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-         // --- Metrics Table (KPI Header) ---
-  const renderMetricsTable = () => (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      {/* Entire KPI Strip: toolbar + cards */}
-      <div
-        className="
-          sticky top-16 z-40 bg-white
-          px-4 md:px-6 py-4
-          flex flex-col items-center justify-center
-          sm:flex-row sm:items-center sm:justify-between
-          border-b border-gray-200 gap-4
-        ">
-         {renderToolbar()} 
-      
-        {/* View Mode Buttons & Date Nav */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <div className="flex space-x-1">
-            {VIEW_MODES.map(mode => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                className={`px-3 md:px-4 py-2 md:py-3 rounded-lg text-sm md:text-base font-medium transition-colors focus:ring-2 focus:ring-green-400 min-h-[44px] ${
-                  viewMode === mode
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {mode}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => handleDateChange('prev')}
-              className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <span className="text-gray-600 text-sm md:text-base px-2">
-              {format(selectedDate, 'dd MMM yyyy')}
-            </span>
-            <button
-              onClick={() => handleDateChange('next')}
-              className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-       {/* Sticky Compact KPI Header */}
- <div className="sticky top-[120px] z-30 bg-white border-b h-10 flex items-center px-2 justify-around">
-    <div className="flex flex-col items-center">
-      <span className="text-xs text-gray-500">Revenue</span>
-      <span className="font-semibold text-green-700 text-base">${metrics.revenue.value.toFixed(0)}</span>
-    </div>
-    <div className="flex flex-col items-center">
-      <span className="text-xs text-gray-500">Orders</span>
-      <span className="font-semibold text-blue-700 text-base">{metrics.orders.value}</span>
-    </div>
-    <div className="flex flex-col items-center">
-      <span className="text-xs text-gray-500">Customers</span>
-      <span className="font-semibold text-purple-700 text-base">{metrics.customers.value}</span>
-    </div>
-  </div>
-
-        {/* Scrollable Dashboard Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
-          {renderContent()}
-          {showOverlay && newOrder && (
-            <NewOrderAlert
-              holeNumber={newOrder.hole_number}
-              customerName={newOrder.customer_name || 'Someone'}
-              onDismiss={handleOverlayDismiss}
-            />
+          </button>
+          {dropdownOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-10"
+                onClick={() => setDropdownOpen(false)}
+              />
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-20">
+                <div className="px-4 py-3 border-b border-gray-100">
+                  <p className="text-sm text-gray-500">Signed in as</p>
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {session?.user?.email}
+                  </p>
+                  {isAdmin && (
+                    <p className="text-xs text-green-600 font-medium">Administrator</p>
+                  )}
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:ring-2 focus:ring-green-400 flex items-center"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign out
+                </button>
+              </div>
+            </>
           )}
-        </main>
+        </div>
       </div>
+
+      {/* Sticky KPI Toolbar */}
+      <div className="sticky top-16 z-40 bg-white border-b h-14 flex items-center">
+        {renderToolbar()}
+      </div>
+
+      {/* Sticky Compact KPI Bar */}
+      <div className="sticky top-[120px] z-30 bg-white border-b h-10">
+        {renderCompactKPIBar()}
+      </div>
+
+      {/* Main Scrollable Content */}
+      <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
+        {/* Tab Bar for Navigation (bottom on mobile, side on desktop) */}
+        <div className="flex space-x-2 mb-4">
+          {visibleTabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-green-400 ${
+                activeTab === tab.id
+                  ? 'bg-green-600 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <tab.icon className="w-5 h-5 mr-2" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {renderContent()}
+
+        {showOverlay && newOrder && (
+          <NewOrderAlert
+            holeNumber={newOrder.hole_number}
+            customerName={newOrder.customer_name || 'Someone'}
+            onDismiss={handleOverlayDismiss}
+          />
+        )}
+      </main>
 
       {/* Mobile/Tablet Sidebar Drawer Overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 flex">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50"
             onClick={() => setSidebarOpen(false)}
           />
-          {/* Drawer panel */}
           <div className="relative w-56 bg-green-600 text-white p-4">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-xl font-bold">FairwayMate</h2>
@@ -1056,6 +803,5 @@ export default function EmployeeDashboard() {
         </div>
       )}
     </div>
-      </>
   );
 }
