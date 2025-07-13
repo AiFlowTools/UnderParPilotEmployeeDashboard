@@ -436,57 +436,6 @@ export default function EmployeeDashboard() {
     URL.revokeObjectURL(url);
   };
 
-  // --- Metrics Table (KPI Header) ---
-  const renderMetricsTable = () => (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      {/* Entire KPI Strip: toolbar + cards */}
-      <div
-        className="
-          sticky top-16 z-40 bg-white
-          px-4 md:px-6 py-4
-          flex flex-col items-center justify-center
-          sm:flex-row sm:items-center sm:justify-between
-          border-b border-gray-200 gap-4
-        ">
-         {renderToolbar()} 
-      
-        {/* View Mode Buttons & Date Nav */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <div className="flex space-x-1">
-            {VIEW_MODES.map(mode => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                className={`px-3 md:px-4 py-2 md:py-3 rounded-lg text-sm md:text-base font-medium transition-colors focus:ring-2 focus:ring-green-400 min-h-[44px] ${
-                  viewMode === mode
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {mode}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => handleDateChange('prev')}
-              className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <span className="text-gray-600 text-sm md:text-base px-2">
-              {format(selectedDate, 'dd MMM yyyy')}
-            </span>
-            <button
-              onClick={() => handleDateChange('next')}
-              className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
         {/* Calendar, Auto-refresh & Export */}
         <div className="flex items-center space-x-2 md:space-x-4">
           <div className="relative">
@@ -983,6 +932,57 @@ export default function EmployeeDashboard() {
                 </>
               )}
             </div>
+          </div>
+        </div>
+
+         // --- Metrics Table (KPI Header) ---
+  const renderMetricsTable = () => (
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      {/* Entire KPI Strip: toolbar + cards */}
+      <div
+        className="
+          sticky top-16 z-40 bg-white
+          px-4 md:px-6 py-4
+          flex flex-col items-center justify-center
+          sm:flex-row sm:items-center sm:justify-between
+          border-b border-gray-200 gap-4
+        ">
+         {renderToolbar()} 
+      
+        {/* View Mode Buttons & Date Nav */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+          <div className="flex space-x-1">
+            {VIEW_MODES.map(mode => (
+              <button
+                key={mode}
+                onClick={() => setViewMode(mode)}
+                className={`px-3 md:px-4 py-2 md:py-3 rounded-lg text-sm md:text-base font-medium transition-colors focus:ring-2 focus:ring-green-400 min-h-[44px] ${
+                  viewMode === mode
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {mode}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => handleDateChange('prev')}
+              className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <span className="text-gray-600 text-sm md:text-base px-2">
+              {format(selectedDate, 'dd MMM yyyy')}
+            </span>
+            <button
+              onClick={() => handleDateChange('next')}
+              className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
