@@ -441,7 +441,9 @@ export default function EmployeeDashboard() {
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       {/* Entire KPI Strip: toolbar + cards */}
       <div
-        className="bg-white rounded-lg shadow-sm mb-4 px-4 md:px-6 py-4 flex flex-col items-center justify-center sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 gap-4"
+        className="
+          sticky top-16 z-40 bg-white border-b h-14 flex items-center px-4
+        "
       >
         {/* View Mode Buttons & Date Nav */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
@@ -980,20 +982,20 @@ export default function EmployeeDashboard() {
         </div>
 
        {/* Sticky Compact KPI Header */}
-<div className="sticky top-0 z-40 bg-white shadow px-2 py-2 flex justify-around items-center">
-  <div className="flex flex-col items-center">
-    <span className="text-xs text-gray-500">Revenue</span>
-    <span className="font-semibold text-green-700 text-base">${metrics.revenue.value.toFixed(0)}</span>
+ <div className="sticky top-[120px] z-30 bg-white border-b h-10 flex items-center px-2 justify-around">
+    <div className="flex flex-col items-center">
+      <span className="text-xs text-gray-500">Revenue</span>
+      <span className="font-semibold text-green-700 text-base">${metrics.revenue.value.toFixed(0)}</span>
+    </div>
+    <div className="flex flex-col items-center">
+      <span className="text-xs text-gray-500">Orders</span>
+      <span className="font-semibold text-blue-700 text-base">{metrics.orders.value}</span>
+    </div>
+    <div className="flex flex-col items-center">
+      <span className="text-xs text-gray-500">Customers</span>
+      <span className="font-semibold text-purple-700 text-base">{metrics.customers.value}</span>
+    </div>
   </div>
-  <div className="flex flex-col items-center">
-    <span className="text-xs text-gray-500">Orders</span>
-    <span className="font-semibold text-blue-700 text-base">{metrics.orders.value}</span>
-  </div>
-  <div className="flex flex-col items-center">
-    <span className="text-xs text-gray-500">Customers</span>
-    <span className="font-semibold text-purple-700 text-base">{metrics.customers.value}</span>
-  </div>
-</div>
 
         {/* Scrollable Dashboard Content */}
         <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
