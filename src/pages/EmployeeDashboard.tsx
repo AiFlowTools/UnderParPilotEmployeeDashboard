@@ -485,7 +485,7 @@ export default function EmployeeDashboard() {
             <Download className="w-5 h-5" />
           </button>
         </div>
-    
+      </div>
 
       {/* KPI Cards Grid */}
       <div className="p-4 md:p-6">
@@ -529,6 +529,8 @@ export default function EmployeeDashboard() {
           ))}
         </div>
       </div>
+    </div>
+  );
 
   // --- Home Tab ---
   const renderHomeTab = () => (
@@ -1053,5 +1055,7 @@ export default function EmployeeDashboard() {
           </div>
         </div>
       )}
+    </div>
+      </>
   );
 }
