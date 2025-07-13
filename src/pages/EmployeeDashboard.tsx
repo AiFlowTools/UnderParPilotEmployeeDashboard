@@ -529,7 +529,6 @@ export default function EmployeeDashboard() {
           ))}
         </div>
       </div>
-  );
 
   // --- Home Tab ---
   const renderHomeTab = () => (
