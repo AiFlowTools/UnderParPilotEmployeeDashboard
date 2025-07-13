@@ -1,24 +1,24 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import ProtectedRoute from './components/ProtectedRoute';
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import EmployeeDashboard from "./pages/EmployeeDashboard";
+import Home from "./pages/Home";
+import Orders from "./pages/Orders";
+import Menu from "./pages/Menu";
+import Settings from "./pages/Settings";
+import Login from "./pages/Login";
 
-function App() {
+export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <Router>
+      <Routes>
+        <Route path="/dashboard" element={<EmployeeDashboard />}>
+          <Route index element={<Home />} />
+          <Route path="orders" element={<Orders />} />
+          <Route path="menu" element={<Menu />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/dashboard" />} />
+      </Routes>
+    </Router>
   );
 }
-
-export default App
