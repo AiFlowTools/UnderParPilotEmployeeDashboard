@@ -585,7 +585,6 @@ export default function EmployeeDashboard() {
   // --- Home Tab ---
   const renderHomeTab = () => (
     <div className="space-y-6">
-      {renderMetricsTable()}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
