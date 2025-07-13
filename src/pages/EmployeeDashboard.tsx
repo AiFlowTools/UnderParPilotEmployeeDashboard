@@ -325,8 +325,12 @@ const renderToolbar = () => (
       </button>
       {showCalendar && (
   <div
-    className="fixed left-[50%] top-20 z-50" // use top-20 for ~80px offset from top (adjust as needed)
-    style={{ transform: 'translateX(-50%)' }} // centers under calendar icon, or adjust to match your UI
+    className="fixed z-50"
+    style={{
+      top: '84px',    // Adjust based on your sticky header + toolbar height
+      left: 'calc(50% - 168px)', // Center horizontally, or use a pixel/percent as needed
+      minWidth: '336px',         // Match calendar width
+    }}
   >
     <Calendar
       mode="single"
