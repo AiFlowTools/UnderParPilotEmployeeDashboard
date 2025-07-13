@@ -142,24 +142,6 @@ export default function Orders() {
     }).format(amount);
   };
 
-  const getStatusBadgeClasses = (status: string) => {
-    const baseClasses = "px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full";
-    switch (status) {
-      case 'new':
-        return `${baseClasses} bg-blue-100 text-blue-800`;
-      case 'preparing':
-        return `${baseClasses} bg-yellow-100 text-yellow-800`;
-      case 'on_the_way':
-        return `${baseClasses} bg-purple-100 text-purple-800`;
-      case 'delivered':
-        return `${baseClasses} bg-green-100 text-green-800`;
-      case 'cancelled':
-        return `${baseClasses} bg-red-100 text-red-800`;
-      default:
-        return `${baseClasses} bg-gray-100 text-gray-800`;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -233,195 +215,194 @@ export default function Orders() {
           </div>
         </div>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="w-8 h-8 animate-spin text-green-500" />
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && (
-          <div className="flex justify-center items-center h-64 text-red-500">
-            <AlertCircle className="w-6 h-6 mr-2" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* Desktop Table View (≥1024px) */}
-        {!loading && !error && (
-          <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort('created_at')}
-                    >
-                      <div className="flex items-center">
-                        Date
-                        <ArrowUpDown className="ml-1 h-4 w-4" />
-                      </div>
-                    </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort('customer_name')}
-                    >
-                      <div className="flex items-center">
-                        Customer
-                        <ArrowUpDown className="ml-1 h-4 w-4" />
-                      </div>
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Items
-                    </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort('total_price')}
-                    >
-                      <div className="flex items-center">
-                        Total
-                        <ArrowUpDown className="ml-1 h-4 w-4" />
-                      </div>
-                    </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort('status')}
-                    >
-                      <div className="flex items-center">
-                        Status
-                        <ArrowUpDown className="ml-1 h-4 w-4" />
-                      </div>
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Notes
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {orders.map((order) => (
-                    <tr key={order.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {order.customer_name || 'N/A'}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {order.customer_email || 'N/A'}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        <ul>
-                          {order.ordered_items.map((item, index) => (
-                            <li key={index}>
-                              {item.quantity}x {item.item_name}
-                            </li>
-                          ))}
-                        </ul>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatCurrency(order.total_price)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={getStatusBadgeClasses(order.fulfillment_status)}>
-                          {order.fulfillment_status.replace(/_/g, ' ')}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {order.notes || '-'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {/* Orders Table (Desktop Only, ≥1024px) */}
+        <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="w-8 h-8 animate-spin text-green-500" />
             </div>
-            {orders.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-gray-500">No orders found.</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Mobile/Tablet Card View (<1024px) */}
-        {!loading && !error && (
-          <div className="block lg:hidden space-y-4">
-            {orders.length === 0 ? (
-              <div className="flex justify-center items-center h-32 text-gray-500">
-                No orders found.
-              </div>
-            ) : (
-              orders.map((order) => (
-                <div
-                  key={order.id}
-                  className="bg-white rounded-lg shadow-sm p-4 space-y-3"
-                >
-                  {/* Header with Order ID and Status */}
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">
-                        Order #{order.id.slice(0, 8)}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
-                      </p>
+          ) : error ? (
+            <div className="flex justify-center items-center h-64 text-red-500">
+              <AlertCircle className="w-6 h-6 mr-2" />
+              <span>{error}</span>
+            </div>
+          ) : (
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort('created_at')}
+                  >
+                    <div className="flex items-center">
+                      Date
+                      <ArrowUpDown className="ml-1 h-4 w-4" />
                     </div>
-                    <span className={getStatusBadgeClasses(order.fulfillment_status)}>
-                      {order.fulfillment_status.replace(/_/g, ' ')}
-                    </span>
-                  </div>
-
-                  {/* Customer Info */}
-                  <div className="border-t pt-3">
-                    <h4 className="text-sm font-medium text-gray-700 mb-1">Customer</h4>
-                    <p className="text-sm text-gray-900">
-                      {order.customer_name || 'Anonymous'}
-                    </p>
-                    {order.customer_email && (
-                      <p className="text-sm text-gray-500">{order.customer_email}</p>
-                    )}
-                  </div>
-
-                  {/* Order Items */}
-                  <div className="border-t pt-3">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Items</h4>
-                    <div className="space-y-1">
-                      {order.ordered_items.map((item, index) => (
-                        <div key={index} className="flex justify-between text-sm">
-                          <span className="text-gray-900">
-                            {item.quantity}x {item.item_name}
-                          </span>
-                          <span className="text-gray-500">
-                            {formatCurrency(item.price * item.quantity)}
-                          </span>
-                        </div>
-                      ))}
+                  </th>
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort('customer_name')}
+                  >
+                    <div className="flex items-center">
+                      Customer
+                      <ArrowUpDown className="ml-1 h-4 w-4" />
                     </div>
-                  </div>
-
-                  {/* Total and Notes */}
-                  <div className="border-t pt-3 flex justify-between items-start">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-700">Total</h4>
-                      <p className="text-lg font-semibold text-gray-900">
-                        {formatCurrency(order.total_price)}
-                      </p>
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Items
+                  </th>
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort('total_price')}
+                  >
+                    <div className="flex items-center">
+                      Total
+                      <ArrowUpDown className="ml-1 h-4 w-4" />
                     </div>
-                    {order.notes && (
-                      <div className="max-w-xs">
-                        <h4 className="text-sm font-medium text-gray-700 mb-1">Notes</h4>
-                        <p className="text-sm text-gray-600 italic">{order.notes}</p>
+                  </th>
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort('status')}
+                  >
+                    <div className="flex items-center">
+                      Status
+                      <ArrowUpDown className="ml-1 h-4 w-4" />
+                    </div>
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Notes
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {orders.map((order) => (
+                  <tr key={order.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {order.customer_name || 'N/A'}
                       </div>
-                    )}
-                  </div>
+                      <div className="text-sm text-gray-500">
+                        {order.customer_email || 'N/A'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      <ul>
+                        {order.ordered_items.map((item, index) => (
+                          <li key={index}>
+                            {item.quantity}x {item.item_name}
+                          </li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {formatCurrency(order.total_price)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          {
+                            new: 'bg-blue-100 text-blue-800',
+                            preparing: 'bg-yellow-100 text-yellow-800',
+                            on_the_way: 'bg-purple-100 text-purple-800',
+                            delivered: 'bg-green-100 text-green-800',
+                            cancelled: 'bg-red-100 text-red-800',
+                          }[order.fulfillment_status]
+                        }`}
+                      >
+                        {order.fulfillment_status.replace(/_/g, ' ')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {order.notes || '-'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* Card/List View for Mobile & Tablet (below 1024px) */}
+        <div className="block lg:hidden space-y-4">
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+            </div>
+          ) : error ? (
+            <div className="flex justify-center items-center h-64 text-red-500">
+              <AlertCircle className="w-6 h-6 mr-2" />
+              <span>{error}</span>
+            </div>
+          ) : orders.length === 0 ? (
+            <div className="flex justify-center items-center h-32 text-gray-500">
+              No orders found.
+            </div>
+          ) : (
+            orders.map((order) => (
+              <div
+                key={order.id}
+                className="bg-white rounded-lg shadow-sm p-4 flex flex-col gap-2"
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-bold">
+                    #{order.id.slice(0, 8)}
+                  </span>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      order.fulfillment_status === 'new'
+                        ? 'bg-blue-100 text-blue-800'
+                        : order.fulfillment_status === 'delivered'
+                        ? 'bg-green-100 text-green-800'
+                        : order.fulfillment_status === 'preparing'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : order.fulfillment_status === 'on_the_way'
+                        ? 'bg-purple-100 text-purple-800'
+                        : order.fulfillment_status === 'cancelled'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}
+                  >
+                    {order.fulfillment_status.replace(/_/g, ' ')}
+                  </span>
                 </div>
-              ))
-            )}
-          </div>
-        )}
+                <div className="text-sm text-gray-600">
+                  <span>{order.customer_name || 'N/A'}</span>
+                  {order.customer_email && (
+                    <span className="ml-2 text-gray-400">
+                      ({order.customer_email})
+                    </span>
+                  )}
+                </div>
+                <div className="text-sm text-gray-500">
+                  {order.ordered_items.map((item, idx) => (
+                    <span key={idx} className="inline-block mr-2">
+                      {item.quantity}x {item.item_name}
+                    </span>
+                  ))}
+                </div>
+                <div className="text-sm text-gray-900 font-semibold">
+                  {formatCurrency(order.total_price)}
+                </div>
+                <div className="flex items-center text-xs text-gray-400">
+                  <span>
+                    {format(
+                      new Date(order.created_at),
+                      'MMM d, yyyy HH:mm'
+                    )}
+                  </span>
+                  {order.notes && (
+                    <span className="ml-3 text-gray-500 italic">
+                      Note: {order.notes}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
