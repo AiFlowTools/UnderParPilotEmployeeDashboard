@@ -26,6 +26,7 @@ interface Order {
   status: string;
   fulfillment_status: 'new' | 'preparing' | 'on_the_way' | 'delivered' | 'cancelled';
   notes: string | null;
+  hole?: string | number | null; // ADDED this, update as needed!
 }
 
 type SortField = 'created_at' | 'customer_name' | 'total_price' | 'status';
@@ -230,47 +231,31 @@ export default function Orders() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('created_at')}
-                  >
-                    <div className="flex items-center">
-                      Date
-                      <ArrowUpDown className="ml-1 h-4 w-4" />
-                    </div>
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('customer_name')}
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      onClick={() => handleSort('customer_name')}>
                     <div className="flex items-center">
                       Customer
                       <ArrowUpDown className="ml-1 h-4 w-4" />
                     </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Hole
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Items
                   </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('total_price')}
-                  >
-                    <div className="flex items-center">
-                      Total
-                      <ArrowUpDown className="ml-1 h-4 w-4" />
-                    </div>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Notes
                   </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('status')}
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      onClick={() => handleSort('status')}>
                     <div className="flex items-center">
                       Status
                       <ArrowUpDown className="ml-1 h-4 w-4" />
                     </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Notes
+                    Date/Time
                   </th>
                 </tr>
               </thead>
@@ -278,15 +263,13 @@ export default function Orders() {
                 {orders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
+                      <div className="font-medium">{order.customer_name || 'N/A'}</div>
+                      {order.customer_email && (
+                        <div className="text-xs text-gray-500">{order.customer_email}</div>
+                      )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {order.customer_name || 'N/A'}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {order.customer_email || 'N/A'}
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {order.hole || '-'}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
                       <ul>
@@ -297,26 +280,27 @@ export default function Orders() {
                         ))}
                       </ul>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatCurrency(order.total_price)}
+                    <td className="px-6 py-4 text-sm">
+                      {order.notes
+                        ? <span className="bg-yellow-100 text-yellow-900 px-2 py-1 rounded">{order.notes}</span>
+                        : <span className="text-gray-400">-</span>
+                      }
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          {
-                            new: 'bg-blue-100 text-blue-800',
-                            preparing: 'bg-yellow-100 text-yellow-800',
-                            on_the_way: 'bg-purple-100 text-purple-800',
-                            delivered: 'bg-green-100 text-green-800',
-                            cancelled: 'bg-red-100 text-red-800',
-                          }[order.fulfillment_status]
-                        }`}
-                      >
+                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        {
+                          new: 'bg-blue-100 text-blue-800',
+                          preparing: 'bg-yellow-100 text-yellow-800',
+                          on_the_way: 'bg-purple-100 text-purple-800',
+                          delivered: 'bg-green-100 text-green-800',
+                          cancelled: 'bg-red-100 text-red-800',
+                        }[order.fulfillment_status]
+                      }`}>
                         {order.fulfillment_status.replace(/_/g, ' ')}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {order.notes || '-'}
+                      {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
                     </td>
                   </tr>
                 ))}
@@ -346,10 +330,16 @@ export default function Orders() {
                 key={order.id}
                 className="bg-white rounded-lg shadow-sm p-4 flex flex-col gap-2"
               >
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-bold">
-                    #{order.id.slice(0, 8)}
-                  </span>
+                <div className="flex flex-wrap gap-2 items-center justify-between">
+                  <div className="font-semibold text-gray-900">
+                    {order.customer_name || 'N/A'}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {order.customer_email}
+                  </div>
+                  <div className="text-base font-semibold">
+                    Hole: <span className="text-gray-700">{order.hole || '-'}</span>
+                  </div>
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${
                       order.fulfillment_status === 'new'
@@ -368,36 +358,20 @@ export default function Orders() {
                     {order.fulfillment_status.replace(/_/g, ' ')}
                   </span>
                 </div>
-                <div className="text-sm text-gray-600">
-                  <span>{order.customer_name || 'N/A'}</span>
-                  {order.customer_email && (
-                    <span className="ml-2 text-gray-400">
-                      ({order.customer_email})
-                    </span>
-                  )}
-                </div>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-700">
                   {order.ordered_items.map((item, idx) => (
-                    <span key={idx} className="inline-block mr-2">
+                    <div key={idx}>
                       {item.quantity}x {item.item_name}
-                    </span>
+                    </div>
                   ))}
                 </div>
-                <div className="text-sm text-gray-900 font-semibold">
-                  {formatCurrency(order.total_price)}
-                </div>
-                <div className="flex items-center text-xs text-gray-400">
-                  <span>
-                    {format(
-                      new Date(order.created_at),
-                      'MMM d, yyyy HH:mm'
-                    )}
-                  </span>
-                  {order.notes && (
-                    <span className="ml-3 text-gray-500 italic">
-                      Note: {order.notes}
-                    </span>
-                  )}
+                {order.notes && (
+                  <div className="bg-yellow-100 text-yellow-900 px-2 py-1 rounded text-xs">
+                    Note: {order.notes}
+                  </div>
+                )}
+                <div className="text-xs text-gray-400">
+                  {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
                 </div>
               </div>
             ))
