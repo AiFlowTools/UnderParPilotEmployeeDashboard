@@ -148,6 +148,12 @@ export default function Orders() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
         </div>
+        
+        <div className="p-8">
+  <div className="hidden lg:block bg-green-200 p-4">TABLE VIEW (Desktop ≥1024px)</div>
+  <div className="block lg:hidden bg-blue-200 p-4">CARD VIEW (Mobile/Tablet &lt;1024px)</div>
+</div>
+
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
@@ -324,11 +330,6 @@ export default function Orders() {
             </table>
           )}
         </div>
-
-        <div className="p-8">
-  <div className="hidden lg:block bg-green-200 p-4">TABLE VIEW (Desktop ≥1024px)</div>
-  <div className="block lg:hidden bg-blue-200 p-4">CARD VIEW (Mobile/Tablet &lt;1024px)</div>
-</div>
 
         {/* Card/List View for Mobile & Tablet (below 1024px) */}
         <div className="block lg:hidden space-y-4">
