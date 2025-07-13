@@ -447,9 +447,9 @@ export default function EmployeeDashboard() {
           flex flex-col items-center justify-center
           sm:flex-row sm:items-center sm:justify-between
           border-b border-gray-200 gap-4
-        "
+        ">
          {renderToolbar()} 
-      >
+      
         {/* View Mode Buttons & Date Nav */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
           <div className="flex space-x-1">
