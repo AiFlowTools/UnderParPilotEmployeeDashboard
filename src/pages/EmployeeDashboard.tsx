@@ -986,11 +986,21 @@ export default function EmployeeDashboard() {
         </div>
 
         {/* Sticky KPI Header */}
-        <div className="sticky top-0 z-40 bg-white shadow">
-          <div>
-            {renderMetricsTable()}
-          </div>
-        </div>
+       {/* Sticky Compact KPI Header */}
+<div className="sticky top-0 z-40 bg-white shadow px-2 py-2 flex justify-around items-center">
+  <div className="flex flex-col items-center">
+    <span className="text-xs text-gray-500">Revenue</span>
+    <span className="font-semibold text-green-700 text-base">${metrics.revenue.value.toFixed(0)}</span>
+  </div>
+  <div className="flex flex-col items-center">
+    <span className="text-xs text-gray-500">Orders</span>
+    <span className="font-semibold text-blue-700 text-base">{metrics.orders.value}</span>
+  </div>
+  <div className="flex flex-col items-center">
+    <span className="text-xs text-gray-500">Customers</span>
+    <span className="font-semibold text-purple-700 text-base">{metrics.customers.value}</span>
+  </div>
+</div>
 
         {/* Scrollable Dashboard Content */}
         <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
