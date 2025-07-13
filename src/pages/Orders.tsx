@@ -325,6 +325,11 @@ export default function Orders() {
           )}
         </div>
 
+        <div className="p-8">
+  <div className="hidden lg:block bg-green-200 p-4">TABLE VIEW (Desktop ≥1024px)</div>
+  <div className="block lg:hidden bg-blue-200 p-4">CARD VIEW (Mobile/Tablet &lt;1024px)</div>
+</div>
+
         {/* Card/List View for Mobile & Tablet (below 1024px) */}
         <div className="block lg:hidden space-y-4">
           {loading ? (
