@@ -287,7 +287,8 @@ export default function EmployeeDashboard() {
 
     // --- KPI Toolbar (Sticky under Green Header) ---
 const renderToolbar = () => (
-  <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-2 py-2">
+  <div className="w-full flex items-center justify-between px-4 py-2 bg-white">
+    {/* Left: View modes and date controls */}
     <div className="flex items-center gap-2">
       {VIEW_MODES.map(mode => (
         <button
@@ -309,7 +310,12 @@ const renderToolbar = () => (
       <span className="text-gray-600 text-sm px-2">
         {format(selectedDate, 'dd MMM yyyy')}
       </span>
-      {/* Restore calendar icon & picker */}
+      <button
+        onClick={() => handleDateChange('next')}
+        className="p-2 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-w-[36px] flex items-center justify-center"
+      >
+        <ChevronRight className="w-5 h-5" />
+      </button>
       <button
         onClick={() => setShowCalendar(!showCalendar)}
         className="p-2 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-w-[36px] flex items-center justify-center"
@@ -318,7 +324,6 @@ const renderToolbar = () => (
       </button>
       {showCalendar && (
         <div className="absolute z-50 mt-2">
-          {/* Your calendar component here */}
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -330,14 +335,25 @@ const renderToolbar = () => (
           />
         </div>
       )}
+    </div>
+    {/* Right: Auto-refresh & Download */}
+    <div className="flex items-center gap-2">
       <button
-        onClick={() => handleDateChange('next')}
-        className="p-2 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-w-[36px] flex items-center justify-center"
+        onClick={() => setAutoRefresh(!autoRefresh)}
+        className={`p-2 rounded flex items-center focus:ring-2 focus:ring-green-400 ${
+          autoRefresh ? 'text-green-600' : 'text-gray-400'
+        }`}
       >
-        <ChevronRight className="w-5 h-5" />
+        <RefreshCw className="w-5 h-5 mr-2" />
+        <span className="hidden sm:inline">Auto-refresh</span>
+      </button>
+      <button
+        onClick={exportData}
+        className="p-2 text-gray-600 hover:text-gray-900 focus:ring-2 focus:ring-green-400"
+      >
+        <Download className="w-5 h-5" />
       </button>
     </div>
-    {/* ...right side buttons... */}
   </div>
 );
 
