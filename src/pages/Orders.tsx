@@ -325,10 +325,6 @@ export default function Orders() {
           )}
         </div>
         <div>
-  <div className="hidden lg:block bg-green-100 p-4 text-center">TABLE (≥1024px)</div>
-  <div className="block lg:hidden bg-blue-100 p-4 text-center">CARD (&lt;1024px)</div>
-</div>
-
 
         {/* Mobile/Tablet Card/List View (below lg) */}
         <div className="lg:hidden space-y-4">
@@ -409,6 +405,5 @@ export default function Orders() {
           )}
         </div>
       </div>
-    </div>
   );
 }
