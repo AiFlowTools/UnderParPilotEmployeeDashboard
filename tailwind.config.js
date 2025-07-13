@@ -23,6 +23,13 @@ module.exports = {
       },
       boxShadow: {
         card: '0 8px 20px rgba(0,0,0,0.05)',
+         screens: {
+      sm: '640px',
+      md: '768px',
+      lg: '1024px', // This is the breakpoint used in your code!
+      xl: '1280px',
+      // ...
+    }
       },
     }
   },
