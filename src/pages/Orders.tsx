@@ -332,6 +332,7 @@ export default function Orders() {
           </div>
         ) : (
           orders.map((order) => (
+            <div key={order.id} className="bg-white rounded-lg shadow-sm p-4 flex flex-col gap-2">
               <div className="flex flex-wrap gap-2 items-center justify-between">
                 <div className="font-semibold text-gray-900">
                   {order.customer_name || 'N/A'}
