@@ -260,13 +260,15 @@ export default function EmployeeDashboard() {
   };
 
   const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      localStorage.clear();
-      navigate('/', { replace: true });
-      window.history.pushState(null, '', '/');
-    } catch (error) {}
-  };
+  try {
+    await supabase.auth.signOut();
+    localStorage.clear();
+    navigate('/login', { replace: true }); // Go to login page!
+    window.history.pushState(null, '', '/login'); // This line is usually not needed
+  } catch (error) {
+    // handle error
+  }
+};
 
   const exportData = () => {
     const data = {
