@@ -441,13 +441,7 @@ export default function EmployeeDashboard() {
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       {/* Entire KPI Strip: toolbar + cards */}
       <div
-        className="
-          sticky top-0 z-40 bg-white
-          px-4 md:px-6 py-4
-          flex flex-col items-center justify-center
-          sm:flex-row sm:items-center sm:justify-between
-          border-b border-gray-200 gap-4
-        "
+        className="bg-white rounded-lg shadow-sm mb-4 px-4 md:px-6 py-4 flex flex-col items-center justify-center sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 gap-4"
       >
         {/* View Mode Buttons & Date Nav */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
@@ -985,7 +979,6 @@ export default function EmployeeDashboard() {
           </div>
         </div>
 
-        {/* Sticky KPI Header */}
        {/* Sticky Compact KPI Header */}
 <div className="sticky top-0 z-40 bg-white shadow px-2 py-2 flex justify-around items-center">
   <div className="flex flex-col items-center">
