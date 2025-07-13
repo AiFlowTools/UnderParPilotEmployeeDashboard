@@ -267,10 +267,6 @@ export default function Orders() {
                       {order.customer_email && (
                         <div className="text-xs text-gray-500">{order.customer_email}</div>
                       )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {order.hole || '-'}
-                    </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
                       <ul>
                         {order.ordered_items.map((item, index) => (
