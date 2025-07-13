@@ -1,5 +1,5 @@
-import Orders from './Orders';
+import EmployeeDashboard from './EmployeeDashboard';
 
-export default function Dashboard() {
-  return <Orders />;
+export default function Dashboard(){
+    return <EmployeeDashboard/>;
 }
