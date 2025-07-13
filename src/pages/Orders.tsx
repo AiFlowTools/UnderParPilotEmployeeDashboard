@@ -32,7 +32,7 @@ interface Order {
   status: string;
   fulfillment_status: 'new' | 'preparing' | 'on_the_way' | 'delivered' | 'cancelled';
   notes: string | null;
-  hole?: string | number | null; // ADDED this, update as needed!
+  hole?: string | number | null;
 }
 
 type SortField = 'created_at' | 'customer_name' | 'total_price' | 'status';
