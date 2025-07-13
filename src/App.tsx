@@ -8,7 +8,6 @@ import Login from "./pages/Login";
 
 export default function App() {
   return (
-    <Router>
       <Routes>
         <Route path="/dashboard" element={<EmployeeDashboard />}>
           <Route index element={<Home />} />
@@ -19,6 +18,5 @@ export default function App() {
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
-    </Router>
   );
 }
