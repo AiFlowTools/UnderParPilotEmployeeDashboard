@@ -333,7 +333,7 @@ const renderToolbar = () => (
     />
     {/* Popover calendar panel */}
     <div
-      className="fixed z-40 bg-white rounded-lg shadow-xl p-2"
+      className="fixed z-50 bg-white rounded-lg shadow-xl p-2"
       style={{
         top: '84px', // adjust this for your actual header+toolbar height
         left: 'calc(50% - 168px)', // adjust for alignment, or use right-8 for right side
