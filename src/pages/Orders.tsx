@@ -327,7 +327,7 @@ export default function Orders() {
         <div>
 
         {/* Mobile/Tablet Card/List View (below lg) */}
-        <div className="lg:hidden space-y-4">
+        <div className="block lg:hidden space-y-4">
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <Loader2 className="w-8 h-8 animate-spin text-green-500" />
