@@ -29,6 +29,7 @@ import {
 import { format, subDays, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 
 import { supabase } from '../lib/supabase';
+import { Calendar } from '../components/ui/calendar';
 import NotificationBell from '../components/NotificationBell';
 import NewOrderAlert from '../components/NewOrderAlert';
 import MenuManagement from '../components/MenuManagement';
@@ -318,20 +319,20 @@ const renderToolbar = () => (
       </button>
       <button
         onClick={() => setShowCalendar(!showCalendar)}
-        className="p-2 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-w-[36px] flex items-center justify-center"
+        className="p-2 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-w-[44px] min-h-[44px] flex items-center justify-center"
       >
         <CalendarIcon className="w-5 h-5" />
       </button>
       {showCalendar && (
-        <div className="absolute z-50 mt-2">
+        <div className="absolute z-50 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-4">
           <Calendar
             mode="single"
             selected={selectedDate}
-            onSelect={date => {
+            onSelect={(date) => {
               setSelectedDate(date || new Date());
               setShowCalendar(false);
             }}
-            initialFocus
+            className="rounded-lg"
           />
         </div>
       )}
