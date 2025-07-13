@@ -442,8 +442,13 @@ export default function EmployeeDashboard() {
       {/* Entire KPI Strip: toolbar + cards */}
       <div
         className="
-          sticky top-16 z-40 bg-white border-b h-14 flex items-center px-4
+          sticky top-16 z-40 bg-white
+          px-4 md:px-6 py-4
+          flex flex-col items-center justify-center
+          sm:flex-row sm:items-center sm:justify-between
+          border-b border-gray-200 gap-4
         "
+         {renderToolbar()} 
       >
         {/* View Mode Buttons & Date Nav */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
@@ -921,7 +926,7 @@ export default function EmployeeDashboard() {
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* Green Header */}
-        <div className="h-16 bg-green-600 flex items-center justify-between px-4 md:px-6 flex-shrink-0 overflow-visible z-50">
+        <div className="sticky top-0 z-50 bg-green-600 text-white px-4 h-16 flex items-center font-bold text-lg">
           <div className="flex items-center">
             {/* Sidebar Toggle */}
             <button
