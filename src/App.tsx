@@ -2,8 +2,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import Home from "./pages/Home";
 import Orders from "./pages/Orders";
+import Menu from "./pages/Menu";
 import Settings from "./pages/Settings";
-import MenuManagement from "./components/MenuManagement";
+import Login from "./pages/Login";
 
 export default function App() {
   return (
@@ -12,7 +13,7 @@ export default function App() {
         <Route path="/dashboard" element={<EmployeeDashboard />}>
           <Route index element={<Home />} />
           <Route path="orders" element={<Orders />} />
-          <Route path="menu" element={<MenuManagement />} />
+          <Route path="menu" element={<Menu />} />
           <Route path="settings" element={<Settings />} />
         </Route>
         {/* Fallback */}
