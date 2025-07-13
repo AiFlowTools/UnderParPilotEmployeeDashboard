@@ -586,10 +586,108 @@ export default function EmployeeDashboard() {
   );  // ← keep this semicolon here
 
   // ─── Home Tab (follows immediately) ───
+  const renderHomeTabContent = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
+          <h3 className="text-lg font-semibold mb-4">Revenue Overview</h3>
+          <div className="flex items-center">
+            <BarChart3 className="w-8 h-8 text-green-600 mr-3" />
+            <div>
+              <p className="text-xl md:text-2xl font-bold">
+                ${metrics.revenue.value.toFixed(2)}
+              </p>
+              <p className="text-sm text-gray-500">
+                This {viewMode.toLowerCase()}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
+          <h3 className="text-lg font-semibold mb-4">Customer Stats</h3>
+          <div className="flex items-center">
+            <Users className="w-8 h-8 text-blue-600 mr-3" />
+            <div>
+              <p className="text-xl md:text-2xl font-bold">
+                {metrics.customers.value}
+              </p>
+              <p className="text-sm text-gray-500">Active customers</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm md:col-span-2 lg:col-span-1">
+          <h3 className="text-lg font-semibold mb-4">Average Order Value</h3>
+          <div className="flex items-center">
+            <CreditCard className="w-8 h-8 text-purple-600 mr-3" />
+            <div>
+              <p className="text-xl md:text-2xl font-bold">
+                ${metrics.avgOrderValue.value.toFixed(2)}
+              </p>
+              <p className="text-sm text-gray-500">Per order</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
+        <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+        <div className="space-y-4">
+          {orders.slice(0, 5).map(order => (
+            <div
+              key={order.id}
+              className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+            >
+              <div>
+                <p className="font-medium">
+                  Order #{order.id.slice(0, 8)}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {format(new Date(order.created_at), 'MMM d, h:mm a')}
+                </p>
+              </div>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  {
+                    new: 'bg-blue-100 text-blue-800',
+                    preparing: 'bg-yellow-100 text-yellow-800',
+                    on_the_way: 'bg-purple-100 text-purple-800',
+                    delivered: 'bg-green-100 text-green-800',
+                    cancelled: 'bg-red-100 text-red-800',
+                  }[order.fulfillment_status]
+                }`}
+              >
+                {order.fulfillment_status.replace(/_/g, ' ')}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   const renderHomeTab = () => (
     <div className="space-y-6">
       {renderMetricsTable()}
+      {renderHomeTabContent()}
+    </div>
+  );
 
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'home':
+        return renderHomeTab();
+      case 'orders':
+        return renderOrdersTab();
+      case 'menu':
+        return isAdmin ? <MenuManagement /> : null;
+      case 'settings':
+        return renderSettingsTab();
+      default:
+        return renderHomeTab();
+    }
+  };
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
           <h3 className="text-lg font-semibold mb-4">Revenue Overview</h3>
@@ -928,87 +1026,92 @@ export default function EmployeeDashboard() {
     // … your code up through visibleTabs definition …
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="h-screen bg-gray-100 flex flex-col">
 
-      {/* ─── Main Content ─── */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* ─── Static Header ─── */}
+      <header className="h-16 bg-green-600 flex items-center justify-between px-4 md:px-6 flex-shrink-0">
+        <div className="flex items-center">
+          {/* Always-visible sidebar toggle */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 mr-3 text-white hover:bg-green-700 rounded-lg focus:ring-2 focus:ring-green-400"
+            aria-label="Open navigation"
+          >
+            <MenuIcon className="w-6 h-6" />
+          </button>
+          <h1 className="text-white text-lg md:text-xl font-semibold">Employee Dashboard</h1>
+        </div>
 
-        {/* Header (contains secondary mobile toggle, title, bell, user menu) */}
-        <header className="h-16 bg-green-600 flex items-center justify-between px-4 md:px-6 flex-shrink-0 overflow-visible">
-          <div className="flex items-center">
-            {/* Always-visible sidebar toggle */}
+        <div className="flex items-center space-x-4">
+          <NotificationBell
+            count={notificationCount}
+            onNotificationClick={handleNotificationClick}
+          />
+          <div className="relative">
             <button
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 mr-3 text-white hover:bg-green-700 rounded-lg focus:ring-2 focus:ring-green-400"
-              aria-label="Open navigation"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="flex items-center space-x-2 text-white hover:bg-green-700 px-2 md:px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400"
+              aria-expanded={dropdownOpen}
             >
-              <MenuIcon className="w-6 h-6" />
+              <UserCircle className="w-5 h-5" />
+              <span className="hidden sm:inline">{session?.user?.email}</span>
+              <ChevronDown
+                className="w-4 h-4 transition-transform"
+                style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}
+              />
             </button>
-            <h1 className="text-white text-lg md:text-xl font-semibold">Employee Dashboard</h1>
-          </div>
 
-          <div className="flex items-center space-x-4">
-            <NotificationBell
-              count={notificationCount}
-              onNotificationClick={handleNotificationClick}
-            />
-            <div className="relative">
-              <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center space-x-2 text-white hover:bg-green-700 px-2 md:px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400"
-                aria-expanded={dropdownOpen}
-              >
-                <UserCircle className="w-5 h-5" />
-                <span className="hidden sm:inline">{session?.user?.email}</span>
-                <ChevronDown
-                  className="w-4 h-4 transition-transform"
-                  style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}
+            {dropdownOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setDropdownOpen(false)}
                 />
-              </button>
-
-              {dropdownOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setDropdownOpen(false)}
-                  />
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-20">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm text-gray-500">Signed in as</p>
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {session?.user?.email}
-                      </p>
-                      {isAdmin && (
-                        <p className="text-xs text-green-600 font-medium">Administrator</p>
-                      )}
-                    </div>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:ring-2 focus:ring-green-400 flex items-center"
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign out
-                    </button>
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-20">
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <p className="text-sm text-gray-500">Signed in as</p>
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {session?.user?.email}
+                    </p>
+                    {isAdmin && (
+                      <p className="text-xs text-green-600 font-medium">Administrator</p>
+                    )}
                   </div>
-                </>
-              )}
-            </div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:ring-2 focus:ring-green-400 flex items-center"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign out
+                  </button>
+                </div>
+              </>
+            )}
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* ─── Main Scrollable Area ─── */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
-          {renderContent()}
+      {/* ─── Sticky KPI Section ─── */}
+      {activeTab === 'home' && (
+        <div className="sticky top-0 z-10 bg-white shadow-sm">
+          {renderMetricsTable()}
+        </div>
+      )}
 
-          {showOverlay && newOrder && (
-            <NewOrderAlert
-              holeNumber={newOrder.hole_number}
-              customerName={newOrder.customer_name || 'Someone'}
-              onDismiss={handleOverlayDismiss}
-            />
-          )}
-        </main>
-      </div>
+      {/* ─── Main Dashboard Content ─── */}
+      <main className="flex-1 overflow-y-auto bg-gray-50 h-[calc(100vh-16rem)]">
+        <div className="p-4 md:p-6">
+          {activeTab === 'home' ? renderHomeTabContent() : renderContent()}
+        </div>
+
+        {showOverlay && newOrder && (
+          <NewOrderAlert
+            holeNumber={newOrder.hole_number}
+            customerName={newOrder.customer_name || 'Someone'}
+            onDismiss={handleOverlayDismiss}
+          />
+        )}
+      </main>
 
       {/* ─── Mobile/Tablet Sidebar Drawer Overlay ─── */}
       {sidebarOpen && (
