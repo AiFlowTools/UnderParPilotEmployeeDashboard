@@ -439,107 +439,9 @@ export default function EmployeeDashboard() {
     URL.revokeObjectURL(url);
   };
 
-    // ─── Metrics Table (lines 442–643) ───
+  // ─── Metrics Table (lines 442–643) ───
   const renderMetricsTable = () => (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      {/* Entire KPI Strip: toolbar + cards */}
-      <div
-        className="
-          sticky top-0 z-20 bg-white
-          px-4 md:px-6 py-4
-          flex flex-col items-center justify-center
-          sm:flex-row sm:items-center sm:justify-between
-          border-b border-gray-200 gap-4
-        "
-      >
-        {/* View Mode Buttons & Date Nav */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <div className="flex space-x-1">
-            {VIEW_MODES.map(mode => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                className={`px-3 md:px-4 py-2 md:py-3 rounded-lg text-sm md:text-base font-medium transition-colors focus:ring-2 focus:ring-green-400 min-h-[44px] ${
-                  viewMode === mode
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {mode}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => handleDateChange('prev')}
-              className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <span className="text-gray-600 text-sm md:text-base px-2">
-              {format(selectedDate, 'dd MMM yyyy')}
-            </span>
-            <button
-              onClick={() => handleDateChange('next')}
-              className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Calendar, Auto-refresh & Export */}
-        <div className="flex items-center space-x-2 md:space-x-4">
-          <div className="relative">
-            <button
-              onClick={() => setShowCalendar(!showCalendar)}
-              className="p-2 md:p-3 text-gray-600 hover:text-gray-900 focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-100"
-              title="Select date"
-            >
-              <CalendarIcon className="w-5 h-5" />
-            </button>
-            {showCalendar && (
-              <>
-                <div
-                  className="fixed inset-0 z-30"
-                  onClick={() => setShowCalendar(false)}
-                />
-                <div className="absolute right-0 mt-2 z-40 bg-white rounded-lg shadow-lg border border-gray-200 p-4">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={date => {
-                      if (date) {
-                        setSelectedDate(date)
-                        setShowCalendar(false)
-                      }
-                    }}
-                    className="rounded-lg"
-                    initialFocus
-                  />
-                </div>
-              </>
-            )}
-          </div>
-          <button
-            onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`p-2 md:p-3 rounded-lg flex items-center focus:ring-2 focus:ring-green-400 min-h-[44px] ${
-              autoRefresh ? 'text-green-600' : 'text-gray-400'
-            }`}
-          >
-            <RefreshCw className="w-5 h-5 mr-2" />
-            <span className="hidden sm:inline">Auto-refresh</span>
-          </button>
-          <button
-            onClick={exportData}
-            className="p-2 md:p-3 text-gray-600 hover:text-gray-900 focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
-          >
-            <Download className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-
+    <div className="bg-white rounded-lg shadow-sm">
       {/* KPI Cards Grid */}
       <div className="p-4 md:p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -583,7 +485,7 @@ export default function EmployeeDashboard() {
         </div>
       </div>
     </div>
-  );  // ← keep this semicolon here
+  );
 
   // ─── Home Tab (follows immediately) ───
   const renderHomeTab = () => (
@@ -912,7 +814,6 @@ export default function EmployeeDashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-      </div>
     );
   }
 
@@ -925,89 +826,174 @@ export default function EmployeeDashboard() {
     return true;
   });
 
-    // … your code up through visibleTabs definition …
-
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex flex-col h-screen">
+      {/* Header (contains secondary mobile toggle, title, bell, user menu) */}
+      <header className="h-16 bg-green-600 flex items-center justify-between px-4 md:px-6 flex-shrink-0">
+        <div className="flex items-center">
+          {/* Always-visible sidebar toggle */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 mr-3 text-white hover:bg-green-700 rounded-lg focus:ring-2 focus:ring-green-400"
+            aria-label="Open navigation"
+          >
+            <MenuIcon className="w-6 h-6" />
+          </button>
+          <h1 className="text-white text-lg md:text-xl font-semibold">Employee Dashboard</h1>
+        </div>
 
-      {/* ─── Main Content ─── */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-
-        {/* Header (contains secondary mobile toggle, title, bell, user menu) */}
-        <header className="h-16 bg-green-600 flex items-center justify-between px-4 md:px-6 flex-shrink-0 overflow-visible">
-          <div className="flex items-center">
-            {/* Always-visible sidebar toggle */}
+        <div className="flex items-center space-x-4">
+          <NotificationBell
+            count={notificationCount}
+            onNotificationClick={handleNotificationClick}
+          />
+          <div className="relative">
             <button
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 mr-3 text-white hover:bg-green-700 rounded-lg focus:ring-2 focus:ring-green-400"
-              aria-label="Open navigation"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="flex items-center space-x-2 text-white hover:bg-green-700 px-2 md:px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400"
+              aria-expanded={dropdownOpen}
             >
-              <MenuIcon className="w-6 h-6" />
+              <UserCircle className="w-5 h-5" />
+              <span className="hidden sm:inline">{session?.user?.email}</span>
+              <ChevronDown
+                className="w-4 h-4 transition-transform"
+                style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}
+              />
             </button>
-            <h1 className="text-white text-lg md:text-xl font-semibold">Employee Dashboard</h1>
+
+            {dropdownOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setDropdownOpen(false)}
+                />
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-20">
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <p className="text-sm text-gray-500">Signed in as</p>
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {session?.user?.email}
+                    </p>
+                    {isAdmin && (
+                      <p className="text-xs text-green-600 font-medium">Administrator</p>
+                    )}
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:ring-2 focus:ring-green-400 flex items-center"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign out
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Sticky KPI Header */}
+      <div className="sticky top-0 z-20 bg-white shadow">
+        <div className="px-4 md:px-6 py-4 flex flex-col items-center justify-center sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 gap-4">
+          {/* View Mode Buttons & Date Nav */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <div className="flex space-x-1">
+              {VIEW_MODES.map(mode => (
+                <button
+                  key={mode}
+                  onClick={() => setViewMode(mode)}
+                  className={`px-3 md:px-4 py-2 md:py-3 rounded-lg text-sm md:text-base font-medium transition-colors focus:ring-2 focus:ring-green-400 min-h-[44px] ${
+                    viewMode === mode
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handleDateChange('prev')}
+                className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <span className="text-gray-600 text-sm md:text-base px-2">
+                {format(selectedDate, 'dd MMM yyyy')}
+              </span>
+              <button
+                onClick={() => handleDateChange('next')}
+                className="p-2 md:p-3 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <NotificationBell
-              count={notificationCount}
-              onNotificationClick={handleNotificationClick}
-            />
+          {/* Calendar, Auto-refresh & Export */}
+          <div className="flex items-center space-x-2 md:space-x-4">
             <div className="relative">
               <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center space-x-2 text-white hover:bg-green-700 px-2 md:px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-400"
-                aria-expanded={dropdownOpen}
+                onClick={() => setShowCalendar(!showCalendar)}
+                className="p-2 md:p-3 text-gray-600 hover:text-gray-900 focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-100"
+                title="Select date"
               >
-                <UserCircle className="w-5 h-5" />
-                <span className="hidden sm:inline">{session?.user?.email}</span>
-                <ChevronDown
-                  className="w-4 h-4 transition-transform"
-                  style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}
-                />
+                <CalendarIcon className="w-5 h-5" />
               </button>
-
-              {dropdownOpen && (
+              {showCalendar && (
                 <>
                   <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setDropdownOpen(false)}
+                    className="fixed inset-0 z-30"
+                    onClick={() => setShowCalendar(false)}
                   />
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-20">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm text-gray-500">Signed in as</p>
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {session?.user?.email}
-                      </p>
-                      {isAdmin && (
-                        <p className="text-xs text-green-600 font-medium">Administrator</p>
-                      )}
-                    </div>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:ring-2 focus:ring-green-400 flex items-center"
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign out
-                    </button>
+                  <div className="absolute right-0 mt-2 z-40 bg-white rounded-lg shadow-lg border border-gray-200 p-4">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={date => {
+                        if (date) {
+                          setSelectedDate(date)
+                          setShowCalendar(false)
+                        }
+                      }}
+                      className="rounded-lg"
+                      initialFocus
+                    />
                   </div>
                 </>
               )}
             </div>
+            <button
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              className={`p-2 md:p-3 rounded-lg flex items-center focus:ring-2 focus:ring-green-400 min-h-[44px] ${
+                autoRefresh ? 'text-green-600' : 'text-gray-400'
+              }`}
+            >
+              <RefreshCw className="w-5 h-5 mr-2" />
+              <span className="hidden sm:inline">Auto-refresh</span>
+            </button>
+            <button
+              onClick={exportData}
+              className="p-2 md:p-3 text-gray-600 hover:text-gray-900 focus:ring-2 focus:ring-green-400 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            >
+              <Download className="w-5 h-5" />
+            </button>
           </div>
-        </header>
+        </div>
+      </div>
 
-        {/* ─── Main Scrollable Area ─── */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
-          {renderContent()}
+      {/* Main Scrollable Content */}
+      <div className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
+        {renderContent()}
 
-          {showOverlay && newOrder && (
-            <NewOrderAlert
-              holeNumber={newOrder.hole_number}
-              customerName={newOrder.customer_name || 'Someone'}
-              onDismiss={handleOverlayDismiss}
-            />
-          )}
-        </main>
+        {showOverlay && newOrder && (
+          <NewOrderAlert
+            holeNumber={newOrder.hole_number}
+            customerName={newOrder.customer_name || 'Someone'}
+            onDismiss={handleOverlayDismiss}
+          />
+        )}
       </div>
 
       {/* ─── Mobile/Tablet Sidebar Drawer Overlay ─── */}
