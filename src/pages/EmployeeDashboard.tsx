@@ -324,18 +324,21 @@ const renderToolbar = () => (
         <CalendarIcon className="w-5 h-5" />
       </button>
       {showCalendar && (
-        <div className="fixed z-50 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-4">
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={(date) => {
-              setSelectedDate(date || new Date());
-              setShowCalendar(false);
-            }}
-            className="rounded-lg"
-          />
-        </div>
-      )}
+  <div
+    className="fixed left-[50%] top-20 z-50" // use top-20 for ~80px offset from top (adjust as needed)
+    style={{ transform: 'translateX(-50%)' }} // centers under calendar icon, or adjust to match your UI
+  >
+    <Calendar
+      mode="single"
+      selected={selectedDate}
+      onSelect={date => {
+        setSelectedDate(date || new Date());
+        setShowCalendar(false);
+      }}
+      initialFocus
+    />
+  </div>
+)}
     </div>
     {/* Right: Auto-refresh & Download */}
     <div className="flex items-center gap-2">
