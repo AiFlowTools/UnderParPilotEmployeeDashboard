@@ -337,7 +337,8 @@ const renderToolbar = () => (
       style={{
         top: '84px', // adjust this for your actual header+toolbar height
         left: 'calc(50% - 125px)', // adjust for alignment, or use right-8 for right side
-        minWidth: '336px',
+        minWidth: '250',
+        maxWidth: '280px'
       }}
     >
       <Calendar
