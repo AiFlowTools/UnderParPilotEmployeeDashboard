@@ -151,7 +151,7 @@ export default function Orders() {
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -215,7 +215,7 @@ export default function Orders() {
           </div>
         </div>
 
-        {/* Orders Table (Desktop Only) */}
+        {/* Orders Table (Desktop Only, ≥1024px) */}
         <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
           {loading ? (
             <div className="flex justify-center items-center h-64">
@@ -324,9 +324,8 @@ export default function Orders() {
             </table>
           )}
         </div>
-        <div>
 
-        {/* Mobile/Tablet Card/List View (below lg) */}
+        {/* Card/List View for Mobile & Tablet (below 1024px) */}
         <div className="block lg:hidden space-y-4">
           {loading ? (
             <div className="flex justify-center items-center h-64">
@@ -403,5 +402,8 @@ export default function Orders() {
               </div>
             ))
           )}
+        </div>
+      </div>
+    </div>
   );
 }
