@@ -529,7 +529,6 @@ export default function EmployeeDashboard() {
           ))}
         </div>
       </div>
-    </div>
   );
 
   // --- Home Tab ---
