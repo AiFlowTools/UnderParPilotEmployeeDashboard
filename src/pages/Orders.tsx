@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { format } from 'date-fns';
 import {
   Search,
@@ -9,6 +10,11 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+
+interface OutletContext {
+  viewMode: 'Day' | 'Week' | 'Month';
+  selectedDate: Date;
+}
 
 interface OrderItem {
   item_name: string;
@@ -33,15 +39,12 @@ type SortField = 'created_at' | 'customer_name' | 'total_price' | 'status';
 type SortDirection = 'asc' | 'desc';
 
 export default function Orders() {
+  const { viewMode, selectedDate } = useOutletContext<OutletContext>();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [dateRange, setDateRange] = useState({
-    start: '',
-    end: '',
-  });
   const [sortConfig, setSortConfig] = useState<{
     field: SortField;
     direction: SortDirection;
@@ -59,12 +62,6 @@ export default function Orders() {
       // Apply filters
       if (statusFilter !== 'all') {
         query = query.eq('status', statusFilter);
-      }
-      if (dateRange.start) {
-        query = query.gte('created_at', dateRange.start);
-      }
-      if (dateRange.end) {
-        query = query.lte('created_at', dateRange.end);
       }
       if (searchQuery) {
         query = query.or(
@@ -124,7 +121,7 @@ export default function Orders() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [statusFilter, searchQuery, dateRange, sortConfig]);
+  }, [statusFilter, searchQuery, sortConfig]);
 
   const handleSort = (field: SortField) => {
     setSortConfig((current) => ({
@@ -181,37 +178,9 @@ export default function Orders() {
             </select>
           </div>
           {/* Date Range */}
-          <div>
-            <div className="flex space-x-2">
-              <div className="relative flex-1">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="date"
-                  value={dateRange.start}
-                  onChange={(e) =>
-                    setDateRange((prev) => ({
-                      ...prev,
-                      start: e.target.value,
-                    }))
-                  }
-                  className="pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
-              <div className="relative flex-1">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="date"
-                  value={dateRange.end}
-                  onChange={(e) =>
-                    setDateRange((prev) => ({
-                      ...prev,
-                      end: e.target.value,
-                    }))
-                  }
-                  className="pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
-            </div>
+          <div className="flex items-center text-sm text-gray-600">
+            <Calendar className="w-4 h-4 mr-2" />
+            <span>Viewing: {viewMode} - {format(selectedDate, 'MMM d, yyyy')}</span>
           </div>
         </div>
       </div>
