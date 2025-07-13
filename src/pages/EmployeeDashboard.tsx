@@ -445,7 +445,7 @@ export default function EmployeeDashboard() {
       {/* Entire KPI Strip: toolbar + cards */}
       <div
         className="
-          sticky top-0 z-40 bg-white
+          sticky top-16 z-40 bg-white
           px-4 md:px-6 py-4
           flex flex-col items-center justify-center
           sm:flex-row sm:items-center sm:justify-between
