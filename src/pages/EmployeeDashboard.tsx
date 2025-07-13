@@ -323,26 +323,36 @@ const renderToolbar = () => (
       >
         <CalendarIcon className="w-5 h-5" />
       </button>
-      {showCalendar && (
-  <div
-    className="fixed z-50"
-    style={{
-      top: '84px',    // Adjust based on your sticky header + toolbar height
-      left: 'calc(50% - 168px)', // Center horizontally, or use a pixel/percent as needed
-      minWidth: '336px',         // Match calendar width
-    }}
-  >
-    <Calendar
-      mode="single"
-      selected={selectedDate}
-      onSelect={date => {
-        setSelectedDate(date || new Date());
-        setShowCalendar(false);
-      }}
-      initialFocus
+     {showCalendar && (
+  <>
+    {/* Overlay to close calendar on click */}
+    <div
+      className="fixed inset-0 z-40"
+      onClick={() => setShowCalendar(false)}
+      aria-label="Close calendar"
     />
-  </div>
+    {/* Popover calendar panel */}
+    <div
+      className="fixed z-50 bg-white rounded-lg shadow-xl p-2"
+      style={{
+        top: '84px', // adjust this for your actual header+toolbar height
+        left: 'calc(50% - 168px)', // adjust for alignment, or use right-8 for right side
+        minWidth: '336px',
+      }}
+    >
+      <Calendar
+        mode="single"
+        selected={selectedDate}
+        onSelect={date => {
+          setSelectedDate(date || new Date());
+          setShowCalendar(false);
+        }}
+        initialFocus
+      />
+    </div>
+  </>
 )}
+
     </div>
     {/* Right: Auto-refresh & Download */}
     <div className="flex items-center gap-2">
