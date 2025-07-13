@@ -286,55 +286,60 @@ export default function EmployeeDashboard() {
   };
 
     // --- KPI Toolbar (Sticky under Green Header) ---
-  const renderToolbar = () => (
-    <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-2 py-2">
-      <div className="flex items-center gap-2">
-        {VIEW_MODES.map(mode => (
-          <button
-            key={mode}
-            onClick={() => setViewMode(mode)}
-            className={`px-3 py-2 rounded text-sm font-medium transition-colors focus:ring-2 focus:ring-green-400 ${
-              viewMode === mode ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            {mode}
-          </button>
-        ))}
+const renderToolbar = () => (
+  <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-2 py-2">
+    <div className="flex items-center gap-2">
+      {VIEW_MODES.map(mode => (
         <button
-          onClick={() => handleDateChange('prev')}
-          className="p-2 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-w-[36px] flex items-center justify-center"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <span className="text-gray-600 text-sm px-2">
-          {format(selectedDate, 'dd MMM yyyy')}
-        </span>
-        <button
-          onClick={() => handleDateChange('next')}
-          className="p-2 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-w-[36px] flex items-center justify-center"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-      </div>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setAutoRefresh(!autoRefresh)}
-          className={`p-2 rounded flex items-center focus:ring-2 focus:ring-green-400 ${
-            autoRefresh ? 'text-green-600' : 'text-gray-400'
+          key={mode}
+          onClick={() => setViewMode(mode)}
+          className={`px-3 py-2 rounded text-sm font-medium transition-colors focus:ring-2 focus:ring-green-400 ${
+            viewMode === mode ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >
-          <RefreshCw className="w-5 h-5 mr-2" />
-          <span className="hidden sm:inline">Auto-refresh</span>
+          {mode}
         </button>
-        <button
-          onClick={exportData}
-          className="p-2 text-gray-600 hover:text-gray-900 focus:ring-2 focus:ring-green-400"
-        >
-          <Download className="w-5 h-5" />
-        </button>
-      </div>
+      ))}
+      <button
+        onClick={() => handleDateChange('prev')}
+        className="p-2 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-w-[36px] flex items-center justify-center"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+      <span className="text-gray-600 text-sm px-2">
+        {format(selectedDate, 'dd MMM yyyy')}
+      </span>
+      {/* Restore calendar icon & picker */}
+      <button
+        onClick={() => setShowCalendar(!showCalendar)}
+        className="p-2 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-w-[36px] flex items-center justify-center"
+      >
+        <CalendarIcon className="w-5 h-5" />
+      </button>
+      {showCalendar && (
+        <div className="absolute z-50 mt-2">
+          {/* Your calendar component here */}
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={date => {
+              setSelectedDate(date || new Date());
+              setShowCalendar(false);
+            }}
+            initialFocus
+          />
+        </div>
+      )}
+      <button
+        onClick={() => handleDateChange('next')}
+        className="p-2 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-green-400 min-w-[36px] flex items-center justify-center"
+      >
+        <ChevronRight className="w-5 h-5" />
+      </button>
     </div>
-  );
+    {/* ...right side buttons... */}
+  </div>
+);
 
   // --- Compact KPI Bar (Sticky under Toolbar) ---
   const renderCompactKPIBar = () => (
@@ -735,23 +740,6 @@ export default function EmployeeDashboard() {
 
       {/* Main Scrollable Content */}
       <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
-        {/* Tab Bar for Navigation (bottom on mobile, side on desktop) */}
-        <div className="flex space-x-2 mb-4">
-          {visibleTabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-green-400 ${
-                activeTab === tab.id
-                  ? 'bg-green-600 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              <tab.icon className="w-5 h-5 mr-2" />
-              {tab.label}
-            </button>
-          ))}
-        </div>
 
         {renderContent()}
 
