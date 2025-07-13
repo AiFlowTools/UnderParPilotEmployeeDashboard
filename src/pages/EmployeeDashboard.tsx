@@ -324,7 +324,7 @@ const renderToolbar = () => (
         <CalendarIcon className="w-5 h-5" />
       </button>
       {showCalendar && (
-        <div className="absolute z-50 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-4">
+        <div className="fixed z-50 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-4">
           <Calendar
             mode="single"
             selected={selectedDate}
