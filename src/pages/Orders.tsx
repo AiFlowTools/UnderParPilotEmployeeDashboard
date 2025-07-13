@@ -261,7 +261,6 @@ export default function Orders() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {orders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div className="font-medium">{order.customer_name || 'N/A'}</div>
                       {order.customer_email && (
