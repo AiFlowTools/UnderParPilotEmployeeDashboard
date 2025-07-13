@@ -327,16 +327,16 @@ const renderToolbar = () => (
   <>
     {/* Overlay to close calendar on click */}
     <div
-      className="fixed inset-0 z-40"
+      className="fixed inset-0 z-40 bg-black/10"
       onClick={() => setShowCalendar(false)}
       aria-label="Close calendar"
     />
     {/* Popover calendar panel */}
     <div
-      className="fixed z-50 bg-white rounded-lg shadow-xl p-2"
+      className="fixed z-50 bg-white rounded-lg shadow-xl p-1"
       style={{
         top: '84px', // adjust this for your actual header+toolbar height
-        left: 'calc(50% - 168px)', // adjust for alignment, or use right-8 for right side
+        left: 'calc(50% - 125px)', // adjust for alignment, or use right-8 for right side
         minWidth: '336px',
       }}
     >
