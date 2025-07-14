@@ -718,7 +718,6 @@ const renderToolbar = () => (
         </button>
         Employee Dashboard
         <div className="flex-1" />
-        <NotificationBell/>
         <NotificationBell onNotificationClick={handleNotificationClick} />
         <div className="relative">
           <button
