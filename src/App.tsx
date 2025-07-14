@@ -14,6 +14,7 @@ export default function App() {
           <Route path="orders" element={<Orders />} />
           <Route path="menu" element={<Menu />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="login" element={<Login />} />
         </Route>
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
