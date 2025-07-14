@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Bell, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
+interface NotificationBellProps {
+  onNotificationClick?: () => void;
+  // ...rest of props
+}
+
 interface Notification {
   id: string;
   message: string;
@@ -54,6 +59,11 @@ export default function NotificationBell() {
       .from('notifications')
       .update({ read: true })
       .eq('id', notif.id);
+   
+    // Call parent handler to switch tabs, if provided
+  if (onNotificationClick) {
+    onNotificationClick();
+  }
 
     // Remove it from UI list
     setNotifications((prev) => prev.filter((n) => n.id !== notif.id));
