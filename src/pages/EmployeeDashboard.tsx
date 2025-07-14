@@ -34,6 +34,7 @@ import NotificationBell from '../components/NotificationBell';
 import NewOrderAlert from '../components/NewOrderAlert';
 import MenuManagement from '../components/MenuManagement';
 import { useUser } from '../hooks/useUser';
+import OrdersTable from "@/components/OrdersTable";
 
 // --- Types ---
 interface OrderItem {
