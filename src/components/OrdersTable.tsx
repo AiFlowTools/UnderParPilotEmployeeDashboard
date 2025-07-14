@@ -26,8 +26,9 @@ interface OrdersTableProps {
 }
 
 const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange }) => (
-  <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-    <div className="overflow-x-auto">
+  <div>
+    {/* Desktop Table */}
+    <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -104,6 +105,79 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange }) => 
           ))}
         </tbody>
       </table>
+    </div>
+
+    {/* Mobile/Tablet Card/List View */}
+    <div className="block lg:hidden space-y-4">
+      {orders.length === 0 ? (
+        <div className="flex justify-center items-center h-32 text-gray-500">
+          No orders found.
+        </div>
+      ) : (
+        orders.map(order => (
+          <div key={order.id} className="bg-white rounded-lg shadow-sm p-4 flex flex-col gap-2">
+            <div className="flex flex-wrap gap-2 items-center justify-between">
+              <div className="font-semibold text-gray-900">
+                {order.customer_name || 'N/A'}
+              </div>
+              {order.customer_email && (
+                <div className="text-xs text-gray-500">{order.customer_email}</div>
+              )}
+              <div className="text-base font-semibold">
+                Hole: <span className="text-gray-700">{order.hole_number ?? '-'}</span>
+              </div>
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  order.fulfillment_status === 'new'
+                    ? 'bg-blue-100 text-blue-800'
+                    : order.fulfillment_status === 'delivered'
+                    ? 'bg-green-100 text-green-800'
+                    : order.fulfillment_status === 'preparing'
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : order.fulfillment_status === 'on_the_way'
+                    ? 'bg-purple-100 text-purple-800'
+                    : order.fulfillment_status === 'cancelled'
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-gray-100 text-gray-800'
+                }`}
+              >
+                {order.fulfillment_status.replace(/_/g, ' ')}
+              </span>
+            </div>
+            <div className="text-sm text-gray-700">
+              {order.ordered_items.map((item, idx) => (
+                <div key={idx}>
+                  {item.quantity}x {item.item_name}
+                </div>
+              ))}
+            </div>
+            {order.notes && (
+              <div className="bg-yellow-100 text-yellow-900 px-2 py-1 rounded text-xs">
+                Note: {order.notes}
+              </div>
+            )}
+            <div className="text-xs text-gray-400">
+              {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
+            </div>
+            {/* Status Change for mobile */}
+            {(order.fulfillment_status !== "delivered" && order.fulfillment_status !== "cancelled" && onStatusChange) && (
+              <div className="mt-2">
+                <select
+                  value={order.fulfillment_status}
+                  onChange={e => onStatusChange(order.id, e.target.value as Order['fulfillment_status'])}
+                  className="appearance-none pl-2 pr-6 py-2 border rounded bg-white text-sm focus:ring-2 focus:ring-green-400 w-full"
+                >
+                  <option value="new">New</option>
+                  <option value="preparing">Preparing</option>
+                  <option value="on_the_way">On the Way</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+            )}
+          </div>
+        ))
+      )}
     </div>
   </div>
 );
