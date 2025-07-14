@@ -384,3 +384,4 @@ export default function Orders() {
   </div>
 );
 }
+export default OrdersTable;
