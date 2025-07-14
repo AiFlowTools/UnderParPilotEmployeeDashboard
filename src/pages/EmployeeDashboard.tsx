@@ -720,9 +720,12 @@ const renderToolbar = () => (
         Employee Dashboard
         <div className="flex-1" />
         <NotificationBell
-          count={notificationCount}
-          onNotificationClick={handleNotificationClick}
-        />
+  count={notificationCount}
+  onNotificationClick={() => {
+    setNotificationCount(0);
+    setActiveTab('orders');
+  }}
+/>
         <div className="relative">
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
