@@ -265,7 +265,6 @@ export default function EmployeeDashboard() {
     await supabase.auth.signOut();
     localStorage.clear();
     navigate('/login', { replace: true }); // Go to login page!
-    window.history.pushState(null, '', '/login'); // This line is usually not needed
   } catch (error) {
     // handle error
   }
