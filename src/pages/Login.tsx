@@ -40,7 +40,7 @@ export default function Login() {
         .single();
 
       if (profile?.role === 'employee') {
-        navigate('/dashboard');
+        navigate('/dashboard/');
       } else {
         throw new Error('Access denied. Employee account required.');
       }
