@@ -719,6 +719,7 @@ const renderToolbar = () => (
         Employee Dashboard
         <div className="flex-1" />
         <NotificationBell/>
+        <NotificationBell onNotificationClick={handleNotificationClick} />
         <div className="relative">
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
