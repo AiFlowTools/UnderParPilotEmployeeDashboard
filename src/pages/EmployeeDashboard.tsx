@@ -152,7 +152,6 @@ export default function EmployeeDashboard() {
   };
 
   const handleNotificationClick = () => {
-    setNotificationCount(0);
     setActiveTab('orders');
     setStatusFilter('new-group');
   };
