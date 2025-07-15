@@ -120,7 +120,7 @@ export default function EmployeeDashboard() {
   useEffect(() => {
     if (userLoading) return;
     if (!user || (role !== 'employee' && role !== 'admin')) {
-      navigate('/');
+      navigate('/login',{ replace: true});
       return;
     }
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
