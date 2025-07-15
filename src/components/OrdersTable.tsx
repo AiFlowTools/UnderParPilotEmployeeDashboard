@@ -26,6 +26,9 @@ interface OrdersTableProps {
   onEdit?: (orderId: string)=> void;// <-- Add this line for Edit support!
 }
 
+// At top of OrdersTable
+const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+
   // State for the status filter (must be inside the component)
 const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdit }) => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'completed' | 'cancelled'>('all');
@@ -144,15 +147,17 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
         ) : (
           filteredOrders.map(order => (
             <div key={order.id} className="bg-white rounded-xl shadow-md p-4 flex flex-col gap-3 mb-2">
-             <div className="flex items-center justify-between">
+           <div className="flex items-center justify-between">
   <div className="font-bold text-lg text-gray-900">{order.customer_name || 'N/A'}</div>
   <div className="flex items-center gap-2">
+    {/* EDIT BUTTON */}
     <button
-      onClick={() => onEdit && onEdit(order.id)}
-      className="px-3 py-1 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+      onClick={() => setEditingOrderId(order.id)}
+      className="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
     >
       Edit
     </button>
+    {/* STATUS */}
     <span
       className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
         order.fulfillment_status === 'new'
