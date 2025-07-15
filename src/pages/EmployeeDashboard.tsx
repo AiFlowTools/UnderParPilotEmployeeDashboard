@@ -470,11 +470,6 @@ const renderToolbar = () => (
     </div>
   );
 
-  function handleEditOrder(orderId: string) {
-    alert("Editing order: " + orderId);
-    // Or setEditingOrderId(orderId), open modal, etc.
-  }
-  
   // --- Orders Tab ---
   const renderOrdersTab = () => (
   <OrdersTable
