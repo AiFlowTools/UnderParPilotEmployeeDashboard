@@ -163,7 +163,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
                   {/* Edit Button */}
                   <button
                     onClick={() => setEditingOrderId(order.id)}
-                    className="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors"
                   >
                     Edit
                   </button>
