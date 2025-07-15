@@ -56,79 +56,73 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
         </select>
       </div>
 
-      {/* Desktop Table */}
-      <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hole</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Notes</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date/Time</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredOrders.map(order => (
-              <tr key={order.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <div className="font-medium">{order.customer_name || 'N/A'}</div>
-                  {order.customer_email && (
-                    <div className="text-xs text-gray-500">{order.customer_email}</div>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {order.hole_number ?? '-'}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  <ul>
-                    {order.ordered_items.map((item, idx) => (
-                      <li key={idx}>
-                        {item.quantity}x {item.item_name}
-                      </li>
-                    ))}
-                  </ul>
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  {order.notes
-                    ? <span className="bg-yellow-100 text-yellow-900 px-2 py-1 rounded">{order.notes}</span>
-                    : <span className="text-gray-400">-</span>
-                  }
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {(order.fulfillment_status !== "delivered" && order.fulfillment_status !== "cancelled" && onStatusChange) ? (
-                    <div className="relative">
-                      <select
-                        value={order.fulfillment_status}
-                        onChange={e => onStatusChange(order.id, e.target.value as Order['fulfillment_status'])}
-                        className="appearance-none pl-2 pr-6 py-1 md:py-2 border rounded bg-white text-sm focus:ring-2 focus:ring-green-400 min-h-[44px]"
-                      >
-                        <option value="new">New</option>
-                        <option value="preparing">Preparing</option>
-                        <option value="on_the_way">On the Way</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                      {/* ChevronDown icon absolutely positioned */}
-                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    </div>
-                  ) : (
-                    <span>-</span>
-                  )}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {/* Put any actions you want here */}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+     {/* Desktop Table */}
+<div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
+  <table className="min-w-full divide-y divide-gray-200">
+    <thead className="bg-gray-50">
+      <tr>
+        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hole</th>
+        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
+        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Notes</th>
+        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date/Time</th>
+        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+      </tr>
+    </thead>
+    <tbody className="bg-white divide-y divide-gray-200">
+      {filteredOrders.map(order => (
+        <tr key={order.id}>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            <div className="font-medium">{order.customer_name || 'N/A'}</div>
+            {order.customer_email && (
+              <div className="text-xs text-gray-500">{order.customer_email}</div>
+            )}
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            {order.hole_number ?? '-'}
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-500">
+            <ul>
+              {order.ordered_items.map((item, idx) => (
+                <li key={idx}>
+                  {item.quantity}x {item.item_name}
+                </li>
+              ))}
+            </ul>
+          </td>
+          <td className="px-6 py-4 text-sm">
+            {order.notes
+              ? <span className="bg-yellow-100 text-yellow-900 px-2 py-1 rounded">{order.notes}</span>
+              : <span className="text-gray-400">-</span>
+            }
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap">
+            <span className={`px-2 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full ${
+              {
+                new: 'bg-blue-100 text-blue-800',
+                preparing: 'bg-yellow-100 text-yellow-800',
+                on_the_way: 'bg-purple-100 text-purple-800',
+                delivered: 'bg-green-100 text-green-800',
+                cancelled: 'bg-red-100 text-red-800',
+              }[order.fulfillment_status]
+            }`}>
+              {order.fulfillment_status.replace(/_/g, ' ')}
+              <ChevronDown className="ml-2 w-4 h-4 text-gray-400" />
+            </span>
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-500">
+            {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
+          </td>
+          <td className="px-6 py-4 whitespace-nowrap">
+            {/* Put your action button/dropdown here */}
+            <span>{/* ... */}</span>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
 
       {/* Mobile/Tablet Card/List View */}
       <div className="block lg:hidden space-y-3">
