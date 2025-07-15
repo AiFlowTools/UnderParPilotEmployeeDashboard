@@ -203,8 +203,6 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange }) => 
     Edit
   </button>
 </div>
-
-              )}
             </div>
           ))
         )}
