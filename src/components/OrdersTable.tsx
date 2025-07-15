@@ -203,15 +203,6 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
       <option value="cancelled">Cancelled</option>
     </select>
   )}
-
-  {/* Edit Button for all orders */}
-  <button
-    onClick={() => onEdit && onEdit(order.id)}
-    className="w-full sm:w-auto px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
-  >
-    Edit
-  </button>
-</div>
             </div>
           ))
         )}
