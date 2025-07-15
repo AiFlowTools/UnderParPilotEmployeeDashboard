@@ -30,6 +30,7 @@ interface OrdersTableProps {
 const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdit }) => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'completed' | 'cancelled'>('all');
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+  const [editStatusTemp, setEditStatusTemp] = useState<Order['fulfillment_status'] | null>(null);
 
   // Filter logic
   const filteredOrders = orders.filter(order => {
