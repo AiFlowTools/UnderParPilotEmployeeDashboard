@@ -155,6 +155,11 @@ export default function EmployeeDashboard() {
     setActiveTab('orders');
     setStatusFilter('new-group');
   };
+  
+  function handleEditOrder(orderId: string) {
+    alert("Editing order: " + orderId);
+    // Or setEditingOrderId(orderId), open modal, etc.
+  }
 
   // --- Orders Fetch ---
   async function fetchOrders() {
