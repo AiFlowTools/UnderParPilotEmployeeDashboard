@@ -179,20 +179,31 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange }) => 
                   <b>Note:</b> {order.notes}
                 </div>
               )}
-              {(order.fulfillment_status !== "delivered" && order.fulfillment_status !== "cancelled" && onStatusChange) && (
-                <div className="mt-1">
-                  <select
-                    value={order.fulfillment_status}
-                    onChange={e => onStatusChange(order.id, e.target.value as Order['fulfillment_status'])}
-                    className="appearance-none pl-2 pr-6 py-2 border rounded bg-white text-sm focus:ring-2 focus:ring-green-400 w-full"
-                  >
-                    <option value="new">New</option>
-                    <option value="preparing">Preparing</option>
-                    <option value="on_the_way">On the Way</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </div>
+             <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+  {/* Status Dropdown for modifiable orders */}
+  {(order.fulfillment_status !== "delivered" && order.fulfillment_status !== "cancelled" && onStatusChange) && (
+    <select
+      value={order.fulfillment_status}
+      onChange={e => onStatusChange(order.id, e.target.value as Order['fulfillment_status'])}
+      className="appearance-none pl-2 pr-6 py-2 border rounded bg-white text-sm focus:ring-2 focus:ring-green-400 w-full"
+    >
+      <option value="new">New</option>
+      <option value="preparing">Preparing</option>
+      <option value="on_the_way">On the Way</option>
+      <option value="delivered">Delivered</option>
+      <option value="cancelled">Cancelled</option>
+    </select>
+  )}
+
+  {/* Edit Button for all orders */}
+  <button
+    onClick={() => onEdit && onEdit(order.id)}
+    className="w-full sm:w-auto px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+  >
+    Edit
+  </button>
+</div>
+
               )}
             </div>
           ))
