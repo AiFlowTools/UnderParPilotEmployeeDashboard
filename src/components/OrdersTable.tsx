@@ -44,18 +44,26 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
   return (
     <div>
       {/* Filter Dropdown */}
-      <div className="flex gap-2 mb-4">
-        <select
-          value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value as any)}
-          className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-        >
-          <option value="all">All Orders</option>
-          <option value="new">New</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-      </div>
+      <select
+  value={statusFilter}
+  onChange={e => setStatusFilter(e.target.value as any)}
+  className={`
+    px-4 py-2 rounded-xl shadow border
+    font-semibold text-sm focus:outline-none
+    focus:ring-2 focus:ring-green-400
+    ${
+      statusFilter === 'new' ? 'border-blue-400 bg-blue-50 text-blue-700'
+      : statusFilter === 'completed' ? 'border-green-400 bg-green-50 text-green-700'
+      : statusFilter === 'cancelled' ? 'border-red-400 bg-red-50 text-red-700'
+      : 'border-gray-300 bg-white text-gray-900'
+    }
+  `}
+>
+  <option value="all">All Orders</option>
+  <option value="new">New</option>
+  <option value="completed">Completed</option>
+  <option value="cancelled">Cancelled</option>
+</select>
 
      {/* Desktop Table */}
 <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
