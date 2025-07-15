@@ -481,6 +481,7 @@ const renderToolbar = () => (
     setStatusFilter={setStatusFilter}
     setHoleFilter={setHoleFilter}
     setSearch={setSearch}
+    onEdit={handleEditOrder}
     // Add any other props that OrdersTable expects!
   />
 );
