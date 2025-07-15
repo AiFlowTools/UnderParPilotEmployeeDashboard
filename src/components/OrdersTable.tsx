@@ -40,6 +40,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
     if (statusFilter === 'cancelled') return order.fulfillment_status === 'cancelled';
     return true;
   });
+console.log('statusFilter:', statusFilter, filteredOrders.length);
 
   return (
     <div>
