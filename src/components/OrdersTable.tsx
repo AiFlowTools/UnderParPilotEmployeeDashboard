@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
-import { ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, Dot } from 'lucide-react';
+import React, { Fragment } from 'react';
+import React, { Listbox, Transition } from '@headlessui/react'
 
 interface OrderItem {
   item_name: string;
@@ -27,6 +29,84 @@ interface OrdersTableProps {
   onEdit?: (orderId: string)=> void;
 }
 
+const statusOptions = [
+  {
+    value: 'all',
+    label: 'All Orders',
+    color: 'bg-gray-200 text-gray-700',
+    icon: <Dot className="w-4 h-4 text-gray-400" />,
+  },
+  {
+    value: 'new',
+    label: 'New',
+    color: 'bg-blue-100 text-blue-800',
+    icon: <Dot className="w-4 h-4 text-blue-400" />,
+  },
+  {
+    value: 'completed',
+    label: 'Completed',
+    color: 'bg-green-100 text-green-800',
+    icon: <Dot className="w-4 h-4 text-green-400" />,
+  },
+  {
+    value: 'cancelled',
+    label: 'Cancelled',
+    color: 'bg-red-100 text-red-800',
+    icon: <Dot className="w-4 h-4 text-red-400" />,
+  },
+];
+
+const StatusFilterDropdown = ({ value, onChange }: { value: string, onChange: (v: string) => void }) => (
+  <Listbox value={value} onChange={onChange}>
+    {({ open }) => (
+      <div className="relative min-w-[160px]">
+        <Listbox.Button className={`flex items-center justify-between w-full rounded-xl shadow border px-4 py-2 font-semibold bg-white text-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition`}>
+          <span className="flex items-center gap-2">
+            {statusOptions.find(o => o.value === value)?.icon}
+            <span className={statusOptions.find(o => o.value === value)?.color + " px-2 py-1 rounded-full"}>
+              {statusOptions.find(o => o.value === value)?.label}
+            </span>
+          </span>
+          <ChevronDown className="w-5 h-5 text-gray-400 ml-2" />
+        </Listbox.Button>
+        <Transition
+          as={Fragment}
+          show={open}
+          leave="transition ease-in duration-100"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <Listbox.Options className="absolute mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 ring-1 ring-black ring-opacity-5 z-10 focus:outline-none">
+            {statusOptions.map(option => (
+              <Listbox.Option
+                key={option.value}
+                value={option.value}
+                className={({ active }) =>
+                  `cursor-pointer select-none relative flex items-center gap-2 px-4 py-2 rounded-lg ${
+                    active ? 'bg-green-100' : ''
+                  }`
+                }
+              >
+                {({ selected }) => (
+                  <>
+                    {option.icon}
+                    <span className={option.color + " px-2 py-1 rounded-full"}>
+                      {option.label}
+                    </span>
+                    {selected ? (
+                      <Check className="w-4 h-4 text-green-500 ml-auto" />
+                    ) : null}
+                  </>
+                )}
+              </Listbox.Option>
+            ))}
+          </Listbox.Options>
+        </Transition>
+      </div>
+    )}
+  </Listbox>
+);
+
 const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdit }) => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'completed' | 'cancelled'>('all');
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
@@ -44,26 +124,10 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
   return (
     <div>
       {/* Filter Dropdown */}
-      <select
+      <StatusFilterDropdown
   value={statusFilter}
-  onChange={e => setStatusFilter(e.target.value as any)}
-  className={`
-    px-4 py-2 rounded-xl shadow border
-    font-semibold text-sm focus:outline-none
-    focus:ring-2 focus:ring-green-400
-    ${
-      statusFilter === 'new' ? 'border-blue-400 bg-blue-50 text-blue-700'
-      : statusFilter === 'completed' ? 'border-green-400 bg-green-50 text-green-700'
-      : statusFilter === 'cancelled' ? 'border-red-400 bg-red-50 text-red-700'
-      : 'border-gray-300 bg-white text-gray-900'
-    }
-  `}
->
-  <option value="all">All Orders</option>
-  <option value="new">New</option>
-  <option value="completed">Completed</option>
-  <option value="cancelled">Cancelled</option>
-</select>
+  onChange={val => setStatusFilter(val as any)}
+/>
 
      {/* Desktop Table */}
 <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
