@@ -97,6 +97,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
               : <span className="text-gray-400">-</span>
             }
           </td>
+          {/* STATUS badge only, never a dropdown */}
           <td className="px-6 py-4 whitespace-nowrap">
             <span className={`px-2 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full ${
               {
@@ -111,12 +112,26 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
               <ChevronDown className="ml-2 w-4 h-4 text-gray-400" />
             </span>
           </td>
+          {/* ACTION column: dropdown only if modifiable */}
           <td className="px-6 py-4 text-sm text-gray-500">
             {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
           </td>
           <td className="px-6 py-4 whitespace-nowrap">
-            {/* Put your action button/dropdown here */}
-            <span>{/* ... */}</span>
+            {(order.fulfillment_status !== "delivered" && order.fulfillment_status !== "cancelled" && onStatusChange) ? (
+              <select
+                value={order.fulfillment_status}
+                onChange={e => onStatusChange(order.id, e.target.value as Order['fulfillment_status'])}
+                className="appearance-none pl-2 pr-6 py-1 md:py-2 border rounded bg-white text-sm focus:ring-2 focus:ring-green-400 min-h-[44px]"
+              >
+                <option value="new">New</option>
+                <option value="preparing">Preparing</option>
+                <option value="on_the_way">On the Way</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            ) : (
+              <span>-</span>
+            )}
           </td>
         </tr>
       ))}
