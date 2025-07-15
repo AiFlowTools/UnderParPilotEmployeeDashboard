@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { Check, ChevronDown, Dot } from 'lucide-react';
 import { Fragment } from 'react';
-import React, { Listbox, Transition } from '@headlessui/react'
+import { Listbox, Transition } from '@headlessui/react'
 
 interface OrderItem {
   item_name: string;
