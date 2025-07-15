@@ -25,6 +25,10 @@ interface OrdersTableProps {
   onStatusChange?: (orderId: string, newStatus: string) => void;
 }
 
+// OrdersTable.tsx
+
+const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'completed' | 'cancelled'>('all');
+
 const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange }) => (
   <div>
     {/* Desktop Table */}
