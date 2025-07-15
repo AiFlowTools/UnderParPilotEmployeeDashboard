@@ -73,15 +73,18 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
     <tbody className="bg-white divide-y divide-gray-200">
       {filteredOrders.map(order => (
         <tr key={order.id}>
+          {/* Customer */}
           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             <div className="font-medium">{order.customer_name || 'N/A'}</div>
             {order.customer_email && (
               <div className="text-xs text-gray-500">{order.customer_email}</div>
             )}
           </td>
+          {/* Hole */}
           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {order.hole_number ?? '-'}
           </td>
+          {/* Items */}
           <td className="px-6 py-4 text-sm text-gray-500">
             <ul>
               {order.ordered_items.map((item, idx) => (
@@ -91,15 +94,16 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
               ))}
             </ul>
           </td>
+          {/* Notes */}
           <td className="px-6 py-4 text-sm">
             {order.notes
               ? <span className="bg-yellow-100 text-yellow-900 px-2 py-1 rounded">{order.notes}</span>
               : <span className="text-gray-400">-</span>
             }
           </td>
-          {/* STATUS badge only, never a dropdown */}
+          {/* Status badge (NO dropdown, NO chevron) */}
           <td className="px-6 py-4 whitespace-nowrap">
-            <span className={`px-2 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full ${
+            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
               {
                 new: 'bg-blue-100 text-blue-800',
                 preparing: 'bg-yellow-100 text-yellow-800',
@@ -109,28 +113,32 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
               }[order.fulfillment_status]
             }`}>
               {order.fulfillment_status.replace(/_/g, ' ')}
-              <ChevronDown className="ml-2 w-4 h-4 text-gray-400" />
             </span>
           </td>
-          {/* ACTION column: dropdown only if modifiable */}
+          {/* Date/Time */}
           <td className="px-6 py-4 text-sm text-gray-500">
             {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
           </td>
+          {/* Action column: dropdown (with chevron) or static text */}
           <td className="px-6 py-4 whitespace-nowrap">
             {(order.fulfillment_status !== "delivered" && order.fulfillment_status !== "cancelled" && onStatusChange) ? (
-              <select
-                value={order.fulfillment_status}
-                onChange={e => onStatusChange(order.id, e.target.value as Order['fulfillment_status'])}
-                className="appearance-none pl-2 pr-6 py-1 md:py-2 border rounded bg-white text-sm focus:ring-2 focus:ring-green-400 min-h-[44px]"
-              >
-                <option value="new">New</option>
-                <option value="preparing">Preparing</option>
-                <option value="on_the_way">On the Way</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={order.fulfillment_status}
+                  onChange={e => onStatusChange(order.id, e.target.value as Order['fulfillment_status'])}
+                  className="appearance-none pl-2 pr-6 py-1 md:py-2 border rounded bg-white text-sm focus:ring-2 focus:ring-green-400 min-h-[44px] w-full"
+                >
+                  <option value="new">New</option>
+                  <option value="preparing">Preparing</option>
+                  <option value="on_the_way">On the Way</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                {/* ChevronDown only in the dropdown */}
+                <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              </div>
             ) : (
-              <span>-</span>
+              <span>{order.fulfillment_status.replace(/_/g, ' ')}</span>
             )}
           </td>
         </tr>
