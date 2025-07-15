@@ -23,12 +23,12 @@ interface Order {
 interface OrdersTableProps {
   orders: Order[];
   onStatusChange?: (orderId: string, newStatus: string) => void;
-  onEdit:{handleEditOrder} // <-- Add this line for Edit support!
+  onEdit?: (orderId: string)=> void;// <-- Add this line for Edit support!
 }
 
   // State for the status filter (must be inside the component)
+const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdit }) => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'completed' | 'cancelled'>('all');
-  const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdit }) => {
 
   // Filter logic
   const filteredOrders = orders.filter(order => {
