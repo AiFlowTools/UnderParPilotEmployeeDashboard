@@ -156,7 +156,7 @@ console.log('statusFilter:', statusFilter, filteredOrders.length);
             No orders found.
           </div>
         ) : (
-          orders.map(order => (
+          filteredOrders.map(order => (
   <div key={order.id} className="bg-white rounded-xl shadow-md p-4 flex flex-col gap-3 mb-2">
     {/* Header row */}
     <div className="flex items-center justify-between">
