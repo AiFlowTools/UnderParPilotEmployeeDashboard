@@ -23,7 +23,7 @@ interface Order {
 interface OrdersTableProps {
   orders: Order[];
   onStatusChange?: (orderId: string, newStatus: string) => void;
-  onEdit?: (orderId: string) => void; // <-- Add this line for Edit support!
+  onEdit:{handleEditOrder} // <-- Add this line for Edit support!
 }
 
 const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange }) => {
