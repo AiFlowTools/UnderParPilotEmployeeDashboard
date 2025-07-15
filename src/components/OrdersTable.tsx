@@ -31,6 +31,20 @@ const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'completed' | '
 
 const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange }) => (
   <div>
+
+    <div className="flex gap-2 mb-4">
+  <select
+    value={statusFilter}
+    onChange={e => setStatusFilter(e.target.value as any)}
+    className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+  >
+    <option value="all">All Orders</option>
+    <option value="new">New</option>
+    <option value="completed">Completed</option>
+    <option value="cancelled">Cancelled</option>
+  </select>
+</div>
+
     {/* Desktop Table */}
     <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
       <table className="min-w-full divide-y divide-gray-200">
