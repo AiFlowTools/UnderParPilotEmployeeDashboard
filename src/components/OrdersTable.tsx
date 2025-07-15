@@ -154,78 +154,101 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
             No orders found.
           </div>
         ) : (
-          orders.map(order => (
-            <div key={order.id} className="bg-white rounded-xl shadow-md p-4 flex flex-col gap-3 mb-2">
-              {/* Header row with customer, edit, status */}
-              <div className="flex items-center justify-between">
-                <div className="font-bold text-lg text-gray-900">{order.customer_name || 'N/A'}</div>
-                <div className="flex items-center gap-2">
-                  {/* Edit Button */}
-                  <button
-                    onClick={() => setEditingOrderId(order.id)}
-                    className="px-4 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors"
-                  >
-                    Edit
-                  </button>
-                  {/* Status Badge */}
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
-                      order.fulfillment_status === 'new'
-                        ? 'bg-blue-100 text-blue-800'
-                        : order.fulfillment_status === 'delivered'
-                        ? 'bg-green-100 text-green-800'
-                        : order.fulfillment_status === 'preparing'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : order.fulfillment_status === 'on_the_way'
-                        ? 'bg-purple-100 text-purple-800'
-                        : order.fulfillment_status === 'cancelled'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}
-                  >
-                    {order.fulfillment_status.replace(/_/g, ' ')}
-                  </span>
-                </div>
-              </div>
-              {/* Hole & Date */}
-              <div className="flex justify-between items-center text-sm text-gray-500">
-                <span className="font-semibold">Hole {order.hole_number ?? '-'}</span>
-                <span>{format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}</span>
-              </div>
-              {/* Items */}
-              <div className="text-sm text-gray-700 bg-gray-50 rounded p-2">
-                {order.ordered_items.map((item, idx) => (
-                  <div key={idx}>
-                    <span className="font-medium">{item.quantity}x {item.item_name}</span>
-                  </div>
-                ))}
-              </div>
-              {/* Notes */}
-              {order.notes && (
-                <div className="bg-yellow-50 text-yellow-900 px-2 py-1 rounded text-xs">
-                  <b>Note:</b> {order.notes}
-                </div>
-              )}
-              {/* Status Dropdown (shows only if editing) */}
-              {editingOrderId === order.id && (
-                <div className="mt-2">
-                  <select
-                    value={order.fulfillment_status}
-                    onChange={e => {
-                      onStatusChange?.(order.id, e.target.value as Order['fulfillment_status']);
-                      setEditingOrderId(null);
-                    }}
-                    className="appearance-none pl-2 pr-6 py-2 border border-green-400 bg-green-50 font-semibold rounded-lg text-sm focus:ring-2 focus:ring-green-400 w-full shadow"
-                  >
-                    <option value="new">New</option>
-                    <option value="preparing">Preparing</option>
-                    <option value="on_the_way">On the Way</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </div>
-              )}
-            </div>
+          {orders.map(order => (
+  <div key={order.id} className="bg-white rounded-xl shadow-md p-4 flex flex-col gap-3 mb-2">
+    {/* Header row */}
+    <div className="flex items-center justify-between">
+      <div className="font-bold text-lg text-gray-900">{order.customer_name || 'N/A'}</div>
+      <div className="flex items-center gap-2">
+        {editingOrderId === order.id ? (
+          <>
+            <button
+              className="px-4 py-2 rounded bg-gray-100 text-gray-800 font-semibold hover:bg-gray-200 transition-colors"
+              onClick={() => {
+                setEditingOrderId(null);
+                setEditStatusTemp(null); // optional, see below
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              className="px-4 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors"
+              onClick={() => {
+                // Only save if changed
+                if (editStatusTemp && editStatusTemp !== order.fulfillment_status) {
+                  onStatusChange?.(order.id, editStatusTemp);
+                }
+                setEditingOrderId(null);
+                setEditStatusTemp(null);
+              }}
+            >
+              Save
+            </button>
+          </>
+        ) : (
+          <button
+            className="px-4 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors"
+            onClick={() => {
+              setEditingOrderId(order.id);
+              setEditStatusTemp(order.fulfillment_status); // optional temp state
+            }}
+          >
+            Edit
+          </button>
+        )}
+        {/* Status badge */}
+        <span className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
+          order.fulfillment_status === 'new'
+            ? 'bg-blue-100 text-blue-800'
+            : order.fulfillment_status === 'delivered'
+            ? 'bg-green-100 text-green-800'
+            : order.fulfillment_status === 'preparing'
+            ? 'bg-yellow-100 text-yellow-800'
+            : order.fulfillment_status === 'on_the_way'
+            ? 'bg-purple-100 text-purple-800'
+            : order.fulfillment_status === 'cancelled'
+            ? 'bg-red-100 text-red-800'
+            : 'bg-gray-100 text-gray-800'
+        }`}>
+          {order.fulfillment_status.replace(/_/g, ' ')}
+        </span>
+      </div>
+    </div>
+    {/* Rest of card... */}
+    <div className="flex justify-between items-center text-sm text-gray-500">
+      <span className="font-semibold">Hole {order.hole_number ?? '-'}</span>
+      <span>{format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}</span>
+    </div>
+    <div className="text-sm text-gray-700 bg-gray-50 rounded p-2">
+      {order.ordered_items.map((item, idx) => (
+        <div key={idx}>
+          <span className="font-medium">{item.quantity}x {item.item_name}</span>
+        </div>
+      ))}
+    </div>
+    {order.notes && (
+      <div className="bg-yellow-50 text-yellow-900 px-2 py-1 rounded text-xs">
+        <b>Note:</b> {order.notes}
+      </div>
+    )}
+    {/* Status dropdown, only while editing */}
+    {editingOrderId === order.id && (
+      <div className="mt-2">
+        <select
+          value={editStatusTemp ?? order.fulfillment_status}
+          onChange={e => setEditStatusTemp(e.target.value as Order['fulfillment_status'])}
+          className="appearance-none pl-2 pr-6 py-2 border-2 border-green-500 bg-green-50 font-semibold rounded-lg text-sm focus:ring-2 focus:ring-green-400 w-full shadow"
+        >
+          <option value="new">New</option>
+          <option value="preparing">Preparing</option>
+          <option value="on_the_way">On the Way</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+    )}
+  </div>
+))
           ))
         )}
       </div>
