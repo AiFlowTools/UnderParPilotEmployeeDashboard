@@ -100,38 +100,27 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
                     : <span className="text-gray-400">-</span>
                   }
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    {
-                      new: 'bg-blue-100 text-blue-800',
-                      preparing: 'bg-yellow-100 text-yellow-800',
-                      on_the_way: 'bg-purple-100 text-purple-800',
-                      delivered: 'bg-green-100 text-green-800',
-                      cancelled: 'bg-red-100 text-red-800',
-                    }[order.fulfillment_status]
-                  }`}>
-                    {order.fulfillment_status.replace(/_/g, ' ')}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {(order.fulfillment_status !== "delivered" && order.fulfillment_status !== "cancelled" && onStatusChange) ? (
-                    <select
-                      value={order.fulfillment_status}
-                      onChange={e => onStatusChange(order.id, e.target.value as Order['fulfillment_status'])}
-                      className="appearance-none pl-2 pr-6 py-1 md:py-2 border rounded bg-white text-sm focus:ring-2 focus:ring-green-400 min-h-[44px]"
-                    >
-                      <option value="new">New</option>
-                      <option value="preparing">Preparing</option>
-                      <option value="on_the_way">On the Way</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  ) : (
-                    <span>-</span>
+               <td className="px-6 py-4 whitespace-nowrap">
+  {(order.fulfillment_status !== "delivered" && order.fulfillment_status !== "cancelled" && onStatusChange) ? (
+    <div className="relative">
+      <select
+        value={order.fulfillment_status}
+        onChange={e => onStatusChange(order.id, e.target.value as Order['fulfillment_status'])}
+        className="appearance-none pl-2 pr-6 py-1 md:py-2 border rounded bg-white text-sm focus:ring-2 focus:ring-green-400 min-h-[44px]"
+      >
+        <option value="new">New</option>
+        <option value="preparing">Preparing</option>
+        <option value="on_the_way">On the Way</option>
+        <option value="delivered">Delivered</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+    </div>
+  ) : (
+    <span>-</span>
+  )}
+</td>
+
                   )}
                 </td>
               </tr>
@@ -201,23 +190,24 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
             )}
             {/* Status Dropdown (shows only if editing) */}
             {editingOrderId === order.id && (
-              <div className="mt-2">
-                <select
-                  value={order.fulfillment_status}
-                  onChange={e => {
-                    onStatusChange?.(order.id, e.target.value as Order['fulfillment_status']);
-                    setEditingOrderId(null); // closes dropdown after change; remove if you want it to stay open
-                  }}
-                  className="appearance-none pl-2 pr-6 py-2 border rounded bg-white text-sm focus:ring-2 focus:ring-green-400 w-full"
-                >
-                  <option value="new">New</option>
-                  <option value="preparing">Preparing</option>
-                  <option value="on_the_way">On the Way</option>
-                  <option value="delivered">Delivered</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </div>
-            )}
+  <div className="mt-2 relative">
+    <select
+      value={order.fulfillment_status}
+      onChange={e => {
+        onStatusChange?.(order.id, e.target.value as Order['fulfillment_status']);
+        setEditingOrderId(null);
+      }}
+      className="appearance-none pl-2 pr-6 py-2 border rounded bg-white text-sm focus:ring-2 focus:ring-green-400 w-full"
+    >
+      <option value="new">New</option>
+      <option value="preparing">Preparing</option>
+      <option value="on_the_way">On the Way</option>
+      <option value="delivered">Delivered</option>
+      <option value="cancelled">Cancelled</option>
+    </select>
+    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+  </div>
+)}
           </div>
         ))
       )}
