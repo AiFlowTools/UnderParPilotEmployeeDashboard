@@ -248,7 +248,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
       </div>
     )}
   </div>
-))
+))}
           ))
         )}
       </div>
