@@ -472,113 +472,18 @@ const renderToolbar = () => (
 
   // --- Orders Tab ---
   const renderOrdersTab = () => (
-    <div className="space-y-6">
-      {/* Filter Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <select 
-          value={statusFilter} 
-          onChange={e => setStatusFilter(e.target.value)} 
-          className="px-3 md:px-4 py-2 md:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 min-h-[44px]"
-        >
-          <option value="all">ALL</option>
-          <option value="new-group">New</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-        <select 
-          value={holeFilter} 
-          onChange={e => setHoleFilter(e.target.value)} 
-          className="px-3 md:px-4 py-2 md:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 min-h-[44px]"
-        >
-          <option value="all">All Holes</option>
-          {[...Array(18)].map((_, i) => (
-            <option key={i+1} value={i+1}>Hole {i+1}</option>
-          ))}
-        </select>
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="Search orders..." 
-            value={search} 
-            onChange={e => setSearch(e.target.value)} 
-            className="w-full pl-10 pr-4 py-2 md:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 min-h-[44px]" 
-          />
-        </div>
-      </div>
-      {/* Orders Table */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                {['ID', 'Customer', 'Hole', 'Items', 'Notes', 'Date & Time', 'Status', 'Action'].map(h => (
-                  <th key={h} className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {orders.map(order => (
-                <tr key={order.id} className="hover:bg-gray-50">
-                  <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {order.id.slice(0,8)}
-                  </td>
-                  <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {order.customer_name || 'Anonymous'}
-                  </td>
-                  <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {order.hole_number}
-                  </td>
-                  <td className="px-4 md:px-6 py-4 text-sm text-gray-900">
-                    {order.ordered_items.map(i => `${i.quantity}x ${i.item_name}`).join(', ')}
-                  </td>
-                  <td className="px-4 md:px-6 py-4 text-sm text-gray-500">
-                    {order.notes || '-'}
-                  </td>
-                  <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(order.created_at).toLocaleString()}
-                  </td>
-                  <td className="px-4 md:px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      {
-                        new: 'bg-blue-100 text-blue-800',
-                        preparing: 'bg-yellow-100 text-yellow-800',
-                        on_the_way: 'bg-purple-100 text-purple-800',
-                        delivered: 'bg-green-100 text-green-800',
-                        cancelled: 'bg-red-100 text-red-800'
-                      }[order.fulfillment_status]
-                    }`}>
-                      {order.fulfillment_status.replace(/_/g,' ')}
-                    </span>
-                  </td>
-                  <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {(order.fulfillment_status !== 'delivered' && order.fulfillment_status !== 'cancelled') && (
-                      <div className="relative inline-block">
-                        <select
-                          value={order.fulfillment_status}
-                          onChange={e => handleStatusChange(order.id, e.target.value)}
-                          className="appearance-none pl-2 pr-6 py-1 md:py-2 border rounded bg-white text-sm focus:ring-2 focus:ring-green-400 min-h-[44px]"
-                        >
-                          <option value="new">New</option>
-                          <option value="preparing">Preparing</option>
-                          <option value="on_the_way">On the Way</option>
-                          <option value="delivered">Delivered</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
-                        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
+  <OrdersTable
+    orders={orders}
+    onStatusChange={handleStatusChange}
+    statusFilter={statusFilter}
+    holeFilter={holeFilter}
+    search={search}
+    setStatusFilter={setStatusFilter}
+    setHoleFilter={setHoleFilter}
+    setSearch={setSearch}
+    // Add any other props that OrdersTable expects!
+  />
+);
 
   // --- Menu Tab ---
   const renderMenuTab = () => (
