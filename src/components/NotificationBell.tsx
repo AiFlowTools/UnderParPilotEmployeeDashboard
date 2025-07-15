@@ -15,7 +15,7 @@ interface Notification {
   order_id: string;
 }
 
-export default function NotificationBell() {
+export default function NotificationBell({ onNotificationClick }: NotificationBellProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -134,4 +134,3 @@ export default function NotificationBell() {
     </div>
   );
 }
-export default NotificationBell;
