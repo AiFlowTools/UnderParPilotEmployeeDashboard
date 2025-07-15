@@ -203,6 +203,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
       <option value="cancelled">Cancelled</option>
     </select>
   )}
+</div>
             </div>
           ))
         )}
