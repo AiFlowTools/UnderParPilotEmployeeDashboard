@@ -144,26 +144,34 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
         ) : (
           filteredOrders.map(order => (
             <div key={order.id} className="bg-white rounded-xl shadow-md p-4 flex flex-col gap-3 mb-2">
-              <div className="flex justify-between items-center">
-                <div className="font-bold text-lg text-gray-900">{order.customer_name || 'N/A'}</div>
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
-                    order.fulfillment_status === 'new'
-                      ? 'bg-blue-100 text-blue-800'
-                      : order.fulfillment_status === 'delivered'
-                      ? 'bg-green-100 text-green-800'
-                      : order.fulfillment_status === 'preparing'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : order.fulfillment_status === 'on_the_way'
-                      ? 'bg-purple-100 text-purple-800'
-                      : order.fulfillment_status === 'cancelled'
-                      ? 'bg-red-100 text-red-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}
-                >
-                  {order.fulfillment_status.replace(/_/g, ' ')}
-                </span>
-              </div>
+             <div className="flex items-center justify-between">
+  <div className="font-bold text-lg text-gray-900">{order.customer_name || 'N/A'}</div>
+  <div className="flex items-center gap-2">
+    <button
+      onClick={() => onEdit && onEdit(order.id)}
+      className="px-3 py-1 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+    >
+      Edit
+    </button>
+    <span
+      className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
+        order.fulfillment_status === 'new'
+          ? 'bg-blue-100 text-blue-800'
+          : order.fulfillment_status === 'delivered'
+          ? 'bg-green-100 text-green-800'
+          : order.fulfillment_status === 'preparing'
+          ? 'bg-yellow-100 text-yellow-800'
+          : order.fulfillment_status === 'on_the_way'
+          ? 'bg-purple-100 text-purple-800'
+          : order.fulfillment_status === 'cancelled'
+          ? 'bg-red-100 text-red-800'
+          : 'bg-gray-100 text-gray-800'
+      }`}
+    >
+      {order.fulfillment_status.replace(/_/g, ' ')}
+    </span>
+  </div>
+</div>
               <div className="flex justify-between items-center text-sm text-gray-500">
                 <span className="font-semibold">Hole {order.hole_number ?? '-'}</span>
                 <span>{format(new Date(order.created_at), 'MMM d, yyyy HH:mm')}</span>
