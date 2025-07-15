@@ -123,6 +123,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
 
                   )}
                 </td>
+      <div>
               </tr>
             ))}
           </tbody>
