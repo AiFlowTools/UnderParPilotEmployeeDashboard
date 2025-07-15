@@ -26,12 +26,12 @@ interface OrdersTableProps {
   onEdit?: (orderId: string)=> void;// <-- Add this line for Edit support!
 }
 
-// At top of OrdersTable
-const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
-
   // State for the status filter (must be inside the component)
 const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdit }) => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'completed' | 'cancelled'>('all');
+  const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+  
+
 
   // Filter logic
   const filteredOrders = orders.filter(order => {
