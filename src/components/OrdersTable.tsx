@@ -215,7 +215,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
                       onStatusChange?.(order.id, e.target.value as Order['fulfillment_status']);
                       setEditingOrderId(null);
                     }}
-                    className="appearance-none pl-2 pr-6 py-2 border-2 border-green-500 shadow-md rounded bg-white text-sm focus:ring-2 focus:ring-green-400 w-full font-semibold"
+                    className="appearance-none pl-2 pr-6 py-2 border border-green-400 bg-green-50 font-semibold rounded-lg text-sm focus:ring-2 focus:ring-green-400 w-full shadow"
                   >
                     <option value="new">New</option>
                     <option value="preparing">Preparing</option>
