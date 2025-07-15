@@ -150,7 +150,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
 
       {/* Mobile/Tablet Card/List View */}
       <div className="block lg:hidden space-y-3">
-        {orders.length === 0 ? (
+        {filteredOrders.length === 0 ? (
           <div className="flex justify-center items-center h-32 text-gray-500">
             No orders found.
           </div>
