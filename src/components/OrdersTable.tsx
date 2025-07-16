@@ -262,71 +262,70 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
                 </td>
                 {/* Action column */}
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {editingOrderId === order.id ? (
-                    <div className="flex flex-col gap-2 items-start">
-                      {/* Status dropdown (editable) */}
-                      <select
-                        value={editStatusTemp ?? order.fulfillment_status}
-                        onChange={e => setEditStatusTemp(e.target.value as Order['fulfillment_status'])}
-                        className="appearance-none px-3 py-2 border-2 border-green-500 bg-green-50 font-semibold rounded-lg text-sm focus:ring-2 focus:ring-green-400 shadow mb-2"
-                      >
-                        <option value="new">New</option>
-                        <option value="preparing">Preparing</option>
-                        <option value="on_the_way">On the Way</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                      {/* Action buttons */}
-                      <div className="flex gap-2">
-                        <button
-                          className="px-4 py-2 rounded bg-gray-100 text-gray-800 font-semibold hover:bg-gray-200 transition"
-                          onClick={() => {
-                            setEditingOrderId(null);
-                            setEditStatusTemp(null);
-                          }}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          className="px-4 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition"
-                          onClick={() => {
-                            if (editStatusTemp && editStatusTemp !== order.fulfillment_status) {
-                              onStatusChange?.(order.id, editStatusTemp);
-                            }
-                            setEditingOrderId(null);
-                            setEditStatusTemp(null);
-                          }}
-                        >
-                          Save
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-start gap-2">
-                      {/* Read-only dropdown */}
-                      <select
-                        value={order.fulfillment_status}
-                        disabled
-                        className="appearance-none px-3 py-2 border bg-gray-100 text-gray-700 font-semibold rounded-lg text-sm shadow mb-2"
-                      >
-                        <option value="new">New</option>
-                        <option value="preparing">Preparing</option>
-                        <option value="on_the_way">On the Way</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                      <button
-                        className="px-4 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition"
-                        onClick={() => {
-                          setEditingOrderId(order.id);
-                          setEditStatusTemp(order.fulfillment_status);
-                        }}
-                      >
-                        Edit
-                      </button>
-                    </div>
-                  )}
-                </td>
+  <div className="flex flex-col items-start gap-2 w-48 min-w-48"> {/* Adjust width as needed */}
+    {editingOrderId === order.id ? (
+      <>
+        <select
+          value={editStatusTemp ?? order.fulfillment_status}
+          onChange={e => setEditStatusTemp(e.target.value as Order['fulfillment_status'])}
+          className="appearance-none px-3 py-2 border-2 border-green-500 bg-green-50 font-semibold rounded-lg text-sm focus:ring-2 focus:ring-green-400 shadow mb-2 w-full"
+        >
+          <option value="new">New</option>
+          <option value="preparing">Preparing</option>
+          <option value="on_the_way">On the Way</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <div className="flex gap-2 w-full">
+          <button
+            className="flex-1 px-4 py-2 rounded bg-gray-100 text-gray-800 font-semibold hover:bg-gray-200 transition"
+            onClick={() => {
+              setEditingOrderId(null);
+              setEditStatusTemp(null);
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            className="flex-1 px-4 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition"
+            onClick={() => {
+              if (editStatusTemp && editStatusTemp !== order.fulfillment_status) {
+                onStatusChange(order.id, editStatusTemp);
+              }
+              setEditingOrderId(null);
+              setEditStatusTemp(null);
+            }}
+          >
+            Save
+          </button>
+        </div>
+      </>
+    ) : (
+      <>
+        <select
+          value={order.fulfillment_status}
+          disabled
+          className="appearance-none px-3 py-2 border bg-gray-100 text-gray-700 font-semibold rounded-lg text-sm shadow mb-2 w-full"
+        >
+          <option value="new">New</option>
+          <option value="preparing">Preparing</option>
+          <option value="on_the_way">On the Way</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <button
+          className="w-full px-4 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition"
+          onClick={() => {
+            setEditingOrderId(order.id);
+            setEditStatusTemp(order.fulfillment_status);
+          }}
+        >
+          Edit
+        </button>
+      </>
+    )}
+  </div>
+</td>
               </tr>
             ))}
           </tbody>
