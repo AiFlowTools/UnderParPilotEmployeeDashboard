@@ -777,7 +777,7 @@ export default function MenuManagement() {
   </div>
 
   {/* Desktop: Show icons inline */}
-  <div className="hidden md:flex space-x-2">
+  <div className="hidden lg:flex space-x-2">
     <button
       onClick={() => handleEdit(item)}
       className="text-green-600 hover:text-green-900 p-1 hover:bg-green-50 rounded transition-colors"
