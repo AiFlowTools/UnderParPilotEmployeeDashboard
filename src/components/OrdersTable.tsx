@@ -141,7 +141,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
 
 
   // Filter logic
-filteredOrders = filteredOrders.sort((a, b) => {
+  const filteredOrders = filteredOrders.sort((a, b) => {
   if (sortOrder === 'newest') {
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   }
