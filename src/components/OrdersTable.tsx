@@ -9,7 +9,6 @@ interface OrderItem {
   quantity: number;
   price: number;
 }
-<SortDropdown value={sortOrder} onChange={val => setSortOrder(val as 'newest' | 'oldest')} />
 
 interface Order {
   id: string;
@@ -58,6 +57,7 @@ const statusOptions = [
 ];
 
 // Newest/Oldest Sort
+<SortDropdown value={sortOrder} onChange={val => setSortOrder(val as 'newest' | 'oldest')} />
 
 const sortOptions = [
   { value: 'newest', label: 'Newest' },
