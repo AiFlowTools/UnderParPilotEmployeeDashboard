@@ -643,7 +643,7 @@ export default function MenuManagement() {
       </div>
 
       {/* Menu Items List */}
-      <div className="bg-white rounded-lg shadow-sm">
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         {filteredItems.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 mb-4">
