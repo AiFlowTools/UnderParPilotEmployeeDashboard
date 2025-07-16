@@ -215,7 +215,8 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {sortedOrders.map(order => (
-              <tr key={order.id}>
+              <tr key={order.id}
+                className="hover: bg-gray-50 transition-colors">
                 {/* Customer */}
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <div className="font-medium">{order.customer_name || 'N/A'}</div>
