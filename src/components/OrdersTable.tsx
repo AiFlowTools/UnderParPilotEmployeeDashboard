@@ -107,12 +107,49 @@ const StatusFilterDropdown = ({ value, onChange }: { value: string, onChange: (v
   </Listbox>
 );
 
+const SortDropdown = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => (
+  <Listbox value={value} onChange={onChange}>
+    <div className="relative w-36">
+      <Listbox.Button className="w-full py-2 pl-3 pr-10 text-left bg-white rounded-lg border focus:outline-none focus:ring-2 focus:ring-green-400 shadow">
+        {value === 'newest' ? 'Newest' : 'Oldest'}
+        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      </Listbox.Button>
+      <Transition
+        as={Fragment}
+        leave="transition ease-in duration-100"
+        leaveFrom="opacity-100"
+        leaveTo="opacity-0"
+      >
+        <Listbox.Options className="absolute mt-1 w-full bg-white border rounded-lg shadow z-10">
+          <Listbox.Option value="newest" className="cursor-pointer hover:bg-gray-100 px-4 py-2">
+            Newest
+          </Listbox.Option>
+          <Listbox.Option value="oldest" className="cursor-pointer hover:bg-gray-100 px-4 py-2">
+            Oldest
+          </Listbox.Option>
+        </Listbox.Options>
+      </Transition>
+    </div>
+  </Listbox>
+);
+
 const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdit }) => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'completed' | 'cancelled'>('all');
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
   const [editStatusTemp, setEditStatusTemp] = useState<Order['fulfillment_status'] | null>(null);
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+
 
   // Filter logic
+  let filteredOrders = orders.filter(...existing filter...);
+
+filteredOrders = filteredOrders.sort((a, b) => {
+  if (sortOrder === 'newest') {
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  }
+  return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+});
+
   const filteredOrders = orders.filter(order => {
     if (statusFilter === 'all') return true;
     if (statusFilter === 'new') return order.fulfillment_status === 'new';
@@ -123,11 +160,22 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
   
   return (
     <div>
+  
       {/* Filter Dropdown */}
-      <StatusFilterDropdown
-  value={statusFilter}
-  onChange={val => setStatusFilter(val as any)}
-/>
+     <div className="flex flex-col md:flex-row justify-between items-center gap-3 mb-4">
+  <div className="w-full md:w-1/3">
+    <StatusFilterDropdown
+      value={statusFilter}
+      onChange={val => setStatusFilter(val as any)}
+    />
+  </div>
+  <div className="w-full md:w-1/3">
+    <SortDropdown
+      value={sortOrder}
+      onChange={val => setSortOrder(val as 'newest' | 'oldest')}
+    />
+  </div>
+</div>
 
      {/* Desktop Table */}
 <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
