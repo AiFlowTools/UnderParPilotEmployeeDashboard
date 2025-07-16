@@ -57,7 +57,6 @@ const statusOptions = [
 ];
 
 // Newest/Oldest Sort
-<SortDropdown value={sortOrder} onChange={val => setSortOrder(val as 'newest' | 'oldest')} />
 
 const sortOptions = [
   { value: 'newest', label: 'Newest' },
@@ -163,6 +162,8 @@ export const SortDropdown = ({ value, onChange }: { value: string, onChange: (va
     )}
   </Listbox>
 );
+
+<SortDropdown value={sortOrder} onChange={val => setSortOrder(val as 'newest' | 'oldest')} />
 
 const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdit }) => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'completed' | 'cancelled'>('all');
