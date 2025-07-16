@@ -740,7 +740,7 @@ export default function MenuManagement() {
                         )}
                       </div>
                     </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium min-w-[80px]">
   {/* Mobile/Tablet: Show menu button */}
   <div className="flex lg:hidden items-center justify-end">
     <Menu as="div" className="relative">
