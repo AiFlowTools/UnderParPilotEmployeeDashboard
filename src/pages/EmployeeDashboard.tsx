@@ -493,6 +493,7 @@ const renderToolbar = () => (
 
   // --- Menu Tab ---
   const renderMenuTab = () => (
+    isAdmin ? (<div>Menu tab is rendering!</div><MenuManagement />) : null
     isAdmin ? <MenuManagement /> : null
   );
 
