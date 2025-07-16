@@ -9,6 +9,7 @@ interface OrderItem {
   quantity: number;
   price: number;
 }
+<SortDropdown value={sortOrder} onChange={val => setSortOrder(val as 'newest' | 'oldest')} />
 
 interface Order {
   id: string;
@@ -54,6 +55,13 @@ const statusOptions = [
     color: 'bg-red-100 text-red-800',
     icon: <Dot className="w-4 h-4 text-red-400" />,
   },
+];
+
+// Newest/Oldest Sort
+
+const sortOptions = [
+  { value: 'newest', label: 'Newest' },
+  { value: 'oldest', label: 'Oldest' },
 ];
 
 const StatusFilterDropdown = ({ value, onChange }: { value: string, onChange: (v: string) => void }) => (
@@ -107,29 +115,52 @@ const StatusFilterDropdown = ({ value, onChange }: { value: string, onChange: (v
   </Listbox>
 );
 
-const SortDropdown = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => (
+export const SortDropdown = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => (
   <Listbox value={value} onChange={onChange}>
-    <div className="relative w-36">
-      <Listbox.Button className="w-full py-2 pl-3 pr-10 text-left bg-white rounded-lg border focus:outline-none focus:ring-2 focus:ring-green-400 shadow">
-        {value === 'newest' ? 'Newest' : 'Oldest'}
-        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-      </Listbox.Button>
-      <Transition
-        as={Fragment}
-        leave="transition ease-in duration-100"
-        leaveFrom="opacity-100"
-        leaveTo="opacity-0"
-      >
-        <Listbox.Options className="absolute mt-1 w-full bg-white border rounded-lg shadow z-10">
-          <Listbox.Option value="newest" className="cursor-pointer hover:bg-gray-100 px-4 py-2">
-            Newest
-          </Listbox.Option>
-          <Listbox.Option value="oldest" className="cursor-pointer hover:bg-gray-100 px-4 py-2">
-            Oldest
-          </Listbox.Option>
-        </Listbox.Options>
-      </Transition>
-    </div>
+    {({ open }) => (
+      <div className="relative w-40">
+        <Listbox.Button
+          className={`
+            flex items-center justify-between w-full px-4 py-2 rounded-xl border
+            font-semibold bg-white text-base shadow-sm transition
+            focus:outline-none focus:ring-2 focus:ring-green-400
+            ${open ? "ring-2 ring-green-200 border-green-400" : "border-gray-200"}
+          `}
+        >
+          <span>{sortOptions.find(o => o.value === value)?.label}</span>
+          <ChevronDown
+            className={`
+              w-5 h-5 ml-2 text-gray-400 transform transition-transform duration-200
+              ${open ? "rotate-180" : ""}
+            `}
+          />
+        </Listbox.Button>
+        <Transition
+          as={Fragment}
+          leave="transition duration-100"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <Listbox.Options
+            className="absolute z-10 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-200 focus:outline-none"
+          >
+            {sortOptions.map(option => (
+              <Listbox.Option
+                key={option.value}
+                value={option.value}
+                className={({ active, selected }) =>
+                  `px-4 py-2 cursor-pointer transition flex items-center rounded-lg
+                  ${active ? "bg-green-50 text-green-700" : ""}
+                  ${selected ? "font-bold text-green-600" : "text-gray-700"}`
+                }
+              >
+                {option.label}
+              </Listbox.Option>
+            ))}
+          </Listbox.Options>
+        </Transition>
+      </div>
+    )}
   </Listbox>
 );
 
