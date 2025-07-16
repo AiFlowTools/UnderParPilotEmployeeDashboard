@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useUser } from '../hooks/useUser';
+import { Menu } from '@headlessui/react';
 
 interface MenuItem {
   id: string;
