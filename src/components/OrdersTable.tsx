@@ -141,20 +141,21 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
 
 
   // Filter logic
-  const filteredOrders = filteredOrders.sort((a, b) => {
-  if (sortOrder === 'newest') {
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-  }
-  return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-});
-
-  const filteredOrders = orders.filter(order => {
+    const filteredOrders = orders.filter(order => {
     if (statusFilter === 'all') return true;
     if (statusFilter === 'new') return order.fulfillment_status === 'new';
     if (statusFilter === 'completed') return order.fulfillment_status === 'delivered';
     if (statusFilter === 'cancelled') return order.fulfillment_status === 'cancelled';
     return true;
   });
+ 
+  // Filtered Result
+  const sortedOrders = filteredOrders.sort((a, b) => {
+  if (sortOrder === 'newest') {
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  }
+  return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+});
   
   return (
     <div>
