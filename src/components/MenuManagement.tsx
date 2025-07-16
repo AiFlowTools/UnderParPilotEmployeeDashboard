@@ -812,3 +812,5 @@ export default function MenuManagement() {
     </div>
   );
 }
+
+export default MenuManagement;
