@@ -114,8 +114,6 @@ const StatusFilterDropdown = ({ value, onChange }: { value: string, onChange: (v
   </Listbox>
 );
 
-<SortDropdown value={sortOrder} onChange={val => setSortOrder(val as 'newest' | 'oldest')} />
-
 export const SortDropdown = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => (
   <Listbox value={value} onChange={onChange}>
     {({ open }) => (
@@ -188,6 +186,8 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
   }
   return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
 });
+  
+  <SortDropdown value={sortOrder} onChange={val => setSortOrder(val as 'newest' | 'oldest')} />
   
   return (
     <div>
