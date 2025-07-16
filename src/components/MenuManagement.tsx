@@ -740,7 +740,7 @@ export default function MenuManagement() {
                     </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
   {/* Mobile/Tablet: Show menu button */}
-  <div className="flex md:hidden items-center justify-end">
+  <div className="flex lg:hidden items-center justify-end">
     <Menu as="div" className="relative">
       <Menu.Button className="p-2 rounded hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500">
         <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2" fill="#4B5563"/><circle cx="12" cy="12" r="2" fill="#4B5563"/><circle cx="19" cy="12" r="2" fill="#4B5563"/></svg>
