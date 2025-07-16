@@ -187,8 +187,6 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
   return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
 });
   
-  <SortDropdown value={sortOrder} onChange={val => setSortOrder(val as 'newest' | 'oldest')} />
-  
   return (
     <div>
   
@@ -201,10 +199,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
     />
   </div>
   <div className="w-full md:w-1/3">
-    <SortDropdown
-      value={sortOrder}
-      onChange={val => setSortOrder(val as 'newest' | 'oldest')}
-    />
+    <SortDropdown value={sortOrder} onChange={val => setSortOrder(val as 'newest' | 'oldest')} />
   </div>
 </div>
 
