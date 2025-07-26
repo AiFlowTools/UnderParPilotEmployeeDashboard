@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Home,
   Settings,
@@ -35,6 +36,7 @@ import NewOrderAlert from '../components/NewOrderAlert';
 import MenuManagement from '../components/MenuManagement';
 import { useUser } from '../hooks/useUser';
 import OrdersTable from "@/components/OrdersTable";
+import LanguageSelector from '../components/LanguageSelector';
 
 // --- Types ---
 interface OrderItem {
@@ -75,10 +77,10 @@ interface DashboardMetrics {
 }
 
 const tabs: TabConfig[] = [
-  { id: 'home', label: 'Home', icon: Home },
-  { id: 'orders', label: 'Orders', icon: ClipboardList },
-  { id: 'menu', label: 'Menu', icon: MenuIcon, adminOnly: true },
-  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'home', label: 'home', icon: Home },
+  { id: 'orders', label: 'orders', icon: ClipboardList },
+  { id: 'menu', label: 'menu', icon: MenuIcon, adminOnly: true },
+  { id: 'settings', label: 'settings', icon: Settings },
 ];
 
 const VIEW_MODES = ['Day', 'Week', 'Month'] as const;
@@ -87,6 +89,7 @@ type ViewMode = typeof VIEW_MODES[number];
 export default function EmployeeDashboard() {
   const { user, role, isAdmin, loading: userLoading } = useUser();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // --- State ---
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -305,7 +308,7 @@ const renderToolbar = () => (
             viewMode === mode ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >
-          {mode}
+          {t(mode.toLowerCase())}
         </button>
       ))}
       <button
@@ -370,7 +373,7 @@ const renderToolbar = () => (
         }`}
       >
         <RefreshCw className="w-5 h-5 mr-2" />
-        <span className="hidden sm:inline">Auto-refresh</span>
+        <span className="hidden sm:inline">{t('auto_refresh')}</span>
       </button>
       <button
         onClick={exportData}
@@ -408,39 +411,39 @@ const renderToolbar = () => (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm flex flex-col items-start">
           <div className="flex items-center mb-2">
             <BarChart3 className="w-8 h-8 text-green-600 mr-3" />
-            <h3 className="text-lg font-semibold">Revenue Overview</h3>
+            <h3 className="text-lg font-semibold">{t('revenue_overview')}</h3>
           </div>
           <div className="text-3xl font-bold mb-1">${metrics.revenue.value.toFixed(2)}</div>
-          <div className="text-sm text-gray-500">This {viewMode.toLowerCase()}</div>
+          <div className="text-sm text-gray-500">{t(`this_${viewMode.toLowerCase()}`)}</div>
         </div>
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm flex flex-col items-start">
           <div className="flex items-center mb-2">
             <Users className="w-8 h-8 text-blue-600 mr-3" />
-            <h3 className="text-lg font-semibold">Customer Stats</h3>
+            <h3 className="text-lg font-semibold">{t('customer_stats')}</h3>
           </div>
           <div className="text-3xl font-bold mb-1">{metrics.customers.value}</div>
-          <div className="text-sm text-gray-500">Active customers</div>
+          <div className="text-sm text-gray-500">{t('active_customers')}</div>
         </div>
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm flex flex-col items-start">
           <div className="flex items-center mb-2">
             <CreditCard className="w-8 h-8 text-purple-600 mr-3" />
-            <h3 className="text-lg font-semibold">Average Order Value</h3>
+            <h3 className="text-lg font-semibold">{t('average_order_value')}</h3>
           </div>
           <div className="text-3xl font-bold mb-1">${metrics.avgOrderValue.value.toFixed(2)}</div>
-          <div className="text-sm text-gray-500">Per order</div>
+          <div className="text-sm text-gray-500">{t('per_order')}</div>
         </div>
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm flex flex-col items-start">
           <div className="flex items-center mb-2">
             <Package className="w-8 h-8 text-yellow-600 mr-3" />
-            <h3 className="text-lg font-semibold">Total Orders</h3>
+            <h3 className="text-lg font-semibold">{t('total_orders')}</h3>
           </div>
           <div className="text-3xl font-bold mb-1">{metrics.orders.value}</div>
-          <div className="text-sm text-gray-500">This {viewMode.toLowerCase()}</div>
+          <div className="text-sm text-gray-500">{t(`this_${viewMode.toLowerCase()}`)}</div>
         </div>
       </div>
       {/* Recent Activity */}
       <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
-        <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+        <h3 className="text-lg font-semibold mb-4">{t('recent_activity')}</h3>
         <div className="space-y-4">
           {orders.slice(0, 5).map(order => (
             <div
@@ -466,7 +469,7 @@ const renderToolbar = () => (
                   }[order.fulfillment_status]
                 }`}
               >
-                {order.fulfillment_status.replace(/_/g, ' ')}
+                {t(order.fulfillment_status)}
               </span>
             </div>
           ))}
@@ -500,11 +503,11 @@ const renderToolbar = () => (
   const renderSettingsTab = () => (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
-        <h3 className="text-lg font-semibold mb-4">Profile Settings</h3>
+        <h3 className="text-lg font-semibold mb-4">{t('profile_settings')}</h3>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
+              {t('email')}
             </label>
             <input
               type="email"
@@ -515,11 +518,11 @@ const renderToolbar = () => (
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Role
+              {t('role')}
             </label>
             <input
               type="text"
-              value={role === 'admin' ? 'Administrator' : 'Employee'}
+              value={role === 'admin' ? t('administrator') : t('employee')}
               disabled
               className="w-full px-3 py-2 md:py-3 border rounded-lg bg-gray-50"
             />
@@ -527,28 +530,29 @@ const renderToolbar = () => (
           {isAdmin && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Admin Status
+                {t('admin_status')}
               </label>
               <input
                 type="text"
-                value="Administrator"
+                value={t('administrator')}
                 disabled
                 className="w-full px-3 py-2 md:py-3 border rounded-lg bg-green-50 text-green-800"
               />
             </div>
           )}
+          <LanguageSelector />
         </div>
       </div>
       <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
-        <h3 className="text-lg font-semibold mb-4">Notification Preferences</h3>
+        <h3 className="text-lg font-semibold mb-4">{t('notification_preferences')}</h3>
         <div className="space-y-4">
           <label className="flex items-center min-h-[44px]">
             <input type="checkbox" className="form-checkbox h-4 w-4 text-green-600 focus:ring-2 focus:ring-green-400" />
-            <span className="ml-2">Email notifications for new orders</span>
+            <span className="ml-2">{t('email_notifications')}</span>
           </label>
           <label className="flex items-center min-h-[44px]">
             <input type="checkbox" className="form-checkbox h-4 w-4 text-green-600 focus:ring-2 focus:ring-green-400" />
-            <span className="ml-2">Push notifications for order updates</span>
+            <span className="ml-2">{t('push_notifications')}</span>
           </label>
           <label className="flex items-center min-h-[44px]">
             <input
@@ -557,14 +561,14 @@ const renderToolbar = () => (
               onChange={(e) => setSoundEnabled(e.target.checked)}
               className="form-checkbox h-4 w-4 text-green-600 focus:ring-2 focus:ring-green-400"
             />
-            <span className="ml-2">Enable sound for new orders</span>
+            <span className="ml-2">{t('sound_notifications')}</span>
           </label>
           {soundEnabled && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm text-gray-600 flex items-center">
                   <Volume2 className="w-4 h-4 mr-2" />
-                  Notification volume
+                  {t('notification_volume')}
                 </label>
                 <span className="text-sm text-gray-500">{Math.round(volume * 100)}%</span>
               </div>
@@ -582,12 +586,12 @@ const renderToolbar = () => (
         </div>
       </div>
       <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
-        <h3 className="text-lg font-semibold text-red-600 mb-4">Danger Zone</h3>
+        <h3 className="text-lg font-semibold text-red-600 mb-4">{t('danger_zone')}</h3>
         <button
           onClick={handleLogout}
           className="px-4 md:px-6 py-2 md:py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors focus:ring-2 focus:ring-red-400 min-h-[44px]"
         >
-          Sign Out
+          {t('sign_out')}
         </button>
       </div>
     </div>
@@ -627,7 +631,7 @@ const renderToolbar = () => (
         >
           <MenuIcon className="w-6 h-6" />
         </button>
-        Employee Dashboard
+        {t('employee_dashboard')}
         <div className="flex-1" />
         <NotificationBell onNotificationClick={handleNotificationClick} />
         <div className="relative">
@@ -664,7 +668,7 @@ const renderToolbar = () => (
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:ring-2 focus:ring-green-400 flex items-center"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
-                  Sign out
+                  {t('sign_out')}
                 </button>
               </div>
             </>
@@ -681,7 +685,7 @@ const renderToolbar = () => (
       <div className="sticky top-[120px] z-30 bg-white border-b h-10">
         {renderCompactKPIBar()}
       </div>
-
+            <span className="text-xs text-gray-500">{t('revenue')}</span>
       {/* Main Scrollable Content */}
       <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
 
@@ -727,9 +731,9 @@ const renderToolbar = () => (
                   }`}
                 >
                   <tab.icon className="w-5 h-5 mr-3" />
-                  {tab.label}
+                  {t(tab.label)}
                 </button>
-              ))}
+            <span className="text-xs text-gray-500">{t('customers')}</span>
             </nav>
           </div>
         </div>
