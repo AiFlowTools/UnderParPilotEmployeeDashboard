@@ -58,8 +58,8 @@ export default function Orders() {
 
       // Apply filters
       if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
-      }
+        query = query.eq('fulfillment_status', statusFilter);
+        }
       if (dateRange.start) {
         query = query.gte('created_at', dateRange.start);
       }
