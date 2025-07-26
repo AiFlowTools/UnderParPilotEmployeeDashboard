@@ -732,7 +732,6 @@ const renderToolbar = () => (
                 >
                   <tab.icon className="w-5 h-5 mr-3" />
                   {t(tab.label)}
-                </button>
               ))}
             </nav>
           </div>

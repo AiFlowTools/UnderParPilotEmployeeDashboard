@@ -5,6 +5,39 @@ import { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react'
 import { useTranslation } from 'react-i18next';
 
+const statusOptions = [
+  {
+    value: 'all',
+    label: 'all_statuses',
+    color: 'bg-gray-200 text-gray-700',
+    icon: <Dot className="w-4 h-4 text-gray-400" />,
+  },
+  {
+    value: 'new',
+    label: 'new',
+    color: 'bg-blue-100 text-blue-800',
+    icon: <Dot className="w-4 h-4 text-blue-400" />,
+  },
+  {
+    value: 'completed',
+    label: 'delivered',
+    color: 'bg-green-100 text-green-800',
+    icon: <Dot className="w-4 h-4 text-green-400" />,
+  },
+  {
+    value: 'cancelled',
+    label: 'cancelled',
+    color: 'bg-red-100 text-red-800',
+    icon: <Dot className="w-4 h-4 text-red-400" />,
+  },
+];
+
+// Newest/Oldest Sort
+const sortOptions = [
+  { value: 'newest', label: 'Newest' },
+  { value: 'oldest', label: 'Oldest' },
+];
+
 interface OrderItem {
   item_name: string;
   quantity: number;
@@ -136,40 +169,6 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
   const [editStatusTemp, setEditStatusTemp] = useState<Order['fulfillment_status'] | null>(null);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const { t } = useTranslation();
-
-  const statusOptions = [
-    {
-      value: 'all',
-      label: t('all_statuses'),
-      color: 'bg-gray-200 text-gray-700',
-      icon: <Dot className="w-4 h-4 text-gray-400" />,
-    },
-    {
-      value: 'new',
-      label: t('new'),
-      color: 'bg-blue-100 text-blue-800',
-      icon: <Dot className="w-4 h-4 text-blue-400" />,
-    },
-    {
-      value: 'completed',
-      label: t('delivered'),
-      color: 'bg-green-100 text-green-800',
-      icon: <Dot className="w-4 h-4 text-green-400" />,
-    },
-    {
-      value: 'cancelled',
-      label: t('cancelled'),
-      color: 'bg-red-100 text-red-800',
-      icon: <Dot className="w-4 h-4 text-red-400" />,
-    },
-  ];
-
-  // Newest/Oldest Sort
-  const sortOptions = [
-    { value: 'newest', label: 'Newest' },
-    { value: 'oldest', label: 'Oldest' },
-  ];
-
 
   // Filter logic
     const filteredOrders = orders.filter(order => {
