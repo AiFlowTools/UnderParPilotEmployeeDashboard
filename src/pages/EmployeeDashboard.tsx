@@ -685,7 +685,7 @@ const renderToolbar = () => (
       <div className="sticky top-[120px] z-30 bg-white border-b h-10">
         {renderCompactKPIBar()}
       </div>
-            <span className="text-xs text-gray-500">{t('revenue')}</span>
+
       {/* Main Scrollable Content */}
       <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
 
@@ -733,7 +733,7 @@ const renderToolbar = () => (
                   <tab.icon className="w-5 h-5 mr-3" />
                   {t(tab.label)}
                 </button>
-            <span className="text-xs text-gray-500">{t('customers')}</span>
+              ))}
             </nav>
           </div>
         </div>
