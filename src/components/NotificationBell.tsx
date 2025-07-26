@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useTranslation } from 'react-i18next';
 
 interface NotificationBellProps {
   onNotificationClick?: () => void;
@@ -18,6 +19,7 @@ interface Notification {
 export default function NotificationBell({ onNotificationClick }: NotificationBellProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useTranslation();
 
   // Fetch initial unread notifications and subscribe to new ones
   useEffect(() => {
@@ -100,7 +102,7 @@ export default function NotificationBell({ onNotificationClick }: NotificationBe
           />
           <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl z-50">
             <div className="flex justify-between items-center px-4 py-2 border-b">
-              <span className="font-medium text-gray-700">Notifications</span>
+              <span className="font-medium text-gray-700">{t('notifications')}</span>
               <button
                 onClick={() => setIsOpen(false)}
                 aria-label="Close"
@@ -124,7 +126,7 @@ export default function NotificationBell({ onNotificationClick }: NotificationBe
               ))}
               {notifications.length === 0 && (
                 <div className="px-4 py-3 text-center text-gray-500">
-                  No new notifications
+                  {t('no_new_notifications')}
                 </div>
               )}
             </div>

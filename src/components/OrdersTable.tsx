@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { Check, ChevronDown, Dot } from 'lucide-react';
 import { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react'
+import { useTranslation } from 'react-i18next';
 
 interface OrderItem {
   item_name: string;
@@ -28,40 +29,6 @@ interface OrdersTableProps {
   onStatusChange?: (orderId: string, newStatus: string) => void;
   onEdit?: (orderId: string)=> void;
 }
-
-const statusOptions = [
-  {
-    value: 'all',
-    label: 'All Orders',
-    color: 'bg-gray-200 text-gray-700',
-    icon: <Dot className="w-4 h-4 text-gray-400" />,
-  },
-  {
-    value: 'new',
-    label: 'New',
-    color: 'bg-blue-100 text-blue-800',
-    icon: <Dot className="w-4 h-4 text-blue-400" />,
-  },
-  {
-    value: 'completed',
-    label: 'Completed',
-    color: 'bg-green-100 text-green-800',
-    icon: <Dot className="w-4 h-4 text-green-400" />,
-  },
-  {
-    value: 'cancelled',
-    label: 'Cancelled',
-    color: 'bg-red-100 text-red-800',
-    icon: <Dot className="w-4 h-4 text-red-400" />,
-  },
-];
-
-// Newest/Oldest Sort
-
-const sortOptions = [
-  { value: 'newest', label: 'Newest' },
-  { value: 'oldest', label: 'Oldest' },
-];
 
 const StatusFilterDropdown = ({ value, onChange }: { value: string, onChange: (v: string) => void }) => (
   <Listbox value={value} onChange={onChange}>
@@ -168,6 +135,40 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
   const [editStatusTemp, setEditStatusTemp] = useState<Order['fulfillment_status'] | null>(null);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const { t } = useTranslation();
+
+  const statusOptions = [
+    {
+      value: 'all',
+      label: t('all_statuses'),
+      color: 'bg-gray-200 text-gray-700',
+      icon: <Dot className="w-4 h-4 text-gray-400" />,
+    },
+    {
+      value: 'new',
+      label: t('new'),
+      color: 'bg-blue-100 text-blue-800',
+      icon: <Dot className="w-4 h-4 text-blue-400" />,
+    },
+    {
+      value: 'completed',
+      label: t('delivered'),
+      color: 'bg-green-100 text-green-800',
+      icon: <Dot className="w-4 h-4 text-green-400" />,
+    },
+    {
+      value: 'cancelled',
+      label: t('cancelled'),
+      color: 'bg-red-100 text-red-800',
+      icon: <Dot className="w-4 h-4 text-red-400" />,
+    },
+  ];
+
+  // Newest/Oldest Sort
+  const sortOptions = [
+    { value: 'newest', label: 'Newest' },
+    { value: 'oldest', label: 'Oldest' },
+  ];
 
 
   // Filter logic
@@ -204,13 +205,13 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hole</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Notes</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date/Time</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('customer')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('hole')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('items')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('notes')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('status')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('date_time')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('action')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -254,7 +255,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
                       cancelled: 'bg-red-100 text-red-800',
                     }[order.fulfillment_status]
                   }`}>
-                    {order.fulfillment_status.replace(/_/g, ' ')}
+                    {t(order.fulfillment_status)}
                   </span>
                 </td>
                 {/* Date/Time */}
@@ -271,11 +272,11 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
           onChange={e => setEditStatusTemp(e.target.value as Order['fulfillment_status'])}
           className="appearance-none px-3 py-2 border-2 border-green-500 bg-green-50 font-semibold rounded-lg text-sm focus:ring-2 focus:ring-green-400 shadow mb-2 w-full"
         >
-          <option value="new">New</option>
-          <option value="preparing">Preparing</option>
-          <option value="on_the_way">On the Way</option>
-          <option value="delivered">Delivered</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="new">{t('new')}</option>
+          <option value="preparing">{t('preparing')}</option>
+          <option value="on_the_way">{t('on_the_way')}</option>
+          <option value="delivered">{t('delivered')}</option>
+          <option value="cancelled">{t('cancelled')}</option>
         </select>
         <div className="flex gap-2 w-full">
           <button
@@ -285,7 +286,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
               setEditStatusTemp(null);
             }}
           >
-            Cancel
+            {t('cancel')}
           </button>
           <button
             className="flex-1 px-4 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition"
@@ -297,7 +298,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
               setEditStatusTemp(null);
             }}
           >
-            Save
+            {t('save')}
           </button>
         </div>
       </>
@@ -308,11 +309,11 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
           disabled
           className="appearance-none px-3 py-2 border bg-gray-100 text-gray-700 font-semibold rounded-lg text-sm shadow mb-2 w-full"
         >
-          <option value="new">New</option>
-          <option value="preparing">Preparing</option>
-          <option value="on_the_way">On the Way</option>
-          <option value="delivered">Delivered</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="new">{t('new')}</option>
+          <option value="preparing">{t('preparing')}</option>
+          <option value="on_the_way">{t('on_the_way')}</option>
+          <option value="delivered">{t('delivered')}</option>
+          <option value="cancelled">{t('cancelled')}</option>
         </select>
         <button
           className="w-full px-4 py-2 rounded bg-green-500 text-white font-semibold hover:bg-green-700 transition"
@@ -321,7 +322,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
             setEditStatusTemp(order.fulfillment_status);
           }}
         >
-          Edit
+          {t('edit')}
         </button>
       </>
     )}
@@ -337,7 +338,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
       <div className="block lg:hidden space-y-3">
         {sortedOrders.length === 0 ? (
           <div className="flex justify-center items-center h-32 text-gray-500">
-            No orders found.
+            {t('no_orders_found')}
           </div>
         ) : (
           sortedOrders.map(order => (
@@ -355,7 +356,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
                           setEditStatusTemp(null);
                         }}
                       >
-                        Cancel
+                        {t('cancel')}
                       </button>
                       <button
                         className="px-4 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors"
@@ -367,7 +368,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
                           setEditStatusTemp(null);
                         }}
                       >
-                        Save
+                        {t('save')}
                       </button>
                     </>
                   ) : (
@@ -378,7 +379,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
                         setEditStatusTemp(order.fulfillment_status);
                       }}
                     >
-                      Edit
+                      {t('edit')}
                     </button>
                   )}
                   {/* Status badge */}
@@ -395,7 +396,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
                       ? 'bg-red-100 text-red-800'
                       : 'bg-gray-100 text-gray-800'
                   }`}>
-                    {order.fulfillment_status.replace(/_/g, ' ')}
+                    {t(order.fulfillment_status)}
                   </span>
                 </div>
               </div>
@@ -424,11 +425,11 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onStatusChange, onEdi
                     onChange={e => setEditStatusTemp(e.target.value as Order['fulfillment_status'])}
                     className="appearance-none pl-2 pr-6 py-2 border-2 border-green-500 bg-green-50 font-semibold rounded-lg text-sm focus:ring-2 focus:ring-green-400 w-full shadow"
                   >
-                    <option value="new">New</option>
-                    <option value="preparing">Preparing</option>
-                    <option value="on_the_way">On the Way</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="new">{t('new')}</option>
+                    <option value="preparing">{t('preparing')}</option>
+                    <option value="on_the_way">{t('on_the_way')}</option>
+                    <option value="delivered">{t('delivered')}</option>
+                    <option value="cancelled">{t('cancelled')}</option>
                   </select>
                 </div>
               )}
